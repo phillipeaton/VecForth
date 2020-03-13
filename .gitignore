@@ -1,0 +1,9 @@
+# Binary files created by the Chromium cross compiler
+*.hex
+*.bin
+
+# Forth screen/block files
+# Project is using plain text file for source code, scr file 
+# is used for building the cross compiled target binary image
+*.scr
+*.blk
