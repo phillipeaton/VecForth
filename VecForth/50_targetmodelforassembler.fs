@@ -16,8 +16,8 @@ VARIABLE 'TDP  \ dictionary pointer
 : ?FULL ( a - a) TDP CELL + @ OVER U<
     ABORT" Dictionary overflowed!" ;
 : TALLOT ( n)  TDP +! ;
-: T, ( n)      THERE ?FULL T!  TCELL TALLOT ;
-: TC, ( n)     THERE ?FULL TC! TCHAR TALLOT ;
+: T, ( n)      THERE ?FULL T!  TCELL   TALLOT ;
+: TC, ( n)     THERE ?FULL TC! TCHAR   TALLOT ;
 : ORG ( n)     TDP !  ;
 
 \ 6\   target threading model            6809 DTC   (c) 17apr95 bjr
@@ -43,7 +43,8 @@ VARIABLE TLATEST  0 TLATEST !    \ addr of latest target def'n
     HEADS @ IF   >IN @
         TLATEST @ T,            \ target link
         THERE TLATEST !         \ update target link
-        BL WORD THERE OVER C@   \ src(host), dst(target), len
+        BL WORD THERE
+        OVER C@         \ src(host), dst(target), len
         WIDTH @ MIN 1+          \ F83 limit length, +1 for count
         DUP TALLOT >TCMOVE      \ allot & copy to target
     >IN !  THEN ;               \ no ALIGN needed

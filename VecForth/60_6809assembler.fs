@@ -1,6 +1,7 @@
 \ 30\   6809 assembler: utilities                         01apr15nac
+ALSO META ASSEMBLER DEFINITIONS \ PJE CR ORDER
 
-ALSO META ASSEMBLER DEFINITIONS  ORDER  HEX
+HEX
 
 : WITHIN   ROT SWAP OVER   \ n lo hi -- f | test within limits
    < ROT ROT > OR 0= ;
@@ -193,8 +194,7 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 AKA NEXT, NEXT
 Y CONSTANT IP   S CONSTANT SP   U CONSTANT RP   X CONSTANT W
 
-PREVIOUS DEFINITIONS  ORDER  \ end of assembler!
-
+PREVIOUS DEFINITIONS \ end of assembler!
 \ : CODE        THEAD ENTERCODE ;   ...defined in metacompiler
 \ : ;C          ;              \ aka END-CODE on some systems
 

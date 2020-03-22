@@ -14,20 +14,125 @@
 \ DP =       UP  User Pointer (high byte)
 \
 \ v1.0  alpha test version, 7 May 95
-\ \\ 6809 Source Code: boot parameters              (c) 28apr95 bjr
-ONLY FORTH META TARGET DEFINITIONS
-HEX E000 FFFF DICTIONARY ROM  ROM
-   7A00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
-   7A   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
 
-   6000 EQU DP-INIT      \ starting RAM adrs for dictionary
-   \ SM2 memory map with 8K RAM: 6000-7BFF RAM, 7C00-7FFF I/O
+\ \\ 6809 Source Code: boot parameters              (c) 28apr95 bjr
+
+ONLY FORTH META TARGET DEFINITIONS
+
+\ HEX E000 FFFF DICTIONARY ROM  ROM
+\    7A00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
+\    7A   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
+\
+\    6000 EQU DP-INIT      \ starting RAM adrs for dictionary
+\    \ SM2 memory map with 8K RAM: 6000-7BFF RAM, 7C00-7FFF I/O
+
+
+
+ HEX 0000 FFFF DICTIONARY ROM  ROM
+    CA00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
+    CA   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
+
+    C900 EQU DP-INIT      \ starting RAM adrs for dictionary
+   \ Vectrex memory map with 1K RAM: C800-CBFF RAM, Dxx0-DxxF I/O
+
+\  0000 +--------------------+
+\       |                    |
+\       | Forth kernel ROM   |
+\       |                    |
+\  8000 +--------------------+
+\       |*     UNMAPPED     *|
+\  C800 +--------------------+
+\       |*RUM RAM (TO C87F) *|
+\  C900 +--------------------+
+\       |Forth RAM dictionary|
+\  C980 +--------------------+
+\       |        TIB         |
+\  CA00 +--------------------+
+\       |     user area      |
+\  CA80 +--------------------+
+\       |  parameter stack   |
+\  CB00 +--------------------+
+\       |   HOLD,PAD areas   |
+\  CB80 +--------------------+
+\       |    return stack    | TOS, "R0", needs setting later on
+\  CBEA +--------------------+
+\       |*BIOS HOUSEKEEPING *|
+\  CC00 +--------------------+
+\       |*   RAM MIRROR     *|
+\  D000 +--------------------+
+\       |*   6522VIAx128    *|
+\  D800 +--------------------+
+\       |*    DO NOT USE    *|
+\  E000 +--------------------+
+\       |*    MINESTORM     *|
+\  F000 +--------------------+
+\       |*       RUM        *|
+\  FFF0 +--------------------+
+\       |*6809 reset vectors*|
+\  FFFF +--------------------+
+
+
+
+
 
 \ Harvard synonyms - these must all be PRESUMEd
 AKA , I,     AKA @ I@     AKA ! I!
 AKA C, IC,   AKA C@ IC@   AKA C! IC!
 AKA HERE IHERE     AKA ALLOT IALLOT
 PRESUME WORD       AKA WORD IWORD
+
+HEX
+\ g         G     C     E           2     0     1     8
+67 C, 20 C, 47 C, 43 C, 45 C, 20 C, 32 C, 30 C, 31 C, 38 C, 80 C,
+FD C, 0D C,             \ Intro Music
+F8 C, 50 C, 20 C, 80 C, \ Height Width etc.
+\ V   E     C     F     O     R     T     H
+56 C, 45 C, 43 C, 46 C, 4F C, 52 C, 54 C, 48 C, 80 C,
+00 C,   \ End of Header
+
+ASM: HERE EQU VFSTART   HEX
+   F192 JSR,    \ >Wait_Recal
+   F2A5 JSR,    \ >Intensity_5F
+   2D # LDU,    \ Address of string to print
+   10 # LDA,    \ Text positon relative Y
+   B0 # LDB,    \ Text positon relative X
+   F37A JSR,    \ >Print_Str_d
+VFSTART BRA,    \ Repeat forever
+\   161B JMP,    \ Vectrex code to jump to VecForth
+   ;C
+
+\ H   E     L     L     O           W     O     R     L     D
+48 C, 45 C, 4C C, 4C C, 4F C, 20 C, 57 C, 4F C, 52 C, 4C C, 44 C, 80 C,
+
+
+\ PJE the below matches up mostly
+\ https://hackaday.io/project/5233-z80-computer/log/19836-serial-io
+\ See also AM8530.pdf, big file, circuitry, C and assembler at the end,
+\ like below.
+\ $7C02 then $25 = #bytes = 3 * 6 + 1
+\ #define sccSetsCount 38
+\ const unsigned char sccSets[] = {
+\     0x00,0x00,      //pointer reset
+\     0x09,0xC0,  //hardware reset
+\     0x04,0x04,  //1x clock, async, 1 stop, no par
+\     0x01,0x00,  //no dma, no interrupts
+\     0x02,0x00,  //clear int vector
+\     0x03,0xC0,  //rx 8 bits, disabled
+\     0x05,0x60,  //tx 8 bits, disabled
+\     0x09,0x01,  //status low, no interrupts
+\     0x0A,0x00,  //nrz encoding
+\     0x0B,0xD6,  //xtal, BRG for rxc, trxc output
+\     0x0C,0xfe,  //time constant low byte (1200)
+\     0x0D,0x05,  //time constant high byte(1200)
+\     0x0E,0x00,  //BRG source RTxC
+\     0x0E,0x80,  //clock source BRG
+\     0x0E,0x01,  //enable BRG
+\     0x0F,0x00,  //no ints
+\     0x10,0x10,  //reset interrupts
+\     0x03,0xC1,  //enable Rx
+\     0x05,0x68,  //enable Tx
+\     0x00,0x00   //overflow
+
 
 \ \\   6809 DTC: SCC initialization                 (c) 17apr95 bjr
 HERE EQU SCCATBL HEX
@@ -59,6 +164,7 @@ CODE KEY?   \ -- f    return true if char waiting
 CODE EMIT   \ c --    output character to serial port
    BEGIN,   SCCACMD LDA,   4 # ANDA,   NE UNTIL,
    SCCADTA STB,   6 # ( D) PULS,   NEXT ;C
+
 
 \ \\   6809 DTC: interpreter logic                       01apr15nac
 ASM:  HERE RESOLVES DOCOLON   HERE EQU <DOCOLON>
@@ -330,6 +436,7 @@ CODE SCAN   \ c-addr u c -- c-addr' u'   find matching char
 
 \ \\   6809 DTC: system dependencies                (c) 21apr95 bjr
 
+
 \ These words are shorter in CODE than as colon definitions!
 CODE ALIGNED  NEXT ;C               \ a1 -- a2  align address
 CODE ALIGN   NEXT ;C                \ --        align HERE
@@ -381,18 +488,19 @@ EMULATE:  TCREATE 0 T, MDOES>   ;EMULATE
     HEX 10 # ( X) PULS,   6 # ( D) PSHS,       \ get pfa in X
     DPR A TFR,  CLRB,   X 0, ADDD,   NEXT, ;C  \ UP+offset -> D
 EMULATE:  TCREATE T, MDOES> .UNDEF  ;EMULATE
+
 \ \\   High level: control structures               (c) 21apr95 bjr
-: IF   \ -- adrs        conditional forward branch
-    ['] ?BRANCH ,BRANCH  HERE DUP ,DEST ;
+
+\ -- adrs        conditional forward branch
+: IF  ['] ?BRANCH ,BRANCH  HERE DUP ,DEST ;
 EMULATE:  M['] ?BRANCH T,  THERE DUP T, ;EMULATE  IMMEDIATE
 
-: THEN \ adrs --        resolve forward branch
-    HERE SWAP !DEST ;
+\ adrs --        resolve forward branch
+: THEN  HERE SWAP !DEST ;
 EMULATE:  THERE SWAP T! ;EMULATE          IMMEDIATE
 
-: ELSE \ adrs1 -- adrs2   branch for IF..ELSE
-    ['] BRANCH ,BRANCH  HERE DUP ,DEST
-    SWAP [COMPILE] THEN ;
+\ adrs1 -- adrs2   branch for IF..ELSE
+: ELSE ['] BRANCH ,BRANCH  HERE DUP ,DEST SWAP [COMPILE] THEN ;
 EMULATE:  M['] BRANCH T,  THERE DUP T,
     SWAP  THERE SWAP T! ;EMULATE         IMMEDIATE
 
@@ -400,37 +508,37 @@ EMULATE:  M['] BRANCH T,  THERE DUP T,
 : BEGIN   HERE ;  \ -- adrs     target for backward branch
 EMULATE: THERE   ;EMULATE        IMMEDIATE
 
-: UNTIL           \ adrs --     conditional backward branch
-    ['] ?BRANCH ,BRANCH  ,DEST ;
+\ adrs --     conditional backward branch
+: UNTIL               ['] ?BRANCH ,BRANCH  ,DEST ;
 EMULATE:  M['] ?BRANCH T, T, ;EMULATE  IMMEDIATE
 
-: AGAIN           \ adrs --     unconditional backward branch
-    ['] BRANCH ,BRANCH  ,DEST ;
+\ adrs --     unconditional backward branch
+: AGAIN    ['] BRANCH ,BRANCH  ,DEST ;
 EMULATE:  M['] BRANCH T,  T, ;EMULATE   IMMEDIATE
 
-: WHILE           \ -- adrs     branch for WHILE loop
-    [COMPILE] IF ;
+\ -- adrs     branch for WHILE loop
+: WHILE [COMPILE] IF ;
 EMULATE:  M['] ?BRANCH T,  THERE DUP T, ;EMULATE  IMMEDIATE
 
 \ \\   High level: control structures               (c) 21apr95 bjr
-: REPEAT          \ adrs1 adrs2 ---   resolve WHILE loop
-    SWAP [COMPILE] AGAIN [COMPILE] THEN ;
+\ adrs1 adrs2 ---   resolve WHILE loop
+: REPEAT              SWAP [COMPILE] AGAIN [COMPILE] THEN ;
 EMULATE:  SWAP  M['] BRANCH T,  T,
     THERE SWAP T! ;EMULATE          IMMEDIATE
 
 : >L   CELL LP +!  LP @ ! ;
 : L>   LP @ @  CELL NEGATE LP +! ;
-: DO              \ -- adrs  L: -- 0
-    ['] (DO) ,BRANCH  HERE  0 >L ;
+
+\ -- adrs  L: -- 0
+: DO                  ['] (DO) ,BRANCH  HERE  0 >L ;
 EMULATE: M['] (DO) T,  THERE  0 T>L  ;EMULATE  IMMEDIATE
 
-: LEAVE  ['] UNLOOP COMPILE,
-    ['] BRANCH ,BRANCH   HERE DUP ,DEST  >L ;
+: LEAVE  ['] UNLOOP COMPILE,    ['] BRANCH ,BRANCH   HERE DUP ,DEST  >L ;
 EMULATE:  M['] UNLOOP T,
     M['] BRANCH T,  THERE DUP T, T>L  ;EMULATE   IMMEDIATE
 \ \\   High level: control structures               (c) 21apr95 bjr
-: ENDLOOP   ,BRANCH ,DEST    \ adrs xt --  L: 0 a1 a2 .. aN --
-    BEGIN L> ?DUP WHILE [COMPILE] THEN REPEAT ;
+ \ adrs xt --  L: 0 a1 a2 .. aN --
+: ENDLOOP   ,BRANCH ,DEST       BEGIN L> ?DUP WHILE [COMPILE] THEN REPEAT ;
 
 ALSO FORTH ALSO META DEFINITIONS
 : TENDLOOP   T, T, BEGIN TL> ?DUP WHILE THERE SWAP T! REPEAT ;
@@ -470,26 +578,33 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
     200 USER R0       \ -- a-addr   end of return stack
 
 \ \\   High level: arithmetic operators             (c) 31mar95 bjr
-: S>D         \ n -- d   single -> double precision
-    DUP 0< ;
-: ?NEGATE     \ n1 n2 -- n3   negate n1 if n2 negative
-    0< IF NEGATE THEN ;
-: ABS         \ n1 -- n2      absolute value
-    DUP ?NEGATE ;
-: DNEGATE     \ d1 -- d2      negate, double precision
-    SWAP INVERT SWAP INVERT 1 M+ ;
-: ?DNEGATE    \ d1 n -- d2    negate d1 if n negative
-    0< IF DNEGATE THEN ;
-: DABS        \ d1 -- d2      absolute value, double precision
-    DUP ?DNEGATE ;
+
+\ n -- d   single -> double precision
+: S>D             DUP 0< ;
+
+\ n1 n2 -- n3   negate n1 if n2 negative
+: ?NEGATE         0< IF NEGATE THEN ;
+
+\ n1 -- n2      absolute value
+: ABS    DUP ?NEGATE ;
+
+\ d1 -- d2      negate, double precision
+: DNEGATE    SWAP INVERT SWAP INVERT 1 M+ ;
+
+\ d1 n -- d2    negate d1 if n negative
+: ?DNEGATE    0< IF DNEGATE THEN ;
+
+\ d1 -- d2      absolute value, double precision
+: DABS    DUP ?DNEGATE ;
 
 \ \\   High level: arithmetic operators             (c) 31mar95 bjr
-: M*          \ n1 n2 -- d       signed 16*16->32 multiply
-    2DUP XOR >R
-    SWAP ABS SWAP ABS UM*
-    R> ?DNEGATE ;
 
-: SM/REM      \ d1 n1 -- n2 n3   symmetric signed division
+\ n1 n2 -- d       signed 16*16->32 multiply
+: M*              2DUP XOR >R    SWAP ABS SWAP ABS UM*    R> ?DNEGATE ;
+
+
+\ d1 n1 -- n2 n3   symmetric signed division
+: SM/REM
     2DUP XOR >R
     OVER >R
     ABS >R DABS R> UM/MOD

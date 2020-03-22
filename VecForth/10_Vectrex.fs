@@ -33,8 +33,8 @@ INCLUDE 70_RESTOFMETACOMPILER.FS        \ META but a few jumps to TARGET and one
 INCLUDE 80_CAMELFORTH6809.FS            \ TARGET but one META
 
 ONLY FORTH ALSO META
-HEX E000 2000 HEXFILE 6809.HEX   ( make hex file )
-\ HEX 0000 2000 BINFILE 6809.BIN   ( make binary file )
+\ HEX E000 2000 HEXFILE 6809.HEX   ( make hex file )
+HEX 0000 2000 BINFILE 6809.BIN   ( make binary file )
 .MIRRORS                         ( print undef'd references )
 BYE
 

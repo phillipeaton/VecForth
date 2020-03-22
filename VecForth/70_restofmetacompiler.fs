@@ -93,12 +93,12 @@ TARGET ' DOCREATE ." ->" .s META @ CONSTANT MIRROR-CF    \ F83
 : DUAL, ( xt -- )  DUP @ MIRROR-CF =                     \ F83
     IF >BODY HOST-EXEC @ THEN  ( xt) COMPILE, ;          \ F83
 \ \\   Meta compiler engine                    F83  (c) 18apr95 bjr
-: T[   0 TSTATE !  ;
+: T[   0 TSTATE ! ;
 : T]  -1 TSTATE !
    BEGIN  ?STACK  >IN @
            SOURCE SWAP DROP OVER = IF ( ." BUFFER EMPTY! " ) REFILL 2DROP 0 THEN    \  <--- LINE ADDED
       DEFINED \ F83
-      IF  ( found)  NIP DUAL? IF DUP DUAL, THEN
+      IF  ( found) NIP DUAL? IF DUP DUAL, THEN
                         EXECUTE
       ELSE NUMBER?
          IF ( number)      DUAL? IF DUP [COMPILE] LITERAL THEN
@@ -108,6 +108,8 @@ TARGET ' DOCREATE ." ->" .s META @ CONSTANT MIRROR-CF    \ F83
                         'MIRROR @ 'MA ! +FWDREF
       THEN THEN
    TSTATE @ 0=  END? @ OR  UNTIL  END? OFF ;   \ F83
+
+
 
 \ \\   Target interpretation                             31mar15nac
 : D>T ( d)   DPL @ 1+ IF SWAP >T ELSE DROP THEN  >T ;
@@ -134,9 +136,9 @@ ALSO TARGET DEFINITIONS  PRESUME DOCOLON IS-CF
         'MIRROR @ HOST-EXEC !          \ start dual definition
     THEN T] ;
 
-: T;   [ TARGET ] ['] EXIT [ META ] MCOMPILE,   \ compile EXIT
+: T;  [ TARGET ] ['] EXIT [ META ] MCOMPILE,   \ compile EXIT
     DUAL? IF  POSTPONE ; THEN                   \ F83??
-    T[ ;
+     T[ ;
 
 : TIMMEDIATE    (TIMMEDIATE) MIMMEDIATE ;
 \ \\   Meta DOES>                              F83  (c) 19apr95 bjr
@@ -151,7 +153,7 @@ VARIABLE TARG-DOES       \ to remember adrs of target DOES code
     NEST , POSTPONE TPFA ; IMMEDIATE     \ begin host's DOES def
 
 : T;CODE   [ TARGET ] ['] (DOES>) [ META ] MCOMPILE,
-    THERE TARG-DOES !   T[ ALSO ASSEMBLER ;
+    THERE TARG-DOES !  T[ ALSO ASSEMBLER ;
 : TDOES>   [ TARGET ] ['] (DOES>) [ META ] MCOMPILE,
     THERE TARG-DOES !   [ TARGET ] DODOES [ META ]
     DUAL? IF [COMPILE] MDOES> THEN  ;
@@ -204,7 +206,7 @@ PRESUME \         EMULATES \        MIMMEDIATE
 PREVIOUS DEFINITIONS
 
 \ \\ Support for CamelForth DO loops                (c) 25apr95 bjr
-ORDER
+CR ORDER
 CREATE LOOPSTACK  20 CELL * ALLOT
 VARIABLE TLP      LOOPSTACK TLP !       \ target loop stack ptr
 
