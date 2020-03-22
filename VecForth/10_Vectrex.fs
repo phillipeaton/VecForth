@@ -31,11 +31,11 @@ INCLUDE 50_TARGETMODELFORASSEMBLER.FS   \ META
 INCLUDE 60_6809ASSEMBLER.FS             \ ASSEMBLER
 INCLUDE 70_RESTOFMETACOMPILER.FS        \ META but a few jumps to TARGET and one ASSEMBLER
 INCLUDE 80_CAMELFORTH6809.FS            \ TARGET but one META
+INCLUDE 90_vectrexapp.fs                \ TARGET
+INCLUDE 95_CAMELFORTH6809End.FS         \ TARGET but one META
 
 ONLY FORTH ALSO META
 \ HEX E000 2000 HEXFILE 6809.HEX   ( make hex file )
 HEX 0000 2000 BINFILE 6809.BIN   ( make binary file )
 .MIRRORS                         ( print undef'd references )
 BYE
-
-

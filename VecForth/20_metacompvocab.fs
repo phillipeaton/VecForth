@@ -4,9 +4,7 @@ ROOT DEFINITIONS \ Expand ROOT to include..
    ' ALSO        ALIAS ALSO
    ' ONLY        ALIAS ONLY
    ' BYE         ALIAS BYE
-
-\ PJE
-\   ' INCLUDE     ALIAS INCLUDE
+   ' INCLUDE     ALIAS INCLUDE
 \   ' DBG         ALIAS DBG
 \   ' CR          ALIAS CR
 \   ' ."          ALIAS ."

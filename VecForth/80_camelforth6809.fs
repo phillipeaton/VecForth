@@ -51,10 +51,10 @@ ONLY FORTH META TARGET DEFINITIONS
 \       |     user area      |
 \  CA80 +--------------------+
 \       |  parameter stack   |
-\  CB00 +--------------------+
+\  CB00 +--------------------+ Initial SP
 \       |   HOLD,PAD areas   |
 \  CB80 +--------------------+
-\       |    return stack    | TOS, "R0", needs setting later on
+\       |    return stack    |
 \  CBEA +--------------------+
 \       |*BIOS HOUSEKEEPING *|
 \  CC00 +--------------------+
@@ -90,19 +90,21 @@ F8 C, 50 C, 20 C, 80 C, \ Height Width etc.
 56 C, 45 C, 43 C, 46 C, 4F C, 52 C, 54 C, 48 C, 80 C,
 00 C,   \ End of Header
 
+
+
 ASM: HERE EQU VFSTART   HEX
-   F192 JSR,    \ >Wait_Recal
-   F2A5 JSR,    \ >Intensity_5F
-   2D # LDU,    \ Address of string to print
-   10 # LDA,    \ Text positon relative Y
-   B0 # LDB,    \ Text positon relative X
-   F37A JSR,    \ >Print_Str_d
-VFSTART BRA,    \ Repeat forever
-\   161B JMP,    \ Vectrex code to jump to VecForth
+\   F192 JSR,    \ >Wait_Recal
+\   F2A5 JSR,    \ >Intensity_5F
+\   2D # LDU,    \ Address of string to print
+\   10 # LDA,    \ Text positon relative Y
+\   B0 # LDB,    \ Text positon relative X
+\   F37A JSR,    \ >Print_Str_d
+\ VFSTART BRA,    \ Repeat forever
+
+   HERE 1 + EQU ENTRY-ADDR
+   9999 JMP,    \ Vectrex code to jump to VecForth ENTRY word, 9999 gets overwritten
    ;C
 
-\ H   E     L     L     O           W     O     R     L     D
-48 C, 45 C, 4C C, 4C C, 4F C, 20 C, 57 C, 4F C, 52 C, 4C C, 44 C, 80 C,
 
 
 \ PJE the below matches up mostly
@@ -923,71 +925,3 @@ EMULATES .S
   DOES> DUP @ SWAP CELL+ @ \ latest here
         DP ! LATEST ! ;
 ( *host action?* )
-
-\ \\   High level: startup                               09mar16nac
-: COLD        \ --        cold start Forth system
-  UINIT U0 #INIT CMOVE
-  ." 6809 CamelForth v1.1  20 Mar 16"  CR
-  ABORT ;
-
-\ \\   Testing words: memory dump                        24mar15nac
-HEX
-: .H  ( n - )   0F AND 30 + DUP 39 > IF 7 + THEN EMIT ;
-: .HH ( n - )   DUP 2/ 2/ 2/ 2/ .H .H ;
-: .HHHH ( n - )   DUP 2/ 2/ 2/ 2/ 2/ 2/ 2/ 2/ .HH .HH ;
-: H.  ( n - )   .HHHH SPACE ;
-: .B  ( a - a+1 )   DUP C@ .HH SPACE 1+ ;
-: .A  ( a - a+1 )   DUP C@ DUP 20 7F WITHIN 0= IF
-  DROP 2E ( . ) THEN EMIT 1+ ;
-: DUMP ( a n - )  0 DO CR DUP H. SPACE DUP
-    .B .B .B .B .B .B .B .B SPACE .B .B .B .B .B .B .B .B
-    DROP SPACE
-    .A .A .A .A .A .A .A .A       .A .A .A .A .A .A .A .A
-    10 +LOOP DROP ;
-
-\ \\   Testing words: simple memory test                 03may15nac
-: STUP  \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I DUP      ! CELL +LOOP ;
-: STUPI \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I NEGATE I ! CELL +LOOP ;
-
-: TSTUP  \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I DUP @      <> IF
-  ."  Error@" I U. THEN CELL +LOOP ;
-: TSTUPI \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I NEGATE I @ <> IF
-  ."  Error@" I U. THEN CELL +LOOP ;
-
-: PASS STUP TSTUP STUPI TSTUPI ; ( do 1 pass)
-: PASSES 0 DO ." ." PASS LOOP ;  ( do N passes)
-
-\ \\   6809 DTC: reset initialization               (c) 25apr95 bjr
-ASM: HERE EQU ENTRY   HEX
-   CLRA,  F000 STA,  INCA,  E000 STA,  INCA,  D000 STA,
-   INCA,  C000 STA,  INCA,  B000 STA,  INCA,  A000 STA,
-   INCA,  9000 STA,  INCA,  8000 STA,  \ init mem mapping
-   UP-INIT-HI # LDA,   A DPR TFR,   \ initial UP
-   UP-INIT 100 + # LDS,             \ initial SP
-   UP-INIT 200 + # LDU,             \ initial RP
-   SCCATBL # LDX,  SCCINIT JSR,     \ init serial ports
-   SCCBTBL # LDX,  SCCINIT JSR,
-   ' COLD JMP,   ;C           \ enter top-level Forth word
-ASM: HERE EQU IRET   RTI,  ;C
-HERE  0FFF0 ORG    \ 6809 hardware vectors
-  IRET ,  IRET ,  IRET ,  IRET ,    \ tbd, SWI3, SWI2, FIRQ
-  IRET ,  IRET ,  IRET ,  ENTRY ,   \ IRQ, SWI, NMI, RESET
-ORG
-\ \\   6809 DTC: user area initialization                24feb16nac
-DECIMAL 26 CONSTANT #INIT   \ # bytes of user area init data
-
-CREATE UINIT  HEX
-   0 , 0A ,                 \ reserved,BASE
-   DP-INIT ,                \ DP
-   0 , 0 ,                  \ BLK,SCR
-   02 , 0800 ,              \ SDcard address of block file
-   0 , 0 , 0 , 0 , 0 ,      \ BSTATE flags and buffers
-META ALSO FORTH TLATEST @ T, PREVIOUS TARGET    \ LATEST
-
-\ Note that UINIT must be the *last* word in the kernel, in
-\ order to set the initial LATEST as shown above.  If this is
-\ not the last word, be sure to patch the LATEST value above.
