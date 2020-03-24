@@ -7,3 +7,7 @@
 # is used for building the cross compiled target binary image
 *.scr
 *.blk
+
+# Compilation memory labels
+*.cnt
+

@@ -19,16 +19,7 @@
 
 ONLY FORTH META TARGET DEFINITIONS
 
-\ HEX E000 FFFF DICTIONARY ROM  ROM
-\    7A00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
-\    7A   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
-\
-\    6000 EQU DP-INIT      \ starting RAM adrs for dictionary
-\    \ SM2 memory map with 8K RAM: 6000-7BFF RAM, 7C00-7FFF I/O
-
-
-
- HEX 0000 FFFF DICTIONARY ROM  ROM
+HEX 0000 FFFF DICTIONARY ROM  ROM
     CA00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
     CA   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
 
@@ -72,14 +63,16 @@ ONLY FORTH META TARGET DEFINITIONS
 \  FFFF +--------------------+
 
 
-
-
-
 \ Harvard synonyms - these must all be PRESUMEd
 AKA , I,     AKA @ I@     AKA ! I!
 AKA C, IC,   AKA C@ IC@   AKA C! IC!
 AKA HERE IHERE     AKA ALLOT IALLOT
 PRESUME WORD       AKA WORD IWORD
+
+\ start of vectrex memory with cartridge name...
+\ ***************************************************************************
+\ VECTREX CART HEADER SECTION
+\ ***************************************************************************
 
 HEX
 \ g         G     C     E           2     0     1     8
@@ -90,22 +83,91 @@ F8 C, 50 C, 20 C, 80 C, \ Height Width etc.
 56 C, 45 C, 43 C, 46 C, 4F C, 52 C, 54 C, 48 C, 80 C,
 00 C,   \ End of Header
 
+ASM: HERE EQU VFSTART
+HERE 1 + EQU ENTRY-ADDR
+9999 JMP, ;C \ Vectrex code to jump to VecForth ENTRY word, 9999 gets overwritten
 
+10 equ v4eRED
+20 equ v4eGREEN
+40 equ v4eBLUE
+30 equ v4eYELLOW
+50 equ v4eMAGENTA
+60 equ v4eCYAN
+70 equ v4eWHITE
 
-ASM: HERE EQU VFSTART   HEX
-\   F192 JSR,    \ >Wait_Recal
-\   F2A5 JSR,    \ >Intensity_5F
-\   2D # LDU,    \ Address of string to print
-\   10 # LDA,    \ Text positon relative Y
-\   B0 # LDB,    \ Text positon relative X
-\   F37A JSR,    \ >Print_Str_d
-\ VFSTART BRA,    \ Repeat forever
+\ ***************************************************************************
+\  MAGIC CARTHEADER SECTION
+\       DO NOT CHANGE THIS STRUCT
+\ ***************************************************************************
+HEX
+30 ORG
 
-   HERE 1 + EQU ENTRY-ADDR
-   9999 JMP,    \ Vectrex code to jump to VecForth ENTRY word, 9999 gets overwritten
-   ;C
-
-
+\ T   h     G     S
+54 C, 68 C, 47 C, 53 C,             \ magic handshake marker
+HERE EQU v4ecartversion     0001 ,  \ I always have a version
+                                    \ in comm. structs
+HERE EQU v4ecartflags       10F0 ,  \ v4e flags:
+                                    \ $8000 + always set by v4e
+                                    \ $4000 - hiscore entry supported
+                                    \ $2000 - enable cart as ram
+                                    \ $1000 - supply default font
+                                    \ $0800 - fast menu switch supported
+                                    \       + set to 0 if hiscore entry
+                                    \ $0700 + v4e timing bits:
+                                    \          0 - heuristic
+                                    \          1 - zero
+                                    \          2 - one
+                                    \          3 - two
+                                    \          4 - three
+                                    \ $0080 - populate storage upon start
+                                    \ $0040 - extension calls used
+                                    \ $0020 - gpios used
+                                    \ $0010 - serial regs and dma
+                                    \       + set to 0 again if serial regs active
+                                    \ $0008 + screensaver enabled
+                                    \ $0003 - font size
+\
+\ first the variables for the v4e font system
+\
+HERE EQU v4efontptr         0000 ,  \ supplied by app:
+                                    \ if != 0: the cart uses this
+                                    \ ptr to supply a font and to
+                                    \ optimize strings;
+HERE EQU v4efontwidth       5F C,   \ supplied by app:
+                                    \ the cart stores a system
+                                    \ font at v4efontptr+0x20 and
+                                    \ adds v4efontwidth per line
+                                    \ ..must be at least $3f
+HERE EQU v4efontlastchar    7E C,   \ supplied by cart:($5e or $7e)
+                                    \ last char supplied by v4e
+                                    \ (first one is always 0x20)
+HERE EQU v4estringlists     0000 ,  \ if !=0 a ptr to a list of ptrs
+                                    \ containing lists of constant
+                                    \ strings that can be optimized
+                                    \ for a given font (0 == end
+                                    \ of lists)
+\
+\ now the variables for the v4e store/load area
+\
+HERE EQU v4eStorageArea     0000 ,  \ pointer to the area - 0: unused
+HERE EQU v4eStorageSize     0000 ,  \ and its size
+HERE EQU v4eStorageLoaded   0000 ,  \ set by v4e: return size for a load
+                                    \ e.g. if set to zero in compile an != 0
+                                    \ at the start shows whether something was
+                                    \ loaded via 'populate storage upon start'
+HERE EQU v4eStorageID
+\ T   E     S     T
+54 C, 45 C, 53 C, 54 C,             \ 4 bytes storage identifier
+\
+\ variables for the v4e bank switching, only populated for 'V4EB' carts
+\ or for carts using serial communication
+\
+HERE EQU v4eMultiBank        0000 , \ during init: no. of banks (0x48)
+HERE EQU v4eMultiBankAddress 0000 , \ e.g. 0: PB6 bank - $8000- normal bank
+HERE EQU v4eMultiBankFlag    00 C,  \ 0: ok
+\
+\ end of v4e cart header
+\
 
 \ PJE the below matches up mostly
 \ https://hackaday.io/project/5233-z80-computer/log/19836-serial-io
@@ -114,7 +176,7 @@ ASM: HERE EQU VFSTART   HEX
 \ $7C02 then $25 = #bytes = 3 * 6 + 1
 \ #define sccSetsCount 38
 \ const unsigned char sccSets[] = {
-\     0x00,0x00,      //pointer reset
+\     0x00,0x00,  //pointer reset
 \     0x09,0xC0,  //hardware reset
 \     0x04,0x04,  //1x clock, async, 1 stop, no par
 \     0x01,0x00,  //no dma, no interrupts
@@ -135,37 +197,57 @@ ASM: HERE EQU VFSTART   HEX
 \     0x05,0x68,  //enable Tx
 \     0x00,0x00   //overflow
 
-
 \ \\   6809 DTC: SCC initialization                 (c) 17apr95 bjr
-HERE EQU SCCATBL HEX
-   7C02 ,  2500 ,   \ port address, #bytes, reset reg ptr
-   09C0 ,  0444 ,  0100 ,  0200 ,  03C0 ,  0560 ,
-   0901 ,  0A00 ,  0B50 ,  0C18 ,  0D00 ,  0E02 ,
-   0E03 ,  03C1 ,  0568 ,  0F00 ,  1010 ,  0100 ,
+\ HERE EQU SCCATBL HEX
+\    7C02 ,  2500 ,   \ port address, #bytes, reset reg ptr
+\    09C0 ,  0444 ,  0100 ,  0200 ,  03C0 ,  0560 ,
+\    0901 ,  0A00 ,  0B50 ,  0C18 ,  0D00 ,  0E02 ,
+\    0E03 ,  03C1 ,  0568 ,  0F00 ,  1010 ,  0100 ,
+\
+\ HERE EQU SCCBTBL
+\    7C00 ,  1F00 ,   \ port address, #bytes, reset reg ptr
+\    0444 ,  0100 ,  03C0 ,  0560 ,  0A00 ,  0B50 ,
+\    0C18 ,  0D00 ,  0E02 ,  0E03 ,  03C1 ,  0568 ,
+\    0F00 ,  1010 ,  0100 ,  \ 0909 ,
+\
+\ ASM: HERE EQU SCCINIT   \ set up on-board i/o
+\    X ,++ LDY,   X ,+ LDB,
+\    BEGIN,   X ,+ LDA,   Y 0, STA,   DECB,   EQ UNTIL,   RTS, ;C
+\ \ \\   6809 DTC: serial I/O                         (c) 31mar95 bjr
+\ HEX 7C02 EQU SCCACMD   7C03 EQU SCCADTA
+\
+\ CODE KEY    \ -- c    get char from serial port
+\    6 # ( D) PSHS,   BEGIN,   SCCACMD LDB,   1 # ANDB,  NE UNTIL,
+\    SCCADTA LDB,   CLRA,   NEXT ;C
+\
+\ CODE KEY?   \ -- f    return true if char waiting
+\    6 # ( D) PSHS,   CLRA,   SCCACMD LDB,   1 # ANDB,
+\    NE IF,   -1 # LDB,   THEN,   NEXT ;C
+\
+\ CODE EMIT   \ c --    output character to serial port
+\    BEGIN,   SCCACMD LDA,   4 # ANDA,   NE UNTIL,
+\    SCCADTA STB,   6 # ( D) PULS,   NEXT ;C
 
-HERE EQU SCCBTBL
-   7C00 ,  1F00 ,   \ port address, #bytes, reset reg ptr
-   0444 ,  0100 ,  03C0 ,  0560 ,  0A00 ,  0B50 ,
-   0C18 ,  0D00 ,  0E02 ,  0E03 ,  03C1 ,  0568 ,
-   0F00 ,  1010 ,  0100 ,  \ 0909 ,
+7FFB EQU v4eTxStatReg \ Read, negative if transmit buffer is in use, positive otherwise
+7FFB EQU v4eTxByteReg \ Write
+7FFC EQU v4eRxStatReg \ Read, zero if no data received, otherwise != 0
+7FFD EQU v4eRxByteReg \ Read, upon reading, 7FFC is automatically cleared
+7FFE EQU v4eLEDReg    \ LED Register, probably read/write?
 
-ASM: HERE EQU SCCINIT   \ set up on-board i/o
-   X ,++ LDY,   X ,+ LDB,
-   BEGIN,   X ,+ LDA,   Y 0, STA,   DECB,   EQ UNTIL,   RTS, ;C
-\ \\   6809 DTC: serial I/O                         (c) 31mar95 bjr
-HEX 7C02 EQU SCCACMD   7C03 EQU SCCADTA
-
-CODE KEY    \ -- c    get char from serial port
-   6 # ( D) PSHS,   BEGIN,   SCCACMD LDB,   1 # ANDB,  NE UNTIL,
-   SCCADTA LDB,   CLRA,   NEXT ;C
 
 CODE KEY?   \ -- f    return true if char waiting
-   6 # ( D) PSHS,   CLRA,   SCCACMD LDB,   1 # ANDB,
-   NE IF,   -1 # LDB,   THEN,   NEXT ;C
+  6 # ( D) PSHS,   CLRA,   v4eRxStatReg LDB,
+  NE IF,   -1 # LDB,   THEN,   NEXT ;C
+
+CODE KEY    \ -- c    get char from serial port
+   6 # ( D) PSHS,   BEGIN,   v4eRxStatReg LDB,   NE UNTIL,
+   v4eRxByteReg  LDB,   CLRA,   NEXT ;C
 
 CODE EMIT   \ c --    output character to serial port
-   BEGIN,   SCCACMD LDA,   4 # ANDA,   NE UNTIL,
-   SCCADTA STB,   6 # ( D) PULS,   NEXT ;C
+   BEGIN,   v4eTxStatReg  LDA,  MI UNTIL,
+   v4eTxByteReg STB,   6 # ( D) PULS,   NEXT ;C
+
+
 
 
 \ \\   6809 DTC: interpreter logic                       01apr15nac
@@ -565,15 +647,20 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
       8 USER SCR      \ -- a-add    blk most recently LISTed
       A USER BLKADRS  \ -- a-addr   two cells: lba2 lba10
       E USER BSTATE   \ -- a-addr   5 cells: f b0 b1 b2 b3
-
-\ \\   High level: system variables and constants        24feb16nac
      18 USER LATEST   \ -- a-addr   last word in dictionary
+
 \ ^-variables from U0 to here initialised by UINIT in scr120 -^
+
      1A USER >IN      \ -- a-addr   holds offset into TIB
      1C USER STATE    \ -- a-addr   holds compiler state
      1E USER 'SOURCE  \ -- a-addr   two cells: length, address
      22 USER HP       \ -- a-addr   HOLD pointer
      24 USER LP       \ -- a-addr   leave-stack pointer
+
+     26 USER YT       \ -- a-addr   User application variable
+     28 USER MT       \ -- a-addr   User application variable
+     2A USER RND      \ -- a-addr   User application variable
+
     100 USER S0       \ -- a-addr   end of parameter stack
     128 USER PAD      \ -- a-addr   user PAD buffer/end of hold
     180 USER L0       \ -- a-addr   bottom of leave stack

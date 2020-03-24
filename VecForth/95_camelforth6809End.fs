@@ -15,6 +15,14 @@
 \
 \ v1.0  alpha test version, 7 May 95
 
+HEX
+
+: COLD        \ -- ; cold start Forth system
+    UINIT U0 #INIT CMOVE
+    CR ." VecForth v0.1 2018-03-18"
+    CR ." based on 6809 CamelForth v1.1 2016-03-20"
+    ABORT ;
+
 \ \\   Testing words: memory dump                        24mar15nac
 HEX
 : .H  ( n - )   0F AND 30 + DUP 39 > IF 7 + THEN EMIT ;
@@ -48,9 +56,9 @@ HEX
 
 \ \\   6809 DTC: reset initialization               (c) 25apr95 bjr
 ASM: HERE EQU ENTRY   HEX
-   CLRA,  F000 STA,  INCA,  E000 STA,  INCA,  D000 STA,
-   INCA,  C000 STA,  INCA,  B000 STA,  INCA,  A000 STA,
-   INCA,  9000 STA,  INCA,  8000 STA,  \ init mem mapping
+\   CLRA,  F000 STA,  INCA,  E000 STA,  INCA,  D000 STA,
+\   INCA,  C000 STA,  INCA,  B000 STA,  INCA,  A000 STA,
+\   INCA,  9000 STA,  INCA,  8000 STA,  \ init mem mapping
    UP-INIT-HI # LDA,   A DPR TFR,   \ initial UP
    UP-INIT 100 + # LDS,             \ initial SP
    UP-INIT 1E9 + # LDU,             \ initial RP - Avoid Vectrex BIOS area
@@ -58,7 +66,6 @@ ASM: HERE EQU ENTRY   HEX
 \   SCCATBL # LDX,  SCCINIT JSR,     \ init serial ports
 \   SCCBTBL # LDX,  SCCINIT JSR,
    ' COLD JMP,   ;C           \ enter top-level Forth word
-
 
 
 ENTRY ENTRY-ADDR ! \ PJE insert entry address into boot code
@@ -80,6 +87,8 @@ CREATE UINIT  HEX
    02 , 0800 ,              \ SDcard address of block file
    0 , 0 , 0 , 0 , 0 ,      \ BSTATE flags and buffers
 META ALSO FORTH TLATEST @ T, PREVIOUS TARGET    \ LATEST
+
+
 
 \ Note that UINIT must be the *last* word in the kernel, in
 \ order to set the initial LATEST as shown above.  If this is
