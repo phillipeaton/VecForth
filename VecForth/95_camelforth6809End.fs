@@ -19,6 +19,7 @@ HEX
 
 : COLD        \ -- ; cold start Forth system
     UINIT U0 #INIT CMOVE
+\ TURNKEY
     CR ." VecForth v0.1 2018-03-18"
     CR ." based on 6809 CamelForth v1.1 2016-03-20"
     ABORT ;

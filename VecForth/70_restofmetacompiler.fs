@@ -228,7 +228,7 @@ VARIABLE EVERYONE  1 EVERYONE !  DECIMAL
 : .MIRRORS   'MIRROR @
    BEGIN DUP WHILE  ( - ma )
     DUP FWD-LIST @  EVERYONE @ OR  IF
-      DUP           CR BODY>           10 .XTID
+      DUP           CR BODY>           20 .XTID
       DUP           @   ." : value="    5 U.R
       DUP FWD-LIST  @   ."  fwdlist="   5 U.R
       DUP PUT-CODE  @   ."  put="       6 .XTID
