@@ -86,22 +86,25 @@ VARIABLE END?
 \ delete TAB and #OUT. >NAME and NAME>STRING are gforth
 \ : .XTID ( xt n -- ) >R >NAME DUP 0= IF DROP S" <noname>" ELSE NAME>STRING THEN DUP >R TYPE R> R> SWAP - 1 MAX SPACES ;
 
-use chromium_ans.scr
+
+\ use chromium_ans.scr
 
 \ blocks 192-255 (last 64 blocks) are used as a virtual memory
 \ image for the target system. The ROM image is built there.
 \ In order to diff images it is convenient (though not necessary)
 \ to put it in a known state
+
 DECIMAL
 \ set all locations in blk n of current block file to 0
 : ZEROBLK ( n - ) BLOCK 1024 0 FILL UPDATE ;
 : CLEARVM 63 FOR I 192 + ZEROBLK NEXT FLUSH ;
 CLEARVM
 
+
+
+
 \ for multicomp use 45 load. Do "1 load" for vanilla (sm2) system
 \ 1 load
-include 10_vectrex.fs
-
 
 \ Portability bug in IMMED: it used "2 +" where it should have used CELL +. A real
 \ Brad bug!! Fixed!!

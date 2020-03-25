@@ -1,4 +1,4 @@
-\ \\CamelForth for the Motorola 6809  (c) 1995 Bradford J. Rodriguez
+\ CamelForth for the Motorola 6809  (c) 1995 Bradford J. Rodriguez
 \ *   Permission is granted to freely copy, modify, and          *
 \ *   distribute this program for personal or educational use.   *
 \ *   Commercial inquiries should be directed to the author at   *
@@ -14,242 +14,6 @@
 \ DP =       UP  User Pointer (high byte)
 \
 \ v1.0  alpha test version, 7 May 95
-
-\ \\ 6809 Source Code: boot parameters              (c) 28apr95 bjr
-
-ONLY FORTH META TARGET DEFINITIONS
-
-HEX 0000 FFFF DICTIONARY ROM  ROM
-    CA00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
-    CA   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
-
-    C900 EQU DP-INIT      \ starting RAM adrs for dictionary
-   \ Vectrex memory map with 1K RAM: C800-CBFF RAM, Dxx0-DxxF I/O
-
-\  0000 +--------------------+
-\       |                    |
-\       | Forth kernel ROM   |
-\       |                    |
-\  8000 +--------------------+
-\       |*     UNMAPPED     *|
-\  C800 +--------------------+
-\       |*RUM RAM (TO C87F) *|
-\  C900 +--------------------+
-\       |Forth RAM dictionary|
-\  C980 +--------------------+
-\       |        TIB         |
-\  CA00 +--------------------+
-\       |     user area      |
-\  CA80 +--------------------+
-\       |  parameter stack   |
-\  CB00 +--------------------+ Initial SP
-\       |   HOLD,PAD areas   |
-\  CB80 +--------------------+
-\       |    return stack    |
-\  CBEA +--------------------+
-\       |*BIOS HOUSEKEEPING *|
-\  CC00 +--------------------+
-\       |*   RAM MIRROR     *|
-\  D000 +--------------------+
-\       |*   6522VIAx128    *|
-\  D800 +--------------------+
-\       |*    DO NOT USE    *|
-\  E000 +--------------------+
-\       |*    MINESTORM     *|
-\  F000 +--------------------+
-\       |*       RUM        *|
-\  FFF0 +--------------------+
-\       |*6809 reset vectors*|
-\  FFFF +--------------------+
-
-
-\ Harvard synonyms - these must all be PRESUMEd
-AKA , I,     AKA @ I@     AKA ! I!
-AKA C, IC,   AKA C@ IC@   AKA C! IC!
-AKA HERE IHERE     AKA ALLOT IALLOT
-PRESUME WORD       AKA WORD IWORD
-
-\ start of vectrex memory with cartridge name...
-\ ***************************************************************************
-\ VECTREX CART HEADER SECTION
-\ ***************************************************************************
-
-HEX
-\ g         G     C     E           2     0     1     8
-67 C, 20 C, 47 C, 43 C, 45 C, 20 C, 32 C, 30 C, 31 C, 38 C, 80 C,
-FD C, 0D C,             \ Intro Music
-F8 C, 50 C, 20 C, 80 C, \ Height Width etc.
-\ V   E     C     F     O     R     T     H
-56 C, 45 C, 43 C, 46 C, 4F C, 52 C, 54 C, 48 C, 80 C,
-00 C,   \ End of Header
-
-ASM: HERE EQU VFSTART
-HERE 1 + EQU ENTRY-ADDR
-9999 JMP, ;C \ Vectrex code to jump to VecForth ENTRY word, 9999 gets overwritten
-
-10 equ v4eRED
-20 equ v4eGREEN
-40 equ v4eBLUE
-30 equ v4eYELLOW
-50 equ v4eMAGENTA
-60 equ v4eCYAN
-70 equ v4eWHITE
-
-\ ***************************************************************************
-\  MAGIC CARTHEADER SECTION
-\       DO NOT CHANGE THIS STRUCT
-\ ***************************************************************************
-HEX
-30 ORG
-
-\ T   h     G     S
-54 C, 68 C, 47 C, 53 C,             \ magic handshake marker
-HERE EQU v4ecartversion     0001 ,  \ I always have a version
-                                    \ in comm. structs
-\ $800 KILLS TEXT \ HERE EQU v4ecartflags       10F0 ,  \ v4e flags:
-HERE EQU v4ecartflags       18F0 ,  \ v4e flags:
-                                    \ $8000 + always set by v4e
-                                    \ $4000 - hiscore entry supported
-                                    \ $2000 - enable cart as ram
-                                    \ $1000 - supply default font
-                                    \ $0800 - fast menu switch supported
-                                    \       + set to 0 if hiscore entry
-                                    \ $0700 + v4e timing bits:
-                                    \          0 - heuristic
-                                    \          1 - zero
-                                    \          2 - one
-                                    \          3 - two
-                                    \          4 - three
-                                    \ $0080 - populate storage upon start
-                                    \ $0040 - extension calls used
-                                    \ $0020 - gpios used
-                                    \ $0010 - serial regs and dma
-                                    \       + set to 0 again if serial regs active
-                                    \ $0008 + screensaver enabled
-                                    \ $0003 - font size
-\
-\ first the variables for the v4e font system
-\
-HERE EQU v4efontptr         0000 ,  \ supplied by app:
-                                    \ if != 0: the cart uses this
-                                    \ ptr to supply a font and to
-                                    \ optimize strings;
-HERE EQU v4efontwidth       5F C,   \ supplied by app:
-                                    \ the cart stores a system
-                                    \ font at v4efontptr+0x20 and
-                                    \ adds v4efontwidth per line
-                                    \ ..must be at least $3f
-HERE EQU v4efontlastchar    7E C,   \ supplied by cart:($5e or $7e)
-                                    \ last char supplied by v4e
-                                    \ (first one is always 0x20)
-HERE EQU v4estringlists     0000 ,  \ if !=0 a ptr to a list of ptrs
-                                    \ containing lists of constant
-                                    \ strings that can be optimized
-                                    \ for a given font (0 == end
-                                    \ of lists)
-\
-\ now the variables for the v4e store/load area
-\
-HERE EQU v4eStorageArea     0000 ,  \ pointer to the area - 0: unused
-HERE EQU v4eStorageSize     0000 ,  \ and its size
-HERE EQU v4eStorageLoaded   0000 ,  \ set by v4e: return size for a load
-                                    \ e.g. if set to zero in compile an != 0
-                                    \ at the start shows whether something was
-                                    \ loaded via 'populate storage upon start'
-HERE EQU v4eStorageID
-\ T   E     S     T
-54 C, 45 C, 53 C, 54 C,             \ 4 bytes storage identifier
-\
-\ variables for the v4e bank switching, only populated for 'V4EB' carts
-\ or for carts using serial communication
-\
-HERE EQU v4eMultiBank        0000 , \ during init: no. of banks (0x48)
-HERE EQU v4eMultiBankAddress 0000 , \ e.g. 0: PB6 bank - $8000- normal bank
-HERE EQU v4eMultiBankFlag    00 C,  \ 0: ok
-\
-\ end of v4e cart header
-\
-
-\ PJE the below matches up mostly
-\ https://hackaday.io/project/5233-z80-computer/log/19836-serial-io
-\ See also AM8530.pdf, big file, circuitry, C and assembler at the end,
-\ like below.
-\ $7C02 then $25 = #bytes = 3 * 6 + 1
-\ #define sccSetsCount 38
-\ const unsigned char sccSets[] = {
-\     0x00,0x00,  //pointer reset
-\     0x09,0xC0,  //hardware reset
-\     0x04,0x04,  //1x clock, async, 1 stop, no par
-\     0x01,0x00,  //no dma, no interrupts
-\     0x02,0x00,  //clear int vector
-\     0x03,0xC0,  //rx 8 bits, disabled
-\     0x05,0x60,  //tx 8 bits, disabled
-\     0x09,0x01,  //status low, no interrupts
-\     0x0A,0x00,  //nrz encoding
-\     0x0B,0xD6,  //xtal, BRG for rxc, trxc output
-\     0x0C,0xfe,  //time constant low byte (1200)
-\     0x0D,0x05,  //time constant high byte(1200)
-\     0x0E,0x00,  //BRG source RTxC
-\     0x0E,0x80,  //clock source BRG
-\     0x0E,0x01,  //enable BRG
-\     0x0F,0x00,  //no ints
-\     0x10,0x10,  //reset interrupts
-\     0x03,0xC1,  //enable Rx
-\     0x05,0x68,  //enable Tx
-\     0x00,0x00   //overflow
-
-\ \\   6809 DTC: SCC initialization                 (c) 17apr95 bjr
-\ HERE EQU SCCATBL HEX
-\    7C02 ,  2500 ,   \ port address, #bytes, reset reg ptr
-\    09C0 ,  0444 ,  0100 ,  0200 ,  03C0 ,  0560 ,
-\    0901 ,  0A00 ,  0B50 ,  0C18 ,  0D00 ,  0E02 ,
-\    0E03 ,  03C1 ,  0568 ,  0F00 ,  1010 ,  0100 ,
-\
-\ HERE EQU SCCBTBL
-\    7C00 ,  1F00 ,   \ port address, #bytes, reset reg ptr
-\    0444 ,  0100 ,  03C0 ,  0560 ,  0A00 ,  0B50 ,
-\    0C18 ,  0D00 ,  0E02 ,  0E03 ,  03C1 ,  0568 ,
-\    0F00 ,  1010 ,  0100 ,  \ 0909 ,
-\
-\ ASM: HERE EQU SCCINIT   \ set up on-board i/o
-\    X ,++ LDY,   X ,+ LDB,
-\    BEGIN,   X ,+ LDA,   Y 0, STA,   DECB,   EQ UNTIL,   RTS, ;C
-\ \ \\   6809 DTC: serial I/O                         (c) 31mar95 bjr
-\ HEX 7C02 EQU SCCACMD   7C03 EQU SCCADTA
-\
-\ CODE KEY    \ -- c    get char from serial port
-\    6 # ( D) PSHS,   BEGIN,   SCCACMD LDB,   1 # ANDB,  NE UNTIL,
-\    SCCADTA LDB,   CLRA,   NEXT ;C
-\
-\ CODE KEY?   \ -- f    return true if char waiting
-\    6 # ( D) PSHS,   CLRA,   SCCACMD LDB,   1 # ANDB,
-\    NE IF,   -1 # LDB,   THEN,   NEXT ;C
-\
-\ CODE EMIT   \ c --    output character to serial port
-\    BEGIN,   SCCACMD LDA,   4 # ANDA,   NE UNTIL,
-\    SCCADTA STB,   6 # ( D) PULS,   NEXT ;C
-
-7FFB EQU v4eTxStatReg \ Read, negative if transmit buffer is in use, positive otherwise
-7FFB EQU v4eTxByteReg \ Write
-7FFC EQU v4eRxStatReg \ Read, zero if no data received, otherwise != 0
-7FFD EQU v4eRxByteReg \ Read, upon reading, 7FFC is automatically cleared
-7FFE EQU v4eLEDReg    \ LED Register, probably read/write?
-
-
-CODE KEY?   \ -- f    return true if char waiting
-  6 # ( D) PSHS,   CLRA,   v4eRxStatReg LDB,
-  NE IF,   -1 # LDB,   THEN,   NEXT ;C
-
-CODE KEY    \ -- c    get char from serial port
-   6 # ( D) PSHS,   BEGIN,   v4eRxStatReg LDB,   NE UNTIL,
-   v4eRxByteReg  LDB,   CLRA,   NEXT ;C
-
-CODE EMIT   \ c --    output character to serial port
-   BEGIN,   v4eTxStatReg  LDA,  MI UNTIL,
-   v4eTxByteReg STB,   6 # ( D) PULS,   NEXT ;C
-
-
-
 
 \ \\   6809 DTC: interpreter logic                       01apr15nac
 ASM:  HERE RESOLVES DOCOLON   HERE EQU <DOCOLON>
@@ -644,8 +408,8 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
       0 USER U0       \ -- a-addr   current user area adrs
       2 USER BASE     \ -- a-addr   holds conversion radix
       4 USER DP       \ -- a-addr   holds dictionary pointer
-      6 USER BLK      \ -- a-add    holds 0 or blk being int'd
-      8 USER SCR      \ -- a-add    blk most recently LISTed
+      6 USER BLK      \ -- a-addr   holds 0 or blk being int'd
+      8 USER SCR      \ -- a-addr   blk most recently LISTed
       A USER BLKADRS  \ -- a-addr   two cells: lba2 lba10
       E USER BSTATE   \ -- a-addr   5 cells: f b0 b1 b2 b3
      18 USER LATEST   \ -- a-addr   last word in dictionary
@@ -940,9 +704,11 @@ EMULATE:  M['] (S") T,  TS"  M['] ?ABORT T,  ;EMULATE IMMEDIATE
     29 WORD DROP ;           IMMEDIATE
 
 : \           \ --           skip input until end of buffer
-    BLK @ IF ( if blk file skip to next 64-char boundary)
+    BLK @
+    IF ( if blk file skip to next 64-char boundary)
         >IN @ DUP 40 MOD 40 SWAP - + >IN ! EXIT
-    THEN SOURCE >IN ! DROP ; IMMEDIATE
+    THEN
+    SOURCE >IN ! DROP ; IMMEDIATE
 \ \\   High level: compiler                              01apr15nac
 : CREATE      \ --        create an empty definition
     LATEST @ I,             \ link field

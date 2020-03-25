@@ -19,8 +19,7 @@ HEX
 
 : COLD        \ -- ; cold start Forth system
     UINIT U0 #INIT CMOVE
-\ TURNKEY
-    CR ." VecForth v0.1 2018-03-18"
+    CR ." VecForth v0.02 2018-07-10"
     CR ." based on 6809 CamelForth v1.1 2016-03-20"
     ABORT ;
 
@@ -38,22 +37,6 @@ HEX
     DROP SPACE
     .A .A .A .A .A .A .A .A       .A .A .A .A .A .A .A .A
     10 +LOOP DROP ;
-
-\ \\   Testing words: simple memory test                 03may15nac
-: STUP  \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I DUP      ! CELL +LOOP ;
-: STUPI \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I NEGATE I ! CELL +LOOP ;
-
-: TSTUP  \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I DUP @      <> IF
-  ."  Error@" I U. THEN CELL +LOOP ;
-: TSTUPI \ start-addr end-addr -- start-addr end-addr
-  2DUP SWAP DO I NEGATE I @ <> IF
-  ."  Error@" I U. THEN CELL +LOOP ;
-
-: PASS STUP TSTUP STUPI TSTUPI ; ( do 1 pass)
-: PASSES 0 DO ." ." PASS LOOP ;  ( do N passes)
 
 \ \\   6809 DTC: reset initialization               (c) 25apr95 bjr
 ASM: HERE EQU ENTRY   HEX

@@ -1,8 +1,10 @@
-\ 30\   6809 assembler: utilities                         01apr15nac
-ALSO META ASSEMBLER DEFINITIONS \ PJE CR ORDER
-
 HEX
 
+ALSO META ASSEMBLER DEFINITIONS
+
+\ Block 30 -----------------------------------------------------
+\   6809 assembler: utilities                         01apr15nac
+\
 : WITHIN   ROT SWAP OVER   \ n lo hi -- f | test within limits
    < ROT ROT > OR 0= ;
 : 8BIT?   -80 7F WITHIN ;
@@ -12,7 +14,9 @@ HEX
 : N,       , ;
 : NCREATE  CREATE ;
 
-\ \\   6809 assembler: addressing modes            ( 01 feb 93 bjr)
+\ Block 31 -----------------------------------------------------
+\   6809 assembler: addressing modes            ( 01 feb 93 bjr)
+\
 : OPCODE,                  \ store opcode with prefix (if any)
    DUP 0FF00 AND  IF T, ELSE TC, THEN  ;
 
@@ -28,7 +32,10 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
    DOES>  @ INDEXREG ;  \ rval -- postbyte
 84 XMODE 0,    86 XMODE A,    85 XMODE B,    8B XMODE D,
 80 XMODE ,+    81 XMODE ,++   82 XMODE -,    83 XMODE --,
-\ \\   6809 assembler: addressing modes            ( 01 feb 93 bjr)
+
+\ Block 32 -----------------------------------------------------
+\   6809 assembler: addressing modes            ( 01 feb 93 bjr)
+\
 : ,      SWAP 89 INDEXREG ;   \ rval n -- n postbyte |
 : ,PCR   20 MODE !  8D ;      \ n -- n postbyte |
 
@@ -44,7 +51,9 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 4 CONSTANT S    5 CONSTANT PC   8 CONSTANT A    9 CONSTANT B
 0A CONSTANT CCR    0B CONSTANT DPR
 
-\ \\   6809 assembler: inherent instructions       ( 01 feb 93 bjr)
+\ Block 33 -----------------------------------------------------
+\   6809 assembler: inherent instructions       ( 01 feb 93 bjr)
+\
 : INHOP   NCREATE  N,      \ opcode -- | Inherent Addressing
    DOES>   @ OPCODE, RESET ; \ -- | lay one or two bytes
 
@@ -58,7 +67,9 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 1D INHOP SEX,   3F INHOP SWI, 103F INHOP SWI2, 113F INHOP SWI3,
 13 INHOP SYNC,  4D INHOP TSTA,  5D INHOP TSTB,
 
-\ \\   6809 assembler: immediate instructions      ( 01 feb 93 bjr)
+\ Block 34 -----------------------------------------------------
+\   6809 assembler: immediate instructions      ( 01 feb 93 bjr)
+\
 : IMMOP   NCREATE  N,      \ opcode -- | Immediate Only (8-bit)
    DOES>   MODE @ ?ADRERR   @ TC, TC, RESET ;  \ operand --
 
@@ -70,11 +81,15 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 
 1E RROP EXG,    1F RROP TFR,
 
-\ \\   6809 assembler: +mode                       ( 01 feb 93 bjr)
+\ Block 35 -----------------------------------------------------
+\   6809 assembler: +mode                       ( 01 feb 93 bjr)
+\
 : +MODE    \ operand -- operand | modify operand per mode
    MODE @ +  DUP 0F0 AND 50 = IF 0F AND THEN ; \ change 5x to 0x
 
-\ \\   6809 assembler: pcrel, cofset                     01apr15nac
+\ Block 36 -----------------------------------------------------
+\   6809 assembler: pcrel, cofset                     01apr15nac
+\
 : PCREL   \ operand postbyte -- | lay PC relative
    SWAP  THERE 2 + -  DUP 8BIT?  \ try 8 bit relative offset
    IF  SWAP 0FE AND TC, TC,      \ it fits...lay postbyte,offset
@@ -89,7 +104,9 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
    ELSE OVER 8BIT? IF  0FE AND TC, TC,   \ 8 bit offset
    ELSE  TC, T,  THEN THEN THEN ;        \ 16 bit offset
 
-\ \\   6809 assembler: indexed, immed                    01apr15nac
+\ Block 37 -----------------------------------------------------
+\   6809 assembler: indexed, immed                    01apr15nac
+\
 : EXTIND    \ operand postbyte -- | lay extended indirect
    TC, T, ;      \ lay postbyte and operand
 
@@ -105,7 +122,9 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
    CELL + @  DUP 0= ?ADRERR \ test immedsize
    1- IF T, ELSE TC, THEN ; \ lay immediate operand in reqd.size
 
-\ \\   6809 assembler: general addr instr          ( 01 feb 93 bjr)
+\ Block 38 -----------------------------------------------------
+\   6809 assembler: general addr instr          ( 01 feb 93 bjr)
+\
 : GENOP   NCREATE  N, N,   \ immedsize opcode -- | Gen'l Addr
    DOES>   DUP @ +MODE OPCODE,   \ [see below] | lay opcode
       MODE @ DUP  0 = IF DROP  IMMED         ELSE   \ immediate
@@ -121,7 +140,10 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 \ (1) immediate, direct, extended:                 operand --
 \ (2) all indexed except (3):                     postbyte --
 \ (3) const.offset, PCR, extended indir:  operand postbyte --
-\ \\   6809 assembler: general addr instr          ( 01 feb 93 bjr)
+
+\ Block 39 -----------------------------------------------------
+\   6809 assembler: general addr instr          ( 01 feb 93 bjr)
+\
 1   89 GENOP ADCA,   1  0C9 GENOP ADCB,   1   8B GENOP ADDA,
 1  0CB GENOP ADDB,   2  0C3 GENOP ADDD,   1   84 GENOP ANDA,
 1  0C4 GENOP ANDB,   1   85 GENOP BITA,   1  0C5 GENOP BITB,
@@ -136,7 +158,9 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 0   48 GENOP LSL,    0   44 GENOP LSR,    0   40 GENOP NEG,
 1   8A GENOP ORA,    1  0CA GENOP ORB,    0   49 GENOP ROL,
 
-\ \\   6809 assembler: general addr instr          ( 01 feb 93 bjr)
+\ Block 40 -----------------------------------------------------
+\   6809 assembler: general addr instr          ( 01 feb 93 bjr)
+\
 0   46 GENOP ROR,    1   82 GENOP SBCA,   1  0C2 GENOP SBCB,
 0   87 GENOP STA,    0  0C7 GENOP STB,    0  0CD GENOP STD,
 0 10CF GENOP STS,    0  0CF GENOP STU,    0   8F GENOP STX,
@@ -145,7 +169,9 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 
 32 INXOP LEAS,  33 INXOP LEAU,  30 INXOP LEAX,  31 INXOP LEAY,
 
-\ \\   6809 assembler: branches                          01apr15nac
+\ Block 41 -----------------------------------------------------
+\   6809 assembler: branches                          01apr15nac
+\
 : CONDBR   NCREATE  N,      \ opcode -- | Conditional Branch
    DOES>   @  SWAP THERE 2 + -     \ addr --
    DUP 8BIT? IF  SWAP TC, TC,                   \ 8 bit
@@ -156,21 +182,27 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
    DUP 8BIT? IF  SWAP >< TC, TC,       \ 8 bit: use short opcode
    ELSE  SWAP TC, 1- T,  THEN RESET ;  \ 16 bit: use long opcode
 
-\ \\   6809 assembler: branch instructions         ( 01 feb 93 bjr)
+\ Block 41 -----------------------------------------------------
+\   6809 assembler: branch instructions         ( 01 feb 93 bjr)
+\
 24 CONDBR BCC,  25 CONDBR BCS,  27 CONDBR BEQ,  2C CONDBR BGE,
 2E CONDBR BGT,  22 CONDBR BHI,  24 CONDBR BHS,  2F CONDBR BLE,
 25 CONDBR BLO,  23 CONDBR BLS,  2D CONDBR BLT,  2B CONDBR BMI,
 26 CONDBR BNE,  2A CONDBR BPL,  21 CONDBR BRN,  28 CONDBR BVC,
 29 CONDBR BVS,  2016 UNCBR BRA,  8D17 UNCBR BSR,
 
+\ Block 42 -----------------------------------------------------
 \   6809 assembler: conditions                  ( 01 feb 93 bjr)
+\
 24 CONSTANT CS  25 CONSTANT CC  27 CONSTANT NE  2C CONSTANT LT
 2E CONSTANT LE  22 CONSTANT LS  24 CONSTANT LO  2F CONSTANT GT
 25 CONSTANT HS  23 CONSTANT HI  2D CONSTANT GE  2B CONSTANT PL
 26 CONSTANT EQ  2A CONSTANT MI  21 CONSTANT ALW 28 CONSTANT VS
 29 CONSTANT VC  20 CONSTANT NVR
 
-\ \\   6809 assembler: structured conditionals      (c) 17apr95 bjr
+\ Block 43 -----------------------------------------------------
+\   6809 assembler: structured conditionals      (c) 17apr95 bjr
+\
 : IF,     \ br.opcode -- adr.next.instr  | reserve space
    TC, 0 TC, THERE ;
 : ENDIF,  \ adr.instr.after.br -- | patch the forward ref.
@@ -186,7 +218,10 @@ VARIABLE MODE   \ 0=immed, 10=direct, 20=indexed, 30=extended
 : REPEAT, \ adr.after.while dest.adr.of.begin --
    NVR UNTIL,  ENDIF, ;
 : THEN,  ENDIF, ;   : END,  UNTIL, ;
-\ 44\   6809 assembler: next, code  6809 DTC model   (c) 01apr95 bjr
+
+\ Block 44 -----------------------------------------------------
+\   6809 assembler: next, code  6809 DTC model   (c) 01apr95 bjr
+\
 : ENTERCODE   RESET ;        \ used by metacompiler
 : EXITCODE    ;              \ used by metacompiler
 
@@ -197,4 +232,3 @@ Y CONSTANT IP   S CONSTANT SP   U CONSTANT RP   X CONSTANT W
 PREVIOUS DEFINITIONS \ end of assembler!
 \ : CODE        THEAD ENTERCODE ;   ...defined in metacompiler
 \ : ;C          ;              \ aka END-CODE on some systems
-
