@@ -453,12 +453,12 @@ PREVIOUS DEFINITIONS
 \ the build process - only reports unresolved words (which
 \ represent errors).
 \
-\ With EVERYONE set to 0, .MIRRORS reports all of the mirror
+\ With EVERYONE set to 1, .MIRRORS reports all of the mirror
 \ words. This can be useful for debug of the metacompiler itself
 \ or of errors arising from the addition of new code to CamelForth
 \ itself.
 \
-VARIABLE EVERYONE  0 EVERYONE !  DECIMAL
+VARIABLE EVERYONE  1 EVERYONE !  DECIMAL
 
 : .MIRRORS   'MIRROR @
    BEGIN DUP WHILE  ( - ma )

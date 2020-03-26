@@ -1,11 +1,11 @@
-
-10 equ v4eRED
-20 equ v4eGREEN
-40 equ v4eBLUE
-30 equ v4eYELLOW
-50 equ v4eMAGENTA
-60 equ v4eCYAN
-70 equ v4eWHITE
+HEX
+\ 10 equ v4eRED
+\ 20 equ v4eGREEN
+\ 40 equ v4eBLUE
+\ 30 equ v4eYELLOW
+\ 50 equ v4eMAGENTA
+\ 60 equ v4eCYAN
+\ 70 equ v4eWHITE
 
 \ ***************************************************************************
 \  MAGIC CARTHEADER SECTION
@@ -18,8 +18,8 @@ HEX
 54 C, 68 C, 47 C, 53 C,             \ magic handshake marker
 HERE EQU v4ecartversion     0001 ,  \ I always have a version
                                     \ in comm. structs
-\ $800 KILLS TEXT \ HERE EQU v4ecartflags       10F0 ,  \ v4e flags:
-HERE EQU v4ecartflags       18F0 ,  \ v4e flags:
+\ $800 KILLS TEXT \ HERE EQU v4ecartflags       18F0 ,  \ v4e flags:
+HERE EQU v4ecartflags       10F0 ,  \ v4e flags:
                                     \ $8000 + always set by v4e
                                     \ $4000 - hiscore entry supported
                                     \ $2000 - enable cart as ram

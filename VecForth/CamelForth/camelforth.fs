@@ -422,9 +422,6 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
      22 USER HP       \ -- a-addr   HOLD pointer
      24 USER LP       \ -- a-addr   leave-stack pointer
 
-     26 USER YT       \ -- a-addr   User application variable
-     28 USER MT       \ -- a-addr   User application variable
-     2A USER RND      \ -- a-addr   User application variable
 
     100 USER S0       \ -- a-addr   end of parameter stack
     128 USER PAD      \ -- a-addr   user PAD buffer/end of hold
@@ -618,10 +615,24 @@ EMULATE:  M['] (S") T,  TS"  M['] TYPE T,  ;EMULATE  IMMEDIATE
     COUNT 3F AND + ;
 : IMMED?      \ nfa -- f        fetch immediate flag
     C@ 40 AND ;
+
+: TOUPPER ( c -- C )
+    DUP 61 ( ascii a ) 7A ( ascii z ) 1+ WITHIN IF DF AND THEN ;
+
+: C<> ( c1 c2 -- flag ) TOUPPER SWAP TOUPPER <> ;
+
+: S<> \ c-addr1 c-addr2 u -- n ; string compare, case insensitive
+    OVER + SWAP DO
+      DUP C@ I C@ C<> IF
+        DROP UNLOOP -1 EXIT
+      THEN
+      1+
+    LOOP DROP 0 ;
+
 : FIND        \ c-addr -- c-addr 0/1/-1   not found/immed/normal
     LATEST @ BEGIN              \ -- a nfa
-        2DUP C@ BF AND SWAP C@  \ -- a nfa n1 n2
-        = IF 2DUP CHAR+ SWAP DUP CHAR+ SWAP C@ S= ELSE 1 THEN
+        2DUP C@ BF AND SWAP C@  \ -- a nfa n1 n2 ; Lengths equal?
+        = IF 2DUP CHAR+ SWAP DUP CHAR+ SWAP C@ S<> ELSE 1 THEN
         DUP IF DROP NFA>LFA @ DUP THEN
     0= UNTIL                    \ -- a nfa  OR  a 0
     DUP IF                      \ if found, check immed status
@@ -634,17 +645,31 @@ EMULATES TLITERAL                       IMMEDIATE
 
 HEX
 : DIGIT?      \ c -- n -1 | x 0    true if c is a valid digit
+   TOUPPER
    DUP 39 > 100 AND +              \ silly looking,
    DUP 140 > 107 AND -  30 -       \ but it works!
    DUP BASE @ U< ;
+
 : ?SIGN       \ adr n -- adr' n' f   get optional sign
    OVER C@                 \ -- adr n c
    2C - DUP ABS 1 = AND    \ -- +=-1, -=+1, else 0
    DUP IF 1+               \ +=0, -=+2        NZ=negative
        >R 1 /STRING R>     \ adr' n' f
    THEN ;
+
+\              #:0a  $:10  %:2  &:0a (again)
+CREATE NUM-BASES 0A ,  10 ,  2 ,  0A ,
+
+: ?BASE       \ adr n -- adr' n' ; set base if base character found
+  OVER C@ 23 ( ascii # ) -       \ -- adr n num-bases-offset ;
+  DUP 0 4 WITHIN IF            \ -- adr n num-bases-offset ; Base code found?
+    CELLS NUM-BASES + @ BASE ! \ -- adr n ; Set base from table value
+    1 /STRING                  \ -- adr' n' ; Trim base char from string
+  ELSE DROP
+  THEN ;
+
 \ \\   High level: interpreter                      (c) 31mar95 bjr
-: >NUMBER     \ ud adr u -- ud' adr' u'  conv. string to number
+: >NUMBER     \ ud adr u -- ud' adr' u' ; Conv. string to number, u'=0 if valid number
     BEGIN DUP WHILE
         OVER C@ DIGIT?
         0= IF DROP EXIT THEN
@@ -653,8 +678,12 @@ HEX
     REPEAT ;
 
 : ?NUMBER     \ c-addr -- n -1 | c-addr 0     string->number
-    DUP  0 0 ROT COUNT     \ -- ca ud adr n
-    ?SIGN >R  >NUMBER      \ -- ca ud adr' n'
+    DUP  0 0 ROT COUNT     \ -- ca ud adr n ; 0 0 = ud i.e. unsigned 32-bit number
+    ?SIGN >R               \ -- ca ud adr' n' ; Recognise sign on number and save
+    BASE @ >R              \ Save current base
+      ?BASE                \ -- ca ud adr' n' ; Recognise base on number and set
+      >NUMBER              \ -- ca ud' adr' n' ; Read the number, n'=0 if valid number
+    R> BASE !              \ Restore previous base
     IF  R> 2DROP 2DROP 0   \ -- ca 0   (error)
     ELSE  2DROP NIP R>
         IF NEGATE THEN -1  \ -- n -1   (ok)
@@ -768,9 +797,9 @@ HEX
 EMULATES WORDS
 
 : .S            \ --     print contents of stack
-    DEPTH .
+    3C ( < ) EMIT DEPTH . 08 ( BS ) EMIT 3E ( > ) EMIT SPACE
     SP@ S0 - IF
-        SP@ S0 2 - DO  I @ h.  -2 +LOOP
+        SP@ S0 2 - DO  I @ . ( h. ) -2 +LOOP
     THEN ;
 EMULATES .S
 

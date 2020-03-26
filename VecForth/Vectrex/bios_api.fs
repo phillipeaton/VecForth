@@ -156,4 +156,11 @@ CODE _Read_Btns \ -- b ; Button Transition State (Same as $C811)
     18 # ( X DP) PULS,
     NEXT ;C
 
+CODE _Joy_Digital \ -- ;
+    1E # ( X DP D) PSHS,
+    D0 # LDX,   X DPR TFR,    \ -- ; DP to D0
+    Joy_Digital JSR,
+    1E # ( X DP D) PULS,
+    NEXT ;C
+
 \ \\\\\\\\\\\ IN WORK

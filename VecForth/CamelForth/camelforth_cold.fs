@@ -1,4 +1,4 @@
-\ \\CamelForth for the Motorola 6809  (c) 1995 Bradford J. Rodriguez
+\ CamelForth for the Motorola 6809  (c) 1995 Bradford J. Rodriguez
 \ *   Permission is granted to freely copy, modify, and          *
 \ *   distribute this program for personal or educational use.   *
 \ *   Commercial inquiries should be directed to the author at   *
@@ -19,9 +19,9 @@ HEX
 
 : COLD        \ -- ; cold start Forth system
     UINIT U0 #INIT CMOVE
-    CR ." VecForth v0.02 2018-07-10"
+    CR ." VecForth v0.03 2019-11-16"
     CR ." based on 6809 CamelForth v1.1 2016-03-20"
-    ABORT ;
+    CR ." OK-0 " ABORT ;
 
 \ \\   Testing words: memory dump                        24mar15nac
 HEX
@@ -52,7 +52,7 @@ ASM: HERE EQU ENTRY   HEX
    ' COLD JMP,   ;C           \ enter top-level Forth word
 
 
-ENTRY ENTRY-ADDR ! \ PJE insert entry address into boot code
+ENTRY ENTRY-ADDR ! \ Insert entry address into Vectrex boot code ********
 
 
 ASM: HERE EQU IRET   RTI,  ;C
