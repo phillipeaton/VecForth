@@ -1,7 +1,6 @@
 HEX
 
 \ VecFever UART serial port interface. VecFever provides buffering (256 bytes each way?)
-
 7FFB EQU v4eTxStatReg \ Read, negative if transmit buffer is in use, positive otherwise
 7FFB EQU v4eTxByteReg \ Write
 7FFC EQU v4eRxStatReg \ Read, zero if no data received, otherwise != 0
