@@ -211,32 +211,40 @@ TARGET ' DOCREATE ." ->" .s META @ CONSTANT MIRROR-CF    \ F83
 \ The metacompiler works like an assembler in this regard.
 \
 : T[   0 TSTATE ! ;
-: T]  -1 TSTATE !
-   BEGIN  ?STACK  >IN @
-      SOURCE SWAP DROP OVER =
-      IF ( ." BUFFER EMPTY! " )
-          REFILL 2DROP 0
+
+: T]-EVAL \ offset c-addr -- ;
+   FIND                     \ -- offset [ xt +/-1 | c-addr 0 ];
+   0<> IF                   \ -- offset xt ; Word found?
+      NIP                   \ -- xt ;
+      EXECUTE               \ -- ; ( i*x xt — j*x )
+   ELSE                     \ -- offset c-addr ; Word not found
+      NUMBER?               \ -- offset [ c-addr 0 | n -1 | d 0> ] ; [ string -- string 0 / n -1 / d 0> ]
+      0<> IF                \ -- offset n ; Number found?
+         NIP TLITERAL       \ -- n ; Drop offset, compile literal
+      ELSE                  \ -- n c-addr ; Number not found
+         DROP               \ -- offset ; Drop string
+         >IN ! (PRESUME)    \ build fwd ref
+         'MIRROR @ 'MA ! +FWDREF
       THEN
-      DEFINED \ F83
-      IF ( found) NIP DUAL?
-          IF DUP DUAL,
-          THEN
-          EXECUTE
-      ELSE NUMBER?
-          IF ( number) DUAL?
-              IF DUP [COMPILE] LITERAL
-              THEN
-              TLITERAL DROP
-          ELSE ( undef)  DUAL?
-              IF .UNDEF
-              THEN
-              DROP  >IN ! (PRESUME)  \ build fwd ref
-              'MIRROR @ 'MA ! +FWDREF
-          THEN
+   THEN
+;
+
+: T]
+   -1 TSTATE !
+   BEGIN                         \ -- ;
+      ?STACK                     \ -- ;
+      >IN @                      \ -- offset ;
+      SOURCE                     \ -- offset addr len ;
+      NIP OVER = IF              \ -- offset ; Offset = buffer length? i.e. is buffer empty
+         DROP                    \ -- ; dump offset, will get reset
+         REFILL 0=               \ -- f ; ff = refill successful
+      ELSE                       \
+         BL WORD                 \ -- offset c-addr ; String len=0 when WORD fails
+         T]-EVAL                 \ -- ;
+         TSTATE @ 0=             \ -- f ; tf = have returned to interpret state
       THEN
-      TSTATE @ 0=  END? @ OR
   UNTIL
-  END? OFF ;   \ F83
+;
 
 \ Block 15 -----------------------------------------------------
 \   Target interpretation                             31mar15nac
