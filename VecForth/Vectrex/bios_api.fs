@@ -2,7 +2,6 @@
 
 HEX
 
-
 \ \\\\\\\\\\ NOT TESTED
 
 \ CODE DPR!   B DPR TFR,   6 # ( D) PULS, NEXT ;C \ DPR -- ;
@@ -36,9 +35,6 @@ CODE _Dot_List \ dl_addr -- ;
 
 
 \ \\\\\\\\\ WORKING
-
-CODE -ROT     \ x1 x2 x3 -- x3 x1 x2   per stack diagram
-    S 2 , LDX,   S 2 , STD,   S 0, LDD,   S 0, STX, NEXT ;C
 
 CODE _Random \ -- n ; n is a random number between 0 and 255
      6 # ( D) PSHS,   Random JSR,   CLRB,   A B EXG,   NEXT ;C
@@ -162,5 +158,3 @@ CODE _Joy_Digital \ -- ;
     Joy_Digital JSR,
     1E # ( X DP D) PULS,
     NEXT ;C
-
-\ \\\\\\\\\\\ IN WORK

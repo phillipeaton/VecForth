@@ -47,9 +47,12 @@ CODE SWAP   \ x1 x2 -- x2 x1  swap top two items
 CODE OVER   \ x1 x2 -- x1 x2 x1   per stack diagram
     6 # ( D) PSHS,   S 2 , LDD,   NEXT ;C
 
-\ \\   6809 DTC: stack operations                   (c) 314apr15nac
+\ \\   6809 DTC: stack operations                   (c) 31apr15nac
 CODE ROT     \ x1 x2 x3 -- x2 x3 x1   per stack diagram
     S 0, LDX,   S 0, STD,   S 2 , LDD,   S 2 , STX,   NEXT ;C
+
+CODE -ROT    \ x1 x2 x3 -- x3 x1 x2   per stack diagram
+    S 2 , LDX,   S 2 , STD,   S 0, LDD,   S 0, STX,   NEXT ;C
 
 CODE NIP     \ x1 x2 -- x2            per stack diagram
     S 2 , LEAS,   NEXT ;C
@@ -839,8 +842,8 @@ ASM: HERE EQU ENTRY   HEX
    UP-INIT-HI # LDA,   A DPR TFR,   \ initial UP
    UP-INIT 100 + # LDS,             \ initial SP
    UP-INIT 1E9 + # LDU,             \ initial RP - Avoid Vectrex BIOS area
-\ Words for Scroungemaster II computer UART initialization
 \   UP-INIT 200 + # LDU,             \ initial RP
+\ Words for Scroungemaster II computer UART initialization
 \   SCCATBL # LDX,  SCCINIT JSR,     \ init serial ports
 \   SCCBTBL # LDX,  SCCINIT JSR,
    ' COLD JMP,   ;C           \ enter top-level Forth word
@@ -854,13 +857,3 @@ HERE  0FFF0 ORG    \ 6809 hardware vectors
   IRET ,  IRET ,  IRET ,  IRET ,    \ tbd, SWI3, SWI2, FIRQ
   IRET ,  IRET ,  IRET ,  ENTRY ,   \ IRQ, SWI, NMI, RESET
 ORG
-
-\ \\   6809 DTC: user area initialization                24feb16nac
-DECIMAL 26 CONSTANT #INIT   \ # bytes of user area init data
-
-CREATE UINIT  HEX
-   0 , 0A ,                 \ reserved,BASE
-   DP-INIT ,                \ DP
-   0 , 0 ,                  \ BLK,SCR
-   02 , 0800 ,              \ SDcard address of block file
-   0 , 0 , 0 , 0 , 0 ,      \ BSTATE flags and buffers

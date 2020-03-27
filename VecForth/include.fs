@@ -30,8 +30,10 @@ include    Vectrex\vecfeverheader.fs
 include CamelForth\serial_io.fs
 include CamelForth\camelforth.fs
 include    Vectrex\vectrex_equ.fs
+include    Vectrex\vector_lists.fs
 include    Vectrex\bios_api.fs
-include CamelForth\camelforth_cold.fs
+include    Vectrex\bios_api_tests.fs
+include CamelForth\latest.fs
 
 ONLY FORTH ALSO META
 \ HEX E000 2000 HEXFILE 6809.HEX   \ make hex file: start, length, filename )
