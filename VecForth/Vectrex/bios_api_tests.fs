@@ -2,12 +2,12 @@
 
 HEX
 
-: KEY? 0 ;
-: KEY 1 ;
-: CR ;
-: EMIT DROP ;
-: U. DROP ;
-: .S ;
+\ : KEY? 0 ;
+\ : KEY 1 ;
+\ : CR ;
+\ : EMIT DROP ;
+\ : U. DROP ;
+\ : .S ;
 
 HERE EQU HELLO-WORLD-STRING
 S" HELLO WORLD" 80 C,
@@ -146,8 +146,8 @@ S" HELLO WORLD" 80 C,
 : intensity \ -- ;
   BEGIN
     _Wait_Recal
-\     _Intensity_3F (dg2)
-\     _Intensity_5F 50 50 -27 -28 box
+    _Intensity_3F (dg2)
+    _Intensity_5F 50 50 -27 -28 box
     80 0 do
         I 100 * _Intensity_a
         -44 i 30 - HELLO-WORLD-STRING 3 + _Print_Str_d
@@ -156,3 +156,13 @@ S" HELLO WORLD" 80 C,
   UNTIL
 ;
 
+: sound \ -- ;
+  1 Vec_Music_Flag c!
+  begin
+      yankee _Init_Music_chk
+\     music1 _Init_Music_chk
+     _Wait_Recal
+     _Do_Sound
+    KEY?
+  until
+;
