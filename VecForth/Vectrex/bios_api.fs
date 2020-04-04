@@ -18,8 +18,8 @@ CODE _Reset0Int         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Int
 
 \ Day to Day
 
-CODE _DP_to_D0          NEXT ;C \ Not needed for Forth
-CODE _DP_to_C8          NEXT ;C \ Not needed for Forth
+CODE _DP_to_D0          NEXT ;C \ Not needed for Forth, DP managed in API calls
+CODE _DP_to_C8          NEXT ;C \ Not needed for Forth, DP managed in API calls
 
 CODE _Print_Ships_x     8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,                           D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ #ships ship_char addr -- ; Utilises Stack underflow?
 CODE _Print_Ships       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,  A B EXG,   S ,++ ADDD,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ #ships ship_char x y -- ; Utilises Stack underflow?
@@ -113,18 +113,18 @@ CODE _Clear_x_d         D X TFR,   6 # ( D) PULS,   Clear_x_b    JSR,   6 # ( D)
 
 \ Memory management / Memory copy
 
-CODE _Move_Mem_a_1      NEXT ;C \
-CODE _Move_Mem_a        NEXT ;C
+CODE _Move_Mem_a_1      NEXT ;C \ Not need for Forth, use CMOVE or CMOVE> instead
+CODE _Move_Mem_a        NEXT ;C \ Not need for Forth, use CMOVE or CMOVE> instead
 
 \ Memory Management / Memory fill
 
-CODE _Clear_x_b_80      NEXT ;C
-CODE _Clear_x_b_a       NEXT ;C
+CODE _Clear_x_b_80      NEXT ;C \ Not need for Forth, use FILL instead
+CODE _Clear_x_b_a       NEXT ;C \ Not need for Forth, use FILL instead
 
 \ Player option
 
-CODE _Select_Game       NEXT ;C
-CODE _Display_Option    NEXT ;C
+CODE _Select_Game      28 # ( Y DP) PSHU,                            A B EXG,   S ,++ ADDD,     Select_Game    JSR,   6 # ( D) PULS,   28 # ( Y DP) PULU, NEXT ;C \ #game_versions #players_max -- ;
+CODE _Display_Option   48 # ( U DP) PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   6 # ( D) PULS,  Display_Option JSR,   6 # ( D) PULS,   48 # ( U DP) PULU, NEXT ;C \ option_val addr -- ;
 
 \ Reset and initialization
 
@@ -137,11 +137,11 @@ CODE _Init_OS           E # ( DP D) PSHU,   Init_OS     JSR,   E # ( DP D) PULU,
 \ Score
 
 CODE _Clear_Score       D X TFR,   Clear_Score   JSR,   6 # ( D) PULS,   NEXT ;C \    addr -- ;
-CODE _Add_Score_a       40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,   6 # ( D) PULS,   Add_Score_a   JSR,   6 # ( D) PULS,   40 # ( U) PULU,   NEXT ;C \ binary# BCD ptr -- ;
-CODE _Add_Score_d                         D X TFR,   6 # ( D) PULS,                               Add_Score_d   JSR,   6 # ( D) PULS,                     NEXT ;C \         BCD ptr -- ;
-CODE _Strip_Zeros                         D X TFR,   6 # ( D) PULS,                               Strip_Zeros   JSR,   6 # ( D) PULS,                     NEXT ;C \      digit# ptr -- ; digit# 8 bit only
-CODE _Compare_Score     40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,                    Compare_Score JSR,   A B EXG,         40 # ( U) PULU,   NEXT ;C \       ptr2 ptr1 -- 0|1|2; Same|1>2|2>1
-CODE _New_High_Score    NEXT ;C \ YOU ARE HERE ************
+CODE _Add_Score_a       40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,   6 # ( D) PULS,   Add_Score_a    JSR,   6 # ( D) PULS,   40 # ( U) PULU,   NEXT ;C \ binary# BCD ptr -- ;
+CODE _Add_Score_d                         D X TFR,   6 # ( D) PULS,                               Add_Score_d    JSR,   6 # ( D) PULS,                     NEXT ;C \         BCD ptr -- ;
+CODE _Strip_Zeros                         D X TFR,   6 # ( D) PULS,                               Strip_Zeros    JSR,   6 # ( D) PULS,                     NEXT ;C \      digit# ptr -- ; digit# 8 bit only
+CODE _Compare_Score     40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,                    Compare_Score  JSR,   A B EXG,         40 # ( U) PULU,   NEXT ;C \       ptr2 ptr1 -- 0|1|2; Same|1>2|2>1
+CODE _New_High_Score    40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,                    New_High_Score JSR,   6 # ( D) PULS,   40 # ( U) PULU,   NEXT ;C \     addr2 addr1 -- ;
 
 \ Sound
 
@@ -151,13 +151,13 @@ CODE _Sound_Byte_raw    NEXT ;C
 CODE _Clear_Sound       NEXT ;C
 CODE _Sound_Bytes       NEXT ;C
 CODE _Sound_Bytes_x     NEXT ;C
-CODE _Do_Sound                     4E # ( U   DP D) PSHS,               D0 # LDA,   A DPR TFR,   Do_Sound   JSR,   4E # ( U   DP D) PULS,                                     NEXT ;C \      -- ;
-CODE _Do_Sound_x                   48 # ( U   DP  ) PSHS,    D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound   JSR,   48 # ( U   DP  ) PULS,                                     NEXT ;C \  ptr -- ; TBD
-CODE _Init_Music_Buf               1E # (     X DP D) PSHS,                                      Init_Music_Buf JSR,   1E # (     X DP D) PULS,                               NEXT ;C \      -- ;
-CODE _Init_Music_chk    D U EXG,   7E # ( U Y X DP D) PSHS,             C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   7E # ( U Y X DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
-CODE _Init_Music        D U EXG,   7E # ( U Y X DP D) PSHS,             C8 # LDX,   X DPR TFR,   Init_Music     JSR,   7E # ( U Y X DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
-CODE _Init_Music_dft    D U EXG,   7E # ( U Y X DP D) PSHS,             C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   7E # ( U Y X DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
-CODE _Explosion_Snd     D U EXG,   1E # (     X DP D) PSHS,             C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   1E # (     X DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+CODE _Do_Sound                     4E # ( U   DP D) PSHS,               D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   4E # ( U   DP D) PULS,                                     NEXT ;C \      -- ;
+CODE _Do_Sound_x                   48 # ( U   DP  ) PSHS,    D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   48 # ( U   DP  ) PULS,                                     NEXT ;C \  ptr -- ; TBD
+CODE _Init_Music_Buf                E # (     DP D) PSHS,                                        Init_Music_Buf JSR,   1E # (     DP D) PULS,                               NEXT ;C \      -- ;
+CODE _Init_Music_chk    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   7E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+CODE _Init_Music        D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music     JSR,   7E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+CODE _Init_Music_dft    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   7E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
+CODE _Explosion_Snd     D U EXG,    E # (     DP D) PSHS,               C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   1E # (     DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
 
 \ Vector beam positioning
 
