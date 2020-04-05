@@ -11,3 +11,5 @@
 # Compilation memory labels
 *.cnt
 
+# Textpad workspace file
+*.tws
