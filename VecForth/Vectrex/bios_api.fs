@@ -3,6 +3,7 @@
 HEX
 
 \ Forth doesn't care about the X register, it's short term work space only, much like the vectrex.
+\ ********** Code saving to U can't store it on teh U stack, needs to go on Y or S stack. E.g. Display_Option, Add_Score etc.
 
 \ Calibration/vector reset
 
@@ -93,8 +94,8 @@ CODE _Draw_Grid_VL     28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,  
 
 \ Joystick handling
 
-CODE _Read_Btns_Mask    E # ( DP  ) PSHU,   D0 # LDB,   B DPR TFR,    Read_Btns_Mask JSR,   A B TFR,   CLRA,   8 # ( DP  ) PULU,   NEXT ;C \ maskA -- b ; Button Transition State (Same as $C811)
-CODE _Read_Btns         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Read_Btns      JSR,   A B TFR,   CLRA,   8 # ( DP  ) PULU,   NEXT ;C \       -- b ; Button Transition State (Same as $C811)
+CODE _Read_Btns_Mask    8 # ( DP  ) PSHU,   D0 # LDB,   B DPR TFR,    Read_Btns_Mask JSR,   A B TFR,   CLRA,   8 # ( DP  ) PULU,   NEXT ;C \ maskA -- b ; Button Transition State (Same as $C811)
+CODE _Read_Btns         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Read_Btns      JSR,   A B TFR,   CLRA,   E # ( DP D) PULU,   NEXT ;C \       -- b ; Button Transition State (Same as $C811)
 
 CODE _Joy_Analog        E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Joy_Analog     JSR,                      E # ( DP D) PULU,   NEXT ;C \ -- ;
 CODE _Joy_Digital       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Joy_Digital    JSR,                      E # ( DP D) PULU,   NEXT ;C \ -- ;
@@ -145,12 +146,13 @@ CODE _New_High_Score    40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,  
 
 \ Sound
 
-CODE _Sound_Byte        NEXT ;C
-CODE _Sound_Byte_x      NEXT ;C
-CODE _Sound_Byte_raw    NEXT ;C
-CODE _Clear_Sound       NEXT ;C
-CODE _Sound_Bytes       NEXT ;C
-CODE _Sound_Bytes_x     NEXT ;C
+CODE _Sound_Byte        8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte  JSR,   6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Sound_Byte_x      8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte  JSR,   6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
+CODE _Sound_Byte_raw    8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte  JSR,   6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Clear_Sound       E # (   DP D) PSHU,   D0 # LDX,   X DPR TFR,                                                        Clear_Sound JSR,                     E # (   DP D) PULU,   NEXT ;C \ -- ;
+CODE _Sound_Bytes      28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes JSR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ;
+CODE _Sound_Bytes_x    28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes JSR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ;
+\ YOU ARE HERE ************
 CODE _Do_Sound                     4E # ( U   DP D) PSHS,               D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   4E # ( U   DP D) PULS,                                     NEXT ;C \      -- ;
 CODE _Do_Sound_x                   48 # ( U   DP  ) PSHS,    D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   48 # ( U   DP  ) PULS,                                     NEXT ;C \  ptr -- ; TBD
 CODE _Init_Music_Buf                E # (     DP D) PSHS,                                        Init_Music_Buf JSR,   1E # (     DP D) PULS,                               NEXT ;C \      -- ;
@@ -229,7 +231,7 @@ NEXT, ;C
 \ + and - don't compile, not sure why, probably a vocabulary issue.
 \ Slimey back, hardcode $19 bytes, you can use more for safety e.g. $30
 
-CODE exit
+CODE Exit \ -- ; Exit back to VecFever menu system
    ramfunctiondata # LDU,      \ source
    ramfunction     # LDX,      \ destination
    $19             # LDA,      \ #bytes = 1+ramfuncend-ramfunctiondata
@@ -237,4 +239,3 @@ CODE exit
    $1000           # LDX,      \ the 'switch back to menu' command
    ramfunction       JMP,      \ up up and away
 NEXT ;C
-
