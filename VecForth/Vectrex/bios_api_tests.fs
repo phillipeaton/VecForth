@@ -12,8 +12,60 @@ HEX
 HERE EQU HELLO-WORLD-STRING
 S" HELLO WORLD" 80 C,
 
+: C/VR \ -- ; Calibration/Vector Reset
+   _Reset0Ref_D0
+   _Wait_Recal
+   _Recalibrate
+   _Set_Refresh
+   _Check0Ref
+   _Reset0Ref
+   _Reset_Pen
+   _Reset0Int
+;
+
+\ Print Ships(_x) test word
+\ Includes a dump of $10 bytes before and after the stack as I saw some
+\ comments that Print_Ships BIOS/RUM routine underflows the stack, but it
+\ looks OK to me
+: ps \ -- ;
+   cr s0 $10 - $20 dump     \ dump the stack, s0 is base of stack
+   $30a0 pad !              \ store y x coords for _x variant
+
+   begin
+       _Wait_Recal
+       _Intensity_7F
+       #5  $68 pad _Print_Ships_x \ #ships ship_char=spaceship ptr_to_xy_coords
+       #10 $69 0 0 _Print_Ships   \ #ships ship_char=spaceman x y
+       key?                       \ press a key to end
+   until
+   cr s0 $10 - $20 dump     \ redump the stack, check under stack is same
+;
+
+\ Random(_3) test words. Visually, rand3 looks more random
+: rand  begin cr _random   8 / 1+ 0 do ." *" loop key? until ;
+: rand3 begin cr _random_3 8 / 1+ 0 do ." *" loop key? until ;
+
+\ Dec_3/6_Counters test. Counters are 8 bit.
+: decc \ -- ;
+     6 0 do                     \ for 6 counters
+        _random i $c82e + c!    \ put in a random number
+     loop
+     $ff 0 do                   \ decrement all counters to zero
+        _Dec_3_Counters         \ dec first three
+        _Dec_6_Counters         \ dec all six, thus first three dec'd twice
+        $c82e 10 dump           \ dump the counters to terminal
+        key? if leave then      \ exit on key press
+     loop
+;
+
+\ Bitmask_a test. Provide a number 1 to 8, get back the power of 2
+\ Forth alternative is LSHIFT e.g. 1 5 lshift = 32
+: bma \ bit_number -- bit_mask ; \ output gives 1 2 4 8 16 32 64 128
+     8 0 do i _Bitmask_a u. loop
+;
 
 : DT \ -- ; Display turtles using vector list with two different BIOS calls
+   cr s0 $10 - $20 dump
   0
   BEGIN
     1+ DUP U.
@@ -30,6 +82,7 @@ S" HELLO WORLD" 80 C,
     KEY?
   UNTIL
   DROP
+   cr s0 $10 - $20 dump
 ;
 
 : DG \ -- ; Draw grid line by line

@@ -4,6 +4,7 @@ HEX
 
 \ Forth doesn't care about the X register, it's short term work space only, much like the vectrex.
 \ ********** Code saving to U can't store it on teh U stack, needs to go on Y or S stack. E.g. Display_Option, Add_Score etc.
+\ ***** Might be better to use some of these with S stack only, but used U due to parametnes.
 
 \ Calibration/vector reset
 
@@ -16,14 +17,13 @@ CODE _Reset0Ref         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Ref
 CODE _Reset_Pen         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset_Pen JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
 CODE _Reset0Int         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Int JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
 
-
 \ Day to Day
 
 CODE _DP_to_D0          NEXT ;C \ Not needed for Forth, DP managed in API calls
 CODE _DP_to_C8          NEXT ;C \ Not needed for Forth, DP managed in API calls
 
-CODE _Print_Ships_x     8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,                           D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ #ships ship_char addr -- ; Utilises Stack underflow?
-CODE _Print_Ships       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,  A B EXG,   S ,++ ADDD,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ #ships ship_char x y -- ; Utilises Stack underflow?
+CODE _Print_Ships_x     28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char addr -- ; Utilises Stack underflow?
+CODE _Print_Ships       28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char x y  -- ; Utilises Stack underflow?
 
 CODE _Random            6 # (  D) PSHS,                 Random   JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
 CODE _Random_3          6 # (  D) PSHS,                 Random_3 JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
@@ -36,12 +36,12 @@ CODE _Bitmask_a         A B EXG,                       Bitmask_a JSR,          A
 
 \ Delay
 
-CODE _Delay_3           6 # ( D) PSHS,   Delay_3 JSR,   NEXT ;C \   -- n  ; n is xxFF, where xx is undefined
-CODE _Delay_2           6 # ( D) PSHS,   Delay_2 JSR,   NEXT ;C \   -- n  ; n is xxFF, where xx is undefined
-CODE _Delay_1           6 # ( D) PSHS,   Delay_1 JSR,   NEXT ;C \   -- n  ; n is xxFF, where xx is undefined
-CODE _Delay_0           6 # ( D) PSHS,   Delay_0 JSR,   NEXT ;C \   -- n  ; n is xxFF, where xx is undefined
-CODE _Delay_b                            Delay_b JSR,   NEXT ;C \ n -- n' ; n is xxnn, where xx is undefined and nn is length to delay. n' is xxFF, where xx is undefined.
-CODE _Delay_RTS                          Delay_b JSR,   NEXT ;C \   --    ;
+CODE _Delay_3           6 # ( D) PSHU,   Delay_3 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_2           6 # ( D) PSHU,   Delay_2 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_1           6 # ( D) PSHU,   Delay_1 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_0           6 # ( D) PSHU,   Delay_0 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_b                            Delay_b JSR,   6 # ( D) PULU,   NEXT ;C \ n -- ; n is xxnn, where xx is undefined and nn is length to delay. n' is xxFF, where xx is undefined.
+CODE _Delay_RTS                          Delay_b JSR,                    NEXT ;C \   -- ;
 
 \ Drawing / Dot
 
@@ -146,20 +146,29 @@ CODE _New_High_Score    40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,  
 
 \ Sound
 
-CODE _Sound_Byte        8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte  JSR,   6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Sound_Byte_x      8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte  JSR,   6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
-CODE _Sound_Byte_raw    8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte  JSR,   6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Clear_Sound       E # (   DP D) PSHU,   D0 # LDX,   X DPR TFR,                                                        Clear_Sound JSR,                     E # (   DP D) PULU,   NEXT ;C \ -- ;
-CODE _Sound_Bytes      28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes JSR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ;
-CODE _Sound_Bytes_x    28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes JSR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ;
-\ YOU ARE HERE ************
-CODE _Do_Sound                     4E # ( U   DP D) PSHS,               D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   4E # ( U   DP D) PULS,                                     NEXT ;C \      -- ;
-CODE _Do_Sound_x                   48 # ( U   DP  ) PSHS,    D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   48 # ( U   DP  ) PULS,                                     NEXT ;C \  ptr -- ; TBD
-CODE _Init_Music_Buf                E # (     DP D) PSHS,                                        Init_Music_Buf JSR,   1E # (     DP D) PULS,                               NEXT ;C \      -- ;
-CODE _Init_Music_chk    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   7E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
-CODE _Init_Music        D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music     JSR,   7E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
-CODE _Init_Music_dft    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   7E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
-CODE _Explosion_Snd     D U EXG,    E # (     DP D) PSHS,               C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   1E # (     DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+CODE _Sound_Byte        8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte     JSR,              6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Sound_Byte_x      8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte     JSR,              6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
+CODE _Sound_Byte_raw    8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte     JSR,              6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Clear_Sound       E # (   DP D) PSHU,   D0 # LDA,   A DPR TFR,                                                        Clear_Sound    JSR,                                E # (   DP D) PULU,   NEXT ;C \ -- ;
+CODE _Sound_Bytes      28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes    JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ;
+CODE _Sound_Bytes_x    28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes_x  JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ; Never Used?
+CODE _Do_Sound         2E # ( Y DP D) PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,                                             Do_Sound       JSR,   Y U TFR,                    2E # ( Y DP D) PULU,   NEXT ;C \     -- ;
+CODE _Do_Sound_x       2E # ( Y DP D) PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,   D X TFR,                                  Do_Sound_x     JSR,   Y U TFR,   6 # ( D) PULS,   2E # ( Y DP D) PULU,   NEXT ;C \ ptr -- ;
+CODE _Init_Music_Buf    6 # (      D) PSHU,                                                                                 Init_Music_Buf JSR,                                6 # (      D) PULU,   NEXT ;C \     -- ;
+CODE _Init_Music_chk   28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Init_Music_chk JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ;
+CODE _Init_Music       28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Init_Music     JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
+CODE _Init_Music_dft   28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Init_Music_x   JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ;
+CODE _Explosion_Snd    28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Explosion_Snd  JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ;
+
+\ Alternative, probably slightly faster alternatives using PSHS instead of U, only _Do_Sound tested
+\ CODE _Do_Sound                     4E # ( U   DP D) PSHS,               D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   4E # ( U   DP D) PULS,                                     NEXT ;C \      -- ;
+\ CODE _Do_Sound_x                   48 # ( U   DP  ) PSHS,    D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   48 # ( U   DP  ) PULS,                                     NEXT ;C \  ptr -- ;
+\ CODE _Init_Music_Buf                E # (     DP D) PSHS,                                        Init_Music_Buf JSR,    E # (     DP D) PULS,                               NEXT ;C \      -- ;
+\ CODE _Init_Music_chk    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   6E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+\ CODE _Init_Music        D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music     JSR,   6E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+\ CODE _Init_Music_dft    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   6E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
+\ CODE _Explosion_Snd     D U EXG,    E # (     DP D) PSHS,               C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   1E # (     DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+
 
 \ Vector beam positioning
 
@@ -180,8 +189,8 @@ CODE _Intensity_7F      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   6 # ( D) PSHS
 CODE _Intensity_a       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,                     Intensity_a JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ n -- ;
 
 \ Vector object handling / Object collision detection
-
-CODE _Obj_Will_Hit_u    NEXT ;C
+\ YOU ARE HERE *************************
+CODE _Obj_Will_Hit_u    26 # ( Y D) PSHU,  A B EXG,   S ,++ ADDD,   D Y TFR,   6 # ( D) PSHS,   S ,++ ADDD,   D X TFR,   6 # ( D) PSHS,           NEXT ;C \ height/2 width/2 ptr>movement x_mis y_mis x_obj y_obj -- f=collided ;
 CODE _Obj_Will_Hit      NEXT ;C
 CODE _Obj_Hit           NEXT ;C
 

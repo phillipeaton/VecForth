@@ -46,11 +46,11 @@ HEX 0000 FFFF DICTIONARY ROM  ROM
 \  CA00 +--------------------+
 \       |     user area      |
 \  CA80 +--------------------+
-\       |  parameter stack   |
+\       |  parameter stack |S|
 \  CB00 +--------------------+ Initial SP
 \       |   HOLD,PAD areas   |
 \  CB80 +--------------------+
-\       |    return stack    |
+\       |    return stack  |U|
 \  CBEA +--------------------+
 \       |*BIOS HOUSEKEEPING *|
 \  CC00 +--------------------+
