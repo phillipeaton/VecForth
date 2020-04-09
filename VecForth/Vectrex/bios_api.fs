@@ -8,10 +8,10 @@ HEX
 
 \ Calibration/vector reset
 
-CODE _Reset0Ref_D0      E # ( DP D) PSHU,                           Reset0Ref_D0 JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ; DP=D0
-CODE _Wait_Recal        E # ( DP D) PSHU,                             Wait_Recal JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ; DP=D0
-CODE _Recalibrate       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,   Recalibrate JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Wait_Recal        E # ( DP D) PSHU,                             Wait_Recal JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
 CODE _Set_Refresh       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,   Set_Refresh JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Recalibrate       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,   Recalibrate JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Reset0Ref_D0      E # ( DP D) PSHU,                           Reset0Ref_D0 JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
 CODE _Check0Ref         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Check0Ref JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
 CODE _Reset0Ref         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Ref JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
 CODE _Reset_Pen         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset_Pen JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
@@ -22,35 +22,35 @@ CODE _Reset0Int         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Int
 CODE _DP_to_D0          NEXT ;C \ Not needed for Forth, DP managed in API calls
 CODE _DP_to_C8          NEXT ;C \ Not needed for Forth, DP managed in API calls
 
-CODE _Print_Ships_x     28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char addr -- ; Utilises Stack underflow?
-CODE _Print_Ships       28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char x y  -- ; Utilises Stack underflow?
+CODE _Print_Ships_x     28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
+CODE _Print_Ships       28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
 
-CODE _Random            6 # (  D) PSHS,                 Random   JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
 CODE _Random_3          6 # (  D) PSHS,                 Random_3 JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
+CODE _Random            6 # (  D) PSHS,                 Random   JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
 
 CODE _Dec_3_Counters    6 # (  D) PSHU,           Dec_3_Counters JSR,    6 # ( D) PULU,   NEXT ;C \ -- ;
 CODE _Dec_6_Counters    6 # (  D) PSHU,           Dec_6_Counters JSR,    6 # ( D) PULU,   NEXT ;C \ -- ;
-CODE _Dec_Counters      D X TFR,   6 # ( D) PULS,   Dec_Counters JSR,    6 # ( D) PULS,   NEXT ;C \ counter_bytes #counters-1 -- ;
+CODE _Dec_Counters      D X TFR,   6 # ( D) PULS,   Dec_Counters JSR,    6 # ( D) PULS,   NEXT ;C \ #counters-1 ptr_counter_bytes -- ;
 
 CODE _Bitmask_a         A B EXG,                       Bitmask_a JSR,          A B EXG,   NEXT ;C \ bit_number -- bit_mask ;
 
 \ Delay
 
-CODE _Delay_3           6 # ( D) PSHU,   Delay_3 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_2           6 # ( D) PSHU,   Delay_2 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_1           6 # ( D) PSHU,   Delay_1 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_0           6 # ( D) PSHU,   Delay_0 JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_b                            Delay_b JSR,   6 # ( D) PULU,   NEXT ;C \ n -- ; n is xxnn, where xx is undefined and nn is length to delay. n' is xxFF, where xx is undefined.
-CODE _Delay_RTS                          Delay_b JSR,                    NEXT ;C \   -- ;
+CODE _Delay_3           6 # ( D) PSHU,   Delay_3   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_2           6 # ( D) PSHU,   Delay_2   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_1           6 # ( D) PSHU,   Delay_1   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_0           6 # ( D) PSHU,   Delay_0   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
+CODE _Delay_b                            Delay_b   JSR,   6 # ( D) PULS,   NEXT ;C \ n -- ; n is xxnn, where xx is undefined and nn is length to delay. n' is xxFF, where xx is undefined.
+CODE _Delay_RTS                          Delay_RTS JSR,                    NEXT ;C \   -- ;
 
 \ Drawing / Dot
 
-CODE _Dot_ix_b          8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   Dot_ix_b JSR,         X D TFR,   8 # ( DP  ) PULU,   NEXT ;C \ intensity coord-pair-addr -- coord-pair-addr+2 ;
-CODE _Dot_ix            8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_ix   JSR,         X D TFR,   8 # ( DP  ) PULU,   NEXT ;C \           coord-pair-addr -- coord-pair-addr+2 ;
+CODE _Dot_ix_b          8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   Dot_ix_b JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \ intensity coord-pair-addr -- ;
+CODE _Dot_ix            8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_ix   JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \           coord-pair-addr -- ;
 CODE _Dot_d             8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,      S ,++ ADDD,   Dot_d    JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \     x y -- ;
 CODE _Dot_here          E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,                               Dot_here JSR,                    E # ( DP D) PULU,   NEXT ;C \         -- ;
-CODE _Dot_List          8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_List JSR,         X D TFR,   8 # ( DP  ) PULU,   NEXT ;C \ dl_addr -- dl_addr' ;
-CODE _Dot_List_Reset    8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,              Dot_List_Reset JSR,         X D TFR,   8 # ( DP  ) PULU,   NEXT ;C \ dl_addr -- dl_addr' ;
+CODE _Dot_List          8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_List JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \ dl_addr -- ;
+CODE _Dot_List_Reset    8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,              Dot_List_Reset JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \ dl_addr -- ;
 
 \ Drawing / String
 

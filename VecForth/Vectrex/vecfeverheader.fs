@@ -19,7 +19,7 @@ HEX
 HERE EQU v4ecartversion     0001 ,  \ I always have a version
                                     \ in comm. structs
 \ $800 KILLS TEXT \ HERE EQU v4ecartflags       18F0 ,  \ v4e flags:
-HERE EQU v4ecartflags       10F0 ,  \ v4e flags:
+HERE EQU v4ecartflags       18F0 ,  \ v4e flags:
                                     \ $8000 + always set by v4e
                                     \ $4000 - hiscore entry supported
                                     \ $2000 - enable cart as ram

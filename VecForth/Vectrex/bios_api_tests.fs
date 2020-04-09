@@ -12,11 +12,11 @@ HEX
 HERE EQU HELLO-WORLD-STRING
 S" HELLO WORLD" 80 C,
 
-: C/VR \ -- ; Calibration/Vector Reset
-   _Reset0Ref_D0
+: c/vr \ -- ; Calibration/Vector Reset
    _Wait_Recal
-   _Recalibrate
    _Set_Refresh
+   _Recalibrate
+   _Reset0Ref_D0
    _Check0Ref
    _Reset0Ref
    _Reset_Pen
@@ -46,22 +46,84 @@ S" HELLO WORLD" 80 C,
 : rand3 begin cr _random_3 8 / 1+ 0 do ." *" loop key? until ;
 
 \ Dec_3/6_Counters test. Counters are 8 bit.
-: decc \ -- ;
-     6 0 do                     \ for 6 counters
-        _random i $c82e + c!    \ put in a random number
+: dec36c \ -- ;
+     6 0 do                         \ for 6 counters
+        _random i Vec_Counters + c! \ store in a random number
      loop
      $ff 0 do                   \ decrement all counters to zero
         _Dec_3_Counters         \ dec first three
         _Dec_6_Counters         \ dec all six, thus first three dec'd twice
-        $c82e 10 dump           \ dump the counters to terminal
+        Vec_Counters $10 dump   \ dump the counters to terminal
         key? if leave then      \ exit on key press
      loop
+;
+
+\ Decrement Counters test. Decrements 1, then 2, 3, through to 6 counters.
+: decc \ -- ;
+    Vec_Counters 6 $ff fill           \ initialise counters to $ff
+    Vec_Counters $10 dump             \ Display counters
+    6 0 do                            \ Decrement 1 counter, 2 ,3...6
+       i Vec_Counters _Dec_Counters   \
+    loop
+    Vec_Counters $10 dump             \ Display counters again
+;
+
+\ Delay_n etc test. Probably unlikey to be used by Forth directly.
+: delays \ -- ;
+     _Delay_3 _Delay_2 _Delay_1 _Delay_0 _Delay_RTS
+     $ff _Delay_b \ Parameterised general delay
 ;
 
 \ Bitmask_a test. Provide a number 1 to 8, get back the power of 2
 \ Forth alternative is LSHIFT e.g. 1 5 lshift = 32
 : bma \ bit_number -- bit_mask ; \ output gives 1 2 4 8 16 32 64 128
      8 0 do i _Bitmask_a u. loop
+;
+
+here equ dot_list
+        60 c, -70 c,  \ seven dots, relative
+       -40 c,  10 c,  \ position, Y, X
+        0  c,  30 c,
+        40 c,  10 c,
+        10 c,  30 c,
+         5 c,  30 c,
+       -10 c,  40 c,
+
+here equ dot_list_packet
+ ff c, -60 c, -70 c,  \ seven dots, relative
+ 00 c, -40 c,  10 c,  \ position, Y, X
+ ff c,  0  c,  30 c,
+ 00 c,  40 c,  10 c,
+ ff c,  10 c,  30 c,
+ ff c,   5 c,  30 c,
+ ff c, -10 c,  40 c,
+ 01 c,                \ list terminator
+
+\ Dot_List test. Displays an approximate mirrored version of Ursa Major
+: dl \ -- ;
+     begin
+        _Wait_Recal
+        _Intensity_5F
+        #50 VIA_t1_cnt_lo c!   \ set scaling to 50 decimal
+
+        _Dot_here                        \ dot in centre of screen
+
+        $10 8 _Dot_d                     \ dot 10 right, 5 up from previous dot
+
+        $1020 pad !                      \ setup yx co-ord parameter
+        pad _Dot_ix                      \ dot 20 right, 10 up from previous dot
+
+        $1020 pad !                      \ setup yx co-ord parameter
+        $1f pad _Dot_ix_b                \ dot 20 right, 10 up, intensity 1f
+        _Intensity_5F                    \ reset the intensity, _ix_b sets it ******** YAH - $1f Intensity NOT WORKING
+
+        dot_list_packet _Dot_List_Reset  \ display dot list, using terminator
+
+        #6 Vec_Misc_Count c!             \ 7 dots total, starting from 0
+        dot_list _Dot_List               \ display dot list, using counter
+
+        key? \ hit a key to exit
+     until
 ;
 
 : DT \ -- ; Display turtles using vector list with two different BIOS calls
