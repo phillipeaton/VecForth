@@ -12,7 +12,14 @@ HEX
 HERE EQU HELLO-WORLD-STRING
 S" HELLO WORLD" 80 C,
 
-: c/vr \ -- ; Calibration/Vector Reset
+\ Reset and initialization
+\ No test words for cold and warm start, as no params passed just run direct
+: inits \ -- ;
+  _Init_VIA  _Init_OS_RAM  _Init_OS
+;
+
+\ Calibration/Vector Reset
+: c/vr \ -- ;
    _Wait_Recal
    _Set_Refresh
    _Recalibrate
