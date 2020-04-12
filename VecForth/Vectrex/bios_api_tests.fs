@@ -30,6 +30,14 @@ S" HELLO WORLD" 80 C,
    _Reset0Int
 ;
 
+
+\ Read Buttons/mask. Display all the bytes that are set by the read
+: rbm 0 begin 1+ dup u. $0033 _Read_Btns_mask u. $C80F $10 dump key? until key 2drop ;
+: rb  0 begin 1+ dup u.       _Read_Btns      u. $C80F $10 dump key? until key 2drop ;
+
+******** YOU ARE HERE
+
+
 \ Print Ships(_x) test word
 \ Includes a dump of $10 bytes before and after the stack as I saw some
 \ comments that Print_Ships BIOS/RUM routine underflows the stack, but it
@@ -122,7 +130,6 @@ here equ dot_list_packet
 
         $1020 pad !                      \ setup yx co-ord parameter
         $1f pad _Dot_ix_b                \ dot 20 right, 10 up, intensity 1f
-        _Intensity_5F                    \ reset the intensity, _ix_b sets it ******** YAH - $1f Intensity NOT WORKING
 
         dot_list_packet _Dot_List_Reset  \ display dot list, using terminator
 
@@ -134,8 +141,6 @@ here equ dot_list_packet
 ;
 
 : DT \ -- ; Display turtles using vector list with two different BIOS calls
-   cr s0 $10 - $20 dump
-  0
   BEGIN
     1+ DUP U.
     _Wait_Recal
@@ -151,7 +156,6 @@ here equ dot_list_packet
     KEY?
   UNTIL
   DROP
-   cr s0 $10 - $20 dump
 ;
 
 : DG \ -- ; Draw grid line by line

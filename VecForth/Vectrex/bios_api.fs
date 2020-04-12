@@ -9,30 +9,38 @@ HEX
 \ general case ,save registers, set Do, arrange registers, combine where necessary, call routine, pull stack etc, note extra pulls to drop stack items at end
 \ Routines rougly in ROM address order as several run inte each other.
 
-$06 equ ~D   $28 EQU ~Ydp
-$0e equ ~dpD
-
+\ Registers
+$06 equ ____D
+$08 equ __dp_
+$0E equ __dpD
+$26 equ _Y__D
+$28 equ _Ydp_
+$2E equ _YdpD
+$40 equ U____
+$48 equ U_dp_
+$4E equ U_dpD
+$6E equ UYdpD
 
 \ Reset and initialization
 
 CODE _Cold_Start        Cold_Start  JMP,   ;C \ -- ; Jump here to restart the Vectrex and re-initialize the OS.
 CODE _Warm_Start        Warm_Start  JMP,   ;C \ -- ; Jump here to restart the Vectrex without re-initializing the OS.
-CODE _Init_VIA          E # ( DP D) PSHU,   Init_VIA    JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Init_OS_RAM       E # ( DP D) PSHU,   Init_OS_RAM JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Init_OS           E # ( DP D) PSHU,   Init_OS     JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Init_VIA          __dpD # PSHU,   Init_VIA    JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Init_OS_RAM       __dpD # PSHU,   Init_OS_RAM JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Init_OS           __dpD # PSHU,   Init_OS     JSR,   __dpD # PULU,   NEXT ;C \ -- ;
 
 \ Calibration/Vector reset
 
-CODE _Wait_Recal        E # ( DP D) PSHU,                             Wait_Recal JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Set_Refresh       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,   Set_Refresh JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Wait_Recal        __dpD # PSHU,                            Wait_Recal   JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Set_Refresh       __dpD # PSHU,   D0 # LDA,   A DPR TFR,   Set_Refresh  JSR,   __dpD # PULU,   NEXT ;C \ -- ;
 \
-CODE _Recalibrate       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,   Recalibrate JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Recalibrate       __dpD # PSHU,   D0 # LDA,   A DPR TFR,   Recalibrate  JSR,   __dpD # PULU,   NEXT ;C \ -- ;
 \
-CODE _Reset0Ref_D0      E # ( DP D) PSHU,                           Reset0Ref_D0 JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Check0Ref         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Check0Ref JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Reset0Ref         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Ref JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Reset_Pen         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset_Pen JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Reset0Int         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,     Reset0Int JSR,   E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Reset0Ref_D0      __dpD # PSHU,                            Reset0Ref_D0 JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Check0Ref         __dpD # PSHU,   D0 # LDA,   A DPR TFR,   Check0Ref    JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Reset0Ref         __dpD # PSHU,   D0 # LDA,   A DPR TFR,   Reset0Ref    JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Reset_Pen         __dpD # PSHU,   D0 # LDA,   A DPR TFR,   Reset_Pen    JSR,   __dpD # PULU,   NEXT ;C \ -- ;
+CODE _Reset0Int         __dpD # PSHU,   D0 # LDA,   A DPR TFR,   Reset0Int    JSR,   __dpD # PULU,   NEXT ;C \ -- ;
 
 \ Set Direct Pointer
 
@@ -41,118 +49,119 @@ CODE _DP_to_C8          NEXT ;C \ Not needed for Forth, DP managed in API calls
 
 \ Joystick handling
 
-CODE _Read_Btns_Mask    8 # ( DP  ) PSHU,   D0 # LDB,   B DPR TFR,    Read_Btns_Mask JSR,   A B TFR,   CLRA,   8 # ( DP  ) PULU,   NEXT ;C \ maskA -- b ; Button Transition State (Same as $C811)
-CODE _Read_Btns         E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Read_Btns      JSR,   A B TFR,   CLRA,   E # ( DP D) PULU,   NEXT ;C \       -- b ; Button Transition State (Same as $C811)
-CODE _Joy_Analog        E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Joy_Analog     JSR,                      E # ( DP D) PULU,   NEXT ;C \ -- ;
-CODE _Joy_Digital       E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,    Joy_Digital    JSR,                      E # ( DP D) PULU,   NEXT ;C \ -- ;
+CODE _Read_Btns_Mask    __dp_ # PSHU,   D0 # LDB,   B DPR TFR,   B A TFR,      Read_Btns_Mask JSR,   A B TFR,   CLRA,   __dp_ # PULU,   NEXT ;C \ maskA -- b ; Button Transition State (Same as $C811)
+CODE _Read_Btns         __dp_ # PSHU,   D0 # LDA,   A DPR TFR,   ____D # PSHS, Read_Btns      JSR,   A B TFR,   CLRA,   __dp_ # PULU,   NEXT ;C \       -- b ; Button Transition State (Same as $C811)
+CODE _Joy_Analog        __dpD # PSHU,   D0 # LDA,   A DPR TFR,                 Joy_Analog     JSR,                      __dpD # PULU,   NEXT ;C \       -- ;
+CODE _Joy_Digital       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                 Joy_Digital    JSR,                      __dpD # PULU,   NEXT ;C \       -- ;
 
 \ Sound
 
-CODE _Sound_Byte        8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte     JSR,              6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Sound_Byte_x      8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte     JSR,              6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
-CODE _Sound_Byte_raw    8 # (   DP  ) PSHU,   D0 # LDX,   X DPR TFR,                               A B EXG,   S ,++ ADDD,   Sound_Byte     JSR,              6 # ( D) PULS,    8 # (   DP  ) PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Clear_Sound       E # (   DP D) PSHU,   D0 # LDA,   A DPR TFR,                                                        Clear_Sound    JSR,                                E # (   DP D) PULU,   NEXT ;C \ -- ;
-CODE _Sound_Bytes      28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes    JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ;
-CODE _Sound_Bytes_x    28 # ( Y DP  ) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Sound_Bytes_x  JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ ptr -- ; Never Used?
-CODE _Do_Sound         2E # ( Y DP D) PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,                                             Do_Sound       JSR,   Y U TFR,                    2E # ( Y DP D) PULU,   NEXT ;C \     -- ;
-CODE _Do_Sound_x       2E # ( Y DP D) PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,   D X TFR,                                  Do_Sound_x     JSR,   Y U TFR,   6 # ( D) PULS,   2E # ( Y DP D) PULU,   NEXT ;C \ ptr -- ;
+CODE _Sound_Byte        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
+CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                           Clear_Sound   JSR,                              __dpD # PULU,   NEXT ;C \     -- ;
+CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
+CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; Never Used?
+CODE _Do_Sound          _YdpD # PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,                Do_Sound      JSR,   Y U TFR,                   _YdpD # PULU,   NEXT ;C \     -- ;
+CODE _Do_Sound_x        _YdpD # PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,   D X   TFR,   Do_Sound_x    JSR,   Y U TFR,   ____D # PULS,   _YdpD # PULU,   NEXT ;C \ ptr -- ;
 \
-CODE _Init_Music_Buf    6 # (      D) PSHU,                                                                                 Init_Music_Buf JSR,                                6 # (      D) PULU,   NEXT ;C \     -- ;
-CODE _Init_Music_chk   28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Init_Music_chk JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ;
-CODE _Init_Music       28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Init_Music     JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
-CODE _Init_Music_dft   28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Init_Music_x   JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ;
-CODE _Explosion_Snd    28 # ( Y DP  ) PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,                                  Explosion_Snd  JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP  ) PULU,   NEXT ;C \ addr -- ;
+CODE _Init_Music_Buf    ____D # PSHU,   Init_Music_Buf JSR,   ____D # PULU,   NEXT ;C \     -- ;
+\
+CODE _Init_Music_chk    _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Init_Music_chk JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ;
+CODE _Init_Music        _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Init_Music     JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
+CODE _Init_Music_dft    _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Init_Music_x   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ;
+CODE _Explosion_Snd     _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Explosion_Snd  JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ;
 \ Alternative, probably slightly faster alternatives using PSHS instead of U, only _Do_Sound tested
-\ CODE _Do_Sound                     4E # ( U   DP D) PSHS,               D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   4E # ( U   DP D) PULS,                                     NEXT ;C \      -- ;
-\ CODE _Do_Sound_x                   48 # ( U   DP  ) PSHS,    D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   48 # ( U   DP  ) PULS,                                     NEXT ;C \  ptr -- ;
-\ CODE _Init_Music_Buf                E # (     DP D) PSHS,                                        Init_Music_Buf JSR,    E # (     DP D) PULS,                               NEXT ;C \      -- ;
-\ CODE _Init_Music_chk    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   6E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
-\ CODE _Init_Music        D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music     JSR,   6E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
-\ CODE _Init_Music_dft    D U EXG,   6E # ( U Y DP D) PSHS,               C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   6E # ( U Y DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
-\ CODE _Explosion_Snd     D U EXG,    E # (     DP D) PSHS,               C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   1E # (     DP D) PULS,   D U TFR,   6 # ( D) PULS,   NEXT ;C \ addr -- ;
+\ CODE _Do_Sound                   U_dpD # PSHS,              D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dpD # PULS,                              NEXT ;C \      -- ;
+\ CODE _Do_Sound_x                 U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dp_ # PULS,                              NEXT ;C \  ptr -- ;
+\ CODE _Init_Music_Buf             __dpD # PSHS,                                       Init_Music_Buf JSR,   __dpD # PULS,                              NEXT ;C \      -- ;
+\ CODE _Init_Music_chk  D U EXG,   UYdpD # PSHS,              C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   UYdpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ;
+\ CODE _Init_Music      D U EXG,   UYdpD # PSHS,              C8 # LDX,   X DPR TFR,   Init_Music     JSR,   UYdpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ;
+\ CODE _Init_Music_dft  D U EXG,   UYdpD # PSHS,              C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   UYdpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
+\ CODE _Explosion_Snd   D U EXG,   __dpD # PSHS,              C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   __dpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ;
 
 \ Vector brightness
 
-CODE _Intensity_1F      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   6 # ( D) PSHS,   Intensity_1F JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ -- ;
-CODE _Intensity_3F      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   6 # ( D) PSHS,   Intensity_3F JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ -- ;
-CODE _Intensity_5F      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   6 # ( D) PSHS,   Intensity_5F JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ -- ;
-CODE _Intensity_7F      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   6 # ( D) PSHS,   Intensity_7F JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ -- ;
-CODE _Intensity_a       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,                     Intensity_a JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ n -- ;
+CODE _Intensity_1F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_1F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_3F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_3F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_5F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_5F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_7F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_7F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_a       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_a  JSR,   ____D # PULS,   __dpD # PULU,   NEXT ;C \ n -- ;
 
 \ Drawing / Dot
 
-CODE _Dot_ix_b          8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   Dot_ix_b JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \ intensity coord-pair-addr -- ;
-CODE _Dot_ix            8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_ix   JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \           coord-pair-addr -- ;
-CODE _Dot_d             8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,      S ,++ ADDD,   Dot_d    JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \     x y -- ;
-CODE _Dot_here          E # ( DP D) PSHU,   D0 # LDA,   A DPR TFR,                               Dot_here JSR,                    E # ( DP D) PULU,   NEXT ;C \         -- ;
-CODE _Dot_List          8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_List JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \ dl_addr -- ;
-CODE _Dot_List_Reset    8 # ( DP  ) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,              Dot_List_Reset JSR,   6 # ( D) PULS,   8 # ( DP  ) PULU,   NEXT ;C \ dl_addr -- ;
+CODE _Dot_ix_b          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D #  PULS,   Dot_ix_b JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ intensity coord-pair-addr -- ;
+CODE _Dot_ix            __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_ix   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \           coord-pair-addr -- ;
+CODE _Dot_d             __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,      Dot_d    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \     x y -- ;
+CODE _Dot_here          __dpD # PSHU,   D0 # LDA,   A DPR TFR,                               Dot_here JSR,                   __dpD # PULU,   NEXT ;C \         -- ;
+CODE _Dot_List          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Dot_List JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ dl_addr -- ;
+CODE _Dot_List_Reset    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,              Dot_List_Reset JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ dl_addr -- ;
 
 \ Vector beam positioning
 
-CODE _Moveto_x_7F       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_x_7F   JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \    addr -- ;
-CODE _Moveto_d_7F       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,      S ,++ ADDD,   Moveto_d_7F   JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ x  y    -- ;
-CODE _Moveto_ix_FF      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_ix_FF  JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \    addr -- ;
-CODE _Moveto_ix_7F      8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_ix_7F  JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \    addr -- ;
-CODE _Moveto_ix_b       8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   6 # ( D) PULS,   Moveto_ix_7F  JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ sf addr -- ;
-CODE _Moveto_ix         8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_ix     JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \    addr -- ;
-CODE _Moveto_d          8 # ( DP) PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,      S ,++ ADDD,   Moveto_d      JSR,   6 # ( D) PULS,   8 # ( DP) PULU,   NEXT ;C \ x  y    -- ;
+CODE _Moveto_x_7F       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_x_7F  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    addr -- ;
+CODE _Moveto_d_7F       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,      Moveto_d_7F  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ x  y    -- ;
+CODE _Moveto_ix_FF      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_ix_FF JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    addr -- ;
+CODE _Moveto_ix_7F      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_ix_7F JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    addr -- ;
+CODE _Moveto_ix_b       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D #  PULS,   Moveto_ix_7F JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf addr -- ;
+CODE _Moveto_ix         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                    Moveto_ix    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    addr -- ;
+CODE _Moveto_d          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,      Moveto_d     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ x  y    -- ;
 
 \ Drawing / String
 
-CODE _Print_Str_d      28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Str_d JSR,   6 # ( D) PULS,   Y U TFR,   28 # ( Y DP) PULU,   NEXT ;C \ x y c-addr -- ; Print single string to screen
-CODE _Print_Str_hwyx    8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   6 # ( D) PSHS,   Print_Str_hwyx JSR,   6 # ( D) PULS,  D U TFR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_Str_yx      8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   6 # ( D) PSHS,   Print_Str_yx   JSR,   6 # ( D) PULS,  D U TFR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_List_hw     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   6 # ( D) PSHS,   Print_List_hw  JSR,   6 # ( D) PULS,  D U TFR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_List        8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   6 # ( D) PSHS,   Print_List     JSR,   6 # ( D) PULS,  D U TFR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_List_chk    8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   6 # ( D) PSHS,   Print_List_chk JSR,   6 # ( D) PULS,  D U TFR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_Str         8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   6 # ( D) PSHS,   Print_Str      JSR,   6 # ( D) PULS,  D U TFR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str_hwyx    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_hwyx JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str_yx      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_yx   JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str_d       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Str_d JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ x y c-addr -- ; Print single string to screen
+CODE _Print_List_hw     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_hw  JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_List        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List     JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_List_chk    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_chk JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str      JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
 
 \ Print Ships
-CODE _Print_Ships_x    ~Ydp # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
-CODE _Print_Ships      28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   Y U TFR,   6 # ( D) PULS,   28 # ( Y DP) PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
+CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
+CODE _Print_Ships       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
 
 \ Drawing / Vector / Move and Draw
 
-CODE _Mov_Draw_VLc_a    8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Mov_Draw_VLc_a JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Mov_Draw_VL_b     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,                             Mov_Draw_VL_b  JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf    addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Mov_Draw_VLcs     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Mov_Draw_VLcs  JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Mov_Draw_VL_ab    8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,    Mov_Draw_VL_ab JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
-CODE _Mov_Draw_VL_a     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,                  Mov_Draw_VL_a  JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Mov_Draw_VL       8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Mov_Draw_VL    JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Mov_Draw_VL_d     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,    Mov_Draw_VL_d  JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
+CODE _Mov_Draw_VLc_a    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Mov_Draw_VLc_a JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Mov_Draw_VL_b     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,                            Mov_Draw_VL_b  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf    addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Mov_Draw_VLcs     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Mov_Draw_VLcs  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Mov_Draw_VL_ab    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Mov_Draw_VL_ab JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
+CODE _Mov_Draw_VL_a     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,                 Mov_Draw_VL_a  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Mov_Draw_VL       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Mov_Draw_VL    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Mov_Draw_VL_d     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Mov_Draw_VL_d  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
 
 \ Drawing / Vector / Draw only
 
-CODE _Draw_VLc          8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VLc       JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VL_b         8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,                             Draw_VL_b      JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf    addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VLcs         8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VLcs      JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, scale, rel y, rel x, rel y, rel x, ...
-CODE _Draw_VL_ab        8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,    Draw_VL_ab     JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
-CODE _Draw_VL_a         8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,                  Draw_VL_a      JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VL           8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VL        JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Line_d       8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,                                A B EXG,   S ,++ ADDD,    Draw_Line_d    JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \        x y -- ;
-CODE _Draw_VLp_FF       8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VLp_FF    JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VLp_7F       8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VLp_7F    JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VLp_scale    8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VLp_scale JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VLp_b        8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,                             Draw_VLp_b     JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf    addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_VLp          8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VLp       JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Pat_VL_a     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,                  Draw_Pat_VL_a  JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Pat_VL       8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_Pat_VL    JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Pat_VL_d     8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   A B EXG,   S ,++ ADDD,    Draw_Pat_VL_d  JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
-CODE _Draw_VL_mode      8 # (   DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,                                              Draw_VL_mode   JSR,   6 # ( D) PULS,   8 # (   DP) PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Grid_VL     28 # ( Y DP) PSHU,   D0 # LDX,   X DPR TFR,    D X TFR,   6 # ( D) PULS,   D Y TFR,                  Draw_Grid_VL   JSR,   6 # ( D) PULS,   8 # ( Y DP) PULU,   NEXT ;C \ addrY addrX -- ;
+CODE _Draw_VLc          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLc       JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VL_b         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,                            Draw_VL_b      JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf    addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VLcs         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLcs      JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, scale, rel y, rel x, rel y, rel x, ...
+CODE _Draw_VL_ab        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Draw_VL_ab     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
+CODE _Draw_VL_a         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,                 Draw_VL_a      JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VL           __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VL        JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_Line_d       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Draw_Line_d    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \        x y -- ;
+CODE _Draw_VLp_FF       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp_FF    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VLp_7F       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp_7F    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VLp_scale    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp_scale JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VLp_b        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,                            Draw_VLp_b     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf    addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_VLp          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp       JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_Pat_VL_a     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,                 Draw_Pat_VL_a  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_Pat_VL       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_Pat_VL    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_Pat_VL_d     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Draw_Pat_VL_d  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
+CODE _Draw_VL_mode      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VL_mode   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
+CODE _Draw_Grid_VL      _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   D Y TFR,                 Draw_Grid_VL   JSR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addrY addrX -- ;
 
 \ Random number generator
 
-CODE _Random_3          6 # (  D) PSHS,                 Random_3 JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
-CODE _Random            6 # (  D) PSHS,                 Random   JSR,  CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
+CODE _Random_3          ____D # PSHS,   Random_3 JSR,   CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
+CODE _Random            ____D # PSHS,   Random   JSR,   CLRB,   A B EXG,   NEXT ;C \ -- n ; n is a random number between 0 and 255
 
 \ Memory Management / Memory clear
 
-CODE _Clear_x_b         D X TFR,   6 # ( D) PULS,   Clear_x_b    JSR,   6 # ( D) PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in bottom 8 bits only
-CODE _Clear_C8_RAM      6 # ( D) PSHU,              Clear_C8_RAM JSR,   6 # ( D) PULS,   NEXT ;C \               -- ;
-CODE _Clear_x_256       D X TFR,                    Clear_x_b    JSR,   6 # ( D) PULS,   NEXT ;C \ addr          -- ; addr = start of RAM to be cleared
-CODE _Clear_x_d         D X TFR,   6 # ( D) PULS,   Clear_x_b    JSR,   6 # ( D) PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in 16 bits only
+CODE _Clear_x_b         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in bottom 8 bits only
+CODE _Clear_C8_RAM      ____D # PSHU,              Clear_C8_RAM JSR,   ____D # PULS,   NEXT ;C \               -- ;
+CODE _Clear_x_256       D X TFR,                   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr          -- ; addr = start of RAM to be cleared
+CODE _Clear_x_d         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in 16 bits only
 
 \ Memory Management / Memory fill
 
@@ -161,18 +170,18 @@ CODE _Clear_x_b_a       NEXT ;C \ Not needed for Forth, use FILL instead
 
 \ Counters
 
-CODE _Dec_3_Counters    6 # ( D) PSHU,            Dec_3_Counters JSR,    6 # ( D) PULU,   NEXT ;C \ -- ;
-CODE _Dec_6_Counters    6 # ( D) PSHU,            Dec_6_Counters JSR,    6 # ( D) PULU,   NEXT ;C \ -- ;
-CODE _Dec_Counters      D X TFR,   6 # ( D) PULS,   Dec_Counters JSR,    6 # ( D) PULS,   NEXT ;C \ #counters-1 ptr_counter_bytes -- ;
+CODE _Dec_3_Counters               ____D # PSHU,   Dec_3_Counters JSR,   ____D # PULU,   NEXT ;C \ -- ;
+CODE _Dec_6_Counters               ____D # PSHU,   Dec_6_Counters JSR,   ____D # PULU,   NEXT ;C \ -- ;
+CODE _Dec_Counters      D X TFR,   ____D # PULS,   Dec_Counters   JSR,   ____D # PULS,   NEXT ;C \ #counters-1 ptr_counter_bytes -- ;
 
 \ Delay
 
-CODE _Delay_3           6 # ( D) PSHU,   Delay_3   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_2           6 # ( D) PSHU,   Delay_2   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_1           6 # ( D) PSHU,   Delay_1   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_0           6 # ( D) PSHU,   Delay_0   JSR,   6 # ( D) PULU,   NEXT ;C \   -- ;
-CODE _Delay_b                            Delay_b   JSR,   6 # ( D) PULS,   NEXT ;C \ n -- ; n is xxnn, where xx is undefined and nn is length to delay. n' is xxFF, where xx is undefined.
-CODE _Delay_RTS                          Delay_RTS JSR,                    NEXT ;C \   -- ;
+CODE _Delay_3           ____D # PSHU,   Delay_3   JSR,   ____D # PULU,   NEXT ;C \   -- ;
+CODE _Delay_2           ____D # PSHU,   Delay_2   JSR,   ____D # PULU,   NEXT ;C \   -- ;
+CODE _Delay_1           ____D # PSHU,   Delay_1   JSR,   ____D # PULU,   NEXT ;C \   -- ;
+CODE _Delay_0           ____D # PSHU,   Delay_0   JSR,   ____D # PULU,   NEXT ;C \   -- ;
+CODE _Delay_b                           Delay_b   JSR,   ____D # PULS,   NEXT ;C \ n -- ; n is xxnn, where xx is undefined and nn is length to delay. n' is xxFF, where xx is undefined.
+CODE _Delay_RTS                         Delay_RTS JSR,                   NEXT ;C \   -- ;
 
 \ Day to Day / Bitmask
 
@@ -208,21 +217,21 @@ CODE _Move_Mem_a        NEXT ;C \ Not need for Forth, use CMOVE or CMOVE> instea
 
 \ Player option
 
-CODE _Select_Game      28 # ( Y DP) PSHU,                            A B EXG,   S ,++ ADDD,     Select_Game    JSR,   6 # ( D) PULS,   28 # ( Y DP) PULU, NEXT ;C \ #game_versions #players_max -- ;
-CODE _Display_Option   48 # ( U DP) PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   6 # ( D) PULS,  Display_Option JSR,   6 # ( D) PULS,   48 # ( U DP) PULU, NEXT ;C \ option_val addr -- ;
+CODE _Select_Game       _Ydp_ # PSHU,                            A B EXG,   S ,++ ADDD,     Select_Game    JSR,   ____D # PULS,   _Ydp_ # PULU, NEXT ;C \ #game_versions #players_max -- ;
+CODE _Display_Option    U_dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   ____D # PULS,   Display_Option JSR,   ____D # PULS,   U_dp_ # PULU, NEXT ;C \ option_val addr -- ;
 
 \ Score
 
-CODE _Clear_Score       D X TFR,   Clear_Score   JSR,   6 # ( D) PULS,   NEXT ;C \    addr -- ;
-CODE _Add_Score_a      40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,   6 # ( D) PULS,   Add_Score_a    JSR,   6 # ( D) PULS,   40 # ( U) PULU,   NEXT ;C \ binary# BCD ptr -- ;
-CODE _Add_Score_d                        D X TFR,   6 # ( D) PULS,                               Add_Score_d    JSR,   6 # ( D) PULS,                     NEXT ;C \         BCD ptr -- ;
-CODE _Strip_Zeros                        D X TFR,   6 # ( D) PULS,                               Strip_Zeros    JSR,   6 # ( D) PULS,                     NEXT ;C \      digit# ptr -- ; digit# 8 bit only
-CODE _Compare_Score    40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,                    Compare_Score  JSR,   A B EXG,         40 # ( U) PULU,   NEXT ;C \       ptr2 ptr1 -- 0|1|2; Same|1>2|2>1
-CODE _New_High_Score   40 # ( U) PSHU,   D X TFR,   6 # ( D) PULS,   D U TFR,                    New_High_Score JSR,   6 # ( D) PULS,   40 # ( U) PULU,   NEXT ;C \     addr2 addr1 -- ;
+CODE _Clear_Score       D X TFR,   Clear_Score   JSR,   ____D # PULS,   NEXT ;C \    addr -- ;
+CODE _Add_Score_a       U____ # PSHU,   D X TFR,   ____D # PULS,   D U TFR,   ____D # PULS,   Add_Score_a    JSR,   ____D # PULS,   U____ # PULU,   NEXT ;C \ binary# BCD ptr -- ;
+CODE _Add_Score_d                       D X TFR,   ____D # PULS,                              Add_Score_d    JSR,   ____D # PULS,                   NEXT ;C \         BCD ptr -- ;
+CODE _Strip_Zeros                       D X TFR,   ____D # PULS,                              Strip_Zeros    JSR,   ____D # PULS,                   NEXT ;C \      digit# ptr -- ; digit# 8 bit only
+CODE _Compare_Score     U____ # PSHU,   D X TFR,   ____D # PULS,   D U TFR,                   Compare_Score  JSR,   A B EXG,        U____ # PULU,   NEXT ;C \       ptr2 ptr1 -- 0|1|2; Same|1>2|2>1
+CODE _New_High_Score    U____ # PSHU,   D X TFR,   ____D # PULS,   D U TFR,                   New_High_Score JSR,   ____D # PULS,   U____ # PULU,   NEXT ;C \     addr2 addr1 -- ;
 
 \ Vector object handling / Object collision detection
 
-CODE _Obj_Will_Hit_u   26 # ( Y D) PSHU,  A B EXG,   S ,++ ADDD,   D Y TFR,   6 # ( D) PSHS,   S ,++ ADDD,   D X TFR,   6 # ( D) PSHS,           NEXT ;C \ height/2 width/2 ptr>movement x_mis y_mis x_obj y_obj -- f=collided ;
+CODE _Obj_Will_Hit_u    _Y__D # PSHU,  A B EXG,   S ,++ ADDD,   D Y TFR,   ____D # PSHS,   S ,++ ADDD,   D X TFR,   ____D # PSHS,   NEXT ;C \ height/2 width/2 ptr>movement x_mis y_mis x_obj y_obj -- f=collided ;
 CODE _Obj_Will_Hit      NEXT ;C \ ********** NOT DONE YET
 CODE _Obj_Hit           NEXT ;C \ ********** NOT DONE YET
 
@@ -252,7 +261,7 @@ NEXT, ;C
 
 \ ramfuncend ramfunctiondata - 1 + EQU #bytes
 \ + and - don't compile, not sure why, probably a vocabulary issue.
-\ Slimey back, hardcode $19 bytes, you can use more for safety e.g. $30
+\ Slimey hack, hardcode $19 bytes, you can use more for safety e.g. $30
 
 CODE Exit \ -- ; Exit back to VecFever menu system
    ramfunctiondata # LDU,      \ source
