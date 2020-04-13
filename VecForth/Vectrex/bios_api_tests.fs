@@ -30,12 +30,70 @@ S" HELLO WORLD" 80 C,
    _Reset0Int
 ;
 
+\ Read Buttons/mask. Display all the bytes that are set by the read.
+\ The u. is displayed on the console at the end of the line as dump includes a CR.
+\ The $0033 sets 3 & 4 to NOT be momentary read for _mask, default setting is $FF.
+: rbm begin $33 _Read_Btns_mask u. Vec_Btn_State $10 dump key? until key drop ;
+: rb  begin     _Read_Btns      u. Vec_Btn_State $10 dump key? until key drop ;
 
-\ Read Buttons/mask. Display all the bytes that are set by the read
-: rbm 0 begin 1+ dup u. $0033 _Read_Btns_mask u. $C80F $10 dump key? until key 2drop ;
-: rb  0 begin 1+ dup u.       _Read_Btns      u. $C80F $10 dump key? until key 2drop ;
+\ Joystick read routines
+: jsetup \ -- ; Joystick setup
+   $00   Vec_Joy_Resltn c! \ Set resolution $00=highest, $80=lowest
+   $0103 Vec_Joy_Mux_1_X ! \ Set joystick read routines
+   $0507 Vec_Joy_Mux_2_X ! \   to do X & Y for Joy 1 & 2
+;
 
-******** YOU ARE HERE
+: jd \ -- ; \ Read Joystick Digital
+   jsetup
+   begin
+      _Joy_Digital
+      Vec_Joy_1_X $10 dump
+      key?
+   until
+   key drop
+;
+
+: ja \ -- ; \ Read Joystick Analogue
+   jsetup
+   begin
+      _Joy_Analog
+      Vec_Joy_1_X $10 dump
+      key?
+   until
+   key drop
+;
+
+: ds \ -- ; Do_Sound test word
+   1 Vec_Music_Flag c!
+   begin
+\      yankee _Init_Music_chk
+      music1 _Init_Music_chk
+      _Wait_Recal
+      _Do_Sound
+     key?
+   until
+   key drop
+;
+
+here equ ES_DATA
+$3F c, $01 c, $EF c, $02 c,
+
+: es \ -- ; Explosion Sound test word
+   ." Space to (re-)play explosion, any other key end"
+   Begin
+      ES_DATA _Explosion_Snd
+      _Wait_Recal
+      _Do_Sound
+      key? dup if                \ -- flag ;
+         key $20 = if            \ -- flag ; key pressed was space?
+            drop 0               \ -- ff ;
+            -1 Vec_Expl_Flag c!  \ -- ff ; Start (re-)playing sound
+         then
+      then
+   until
+;
+
+
 
 
 \ Print Ships(_x) test word
@@ -282,13 +340,3 @@ here equ dot_list_packet
   UNTIL
 ;
 
-: sound \ -- ;
-  1 Vec_Music_Flag c!
-  begin
-      yankee _Init_Music_chk
-\     music1 _Init_Music_chk
-     _Wait_Recal
-     _Do_Sound
-    KEY?
-  until
-;

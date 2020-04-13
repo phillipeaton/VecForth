@@ -16,10 +16,14 @@ $0E equ __dpD
 $26 equ _Y__D
 $28 equ _Ydp_
 $2E equ _YdpD
-$40 equ U____
-$48 equ U_dp_
-$4E equ U_dpD
-$6E equ UYdpD
+$40 equ U____    $40 equ S____
+$48 equ U_dp_    $48 equ S_dp_
+$4E equ U_dpD    $4E equ S_dpD
+$68 equ UYdp_    $68 equ SYdp_
+$6E equ UYdpD    $6E equ SYdpD
+
+
+
 
 \ Reset and initialization
 
@@ -49,10 +53,10 @@ CODE _DP_to_C8          NEXT ;C \ Not needed for Forth, DP managed in API calls
 
 \ Joystick handling
 
-CODE _Read_Btns_Mask    __dp_ # PSHU,   D0 # LDB,   B DPR TFR,   B A TFR,      Read_Btns_Mask JSR,   A B TFR,   CLRA,   __dp_ # PULU,   NEXT ;C \ maskA -- b ; Button Transition State (Same as $C811)
-CODE _Read_Btns         __dp_ # PSHU,   D0 # LDA,   A DPR TFR,   ____D # PSHS, Read_Btns      JSR,   A B TFR,   CLRA,   __dp_ # PULU,   NEXT ;C \       -- b ; Button Transition State (Same as $C811)
-CODE _Joy_Analog        __dpD # PSHU,   D0 # LDA,   A DPR TFR,                 Joy_Analog     JSR,                      __dpD # PULU,   NEXT ;C \       -- ;
-CODE _Joy_Digital       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                 Joy_Digital    JSR,                      __dpD # PULU,   NEXT ;C \       -- ;
+CODE _Read_Btns_Mask    __dp_ # PSHU,   D0 # LDA,   A DPR TFR,        B A TFR,   Read_Btns_Mask JSR,   A B TFR,   CLRA,   __dp_ # PULU,   NEXT ;C \ maskA -- b ; Button Transition State (Same as $C811)
+CODE _Read_Btns         __dp_ # PSHU,   D0 # LDA,   A DPR TFR,   ____D # PSHS,   Read_Btns      JSR,   A B TFR,   CLRA,   __dp_ # PULU,   NEXT ;C \       -- b ; Button Transition State (Same as $C811)
+CODE _Joy_Analog        __dpD # PSHU,   D0 # LDX,   X DPR TFR,                   Joy_Analog     JSR,                      __dpD # PULU,   NEXT ;C \       -- ;
+CODE _Joy_Digital       __dpD # PSHU,   D0 # LDX,   X DPR TFR,                   Joy_Digital    JSR,                      __dpD # PULU,   NEXT ;C \       -- ;
 
 \ Sound
 
@@ -62,23 +66,15 @@ CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                  
 CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                           Clear_Sound   JSR,                              __dpD # PULU,   NEXT ;C \     -- ;
 CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
 CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; Never Used?
-CODE _Do_Sound          _YdpD # PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,                Do_Sound      JSR,   Y U TFR,                   _YdpD # PULU,   NEXT ;C \     -- ;
-CODE _Do_Sound_x        _YdpD # PSHU,   D0 # LDA,   A DPR TFR,   U Y TFR,   D X   TFR,   Do_Sound_x    JSR,   Y U TFR,   ____D # PULS,   _YdpD # PULU,   NEXT ;C \ ptr -- ;
+CODE _Do_Sound          U_dpD # PSHS,              D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dpD # PULS,                   NEXT ;C \      -- ;
+CODE _Do_Sound_x        U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dp_ # PULS,   ____D # PULS,   NEXT ;C \  ptr -- ;
 \
-CODE _Init_Music_Buf    ____D # PSHU,   Init_Music_Buf JSR,   ____D # PULU,   NEXT ;C \     -- ;
+CODE _Init_Music_Buf    ____D # PSHS,                                       Init_Music_Buf JSR,                   ____D # PULS,   NEXT ;C \      -- ;
 \
-CODE _Init_Music_chk    _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Init_Music_chk JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ;
-CODE _Init_Music        _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Init_Music     JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
-CODE _Init_Music_dft    _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Init_Music_x   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ;
-CODE _Explosion_Snd     _Ydp_ # PSHU,   C8 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Explosion_Snd  JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addr -- ;
-\ Alternative, probably slightly faster alternatives using PSHS instead of U, only _Do_Sound tested
-\ CODE _Do_Sound                   U_dpD # PSHS,              D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dpD # PULS,                              NEXT ;C \      -- ;
-\ CODE _Do_Sound_x                 U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dp_ # PULS,                              NEXT ;C \  ptr -- ;
-\ CODE _Init_Music_Buf             __dpD # PSHS,                                       Init_Music_Buf JSR,   __dpD # PULS,                              NEXT ;C \      -- ;
-\ CODE _Init_Music_chk  D U EXG,   UYdpD # PSHS,              C8 # LDX,   X DPR TFR,   Init_Music_chk JSR,   UYdpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ;
-\ CODE _Init_Music      D U EXG,   UYdpD # PSHS,              C8 # LDX,   X DPR TFR,   Init_Music     JSR,   UYdpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ;
-\ CODE _Init_Music_dft  D U EXG,   UYdpD # PSHS,              C8 # LDX,   X DPR TFR,   Init_Music_x   JSR,   UYdpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
-\ CODE _Explosion_Snd   D U EXG,   __dpD # PSHS,              C8 # LDX,   X DPR TFR,   Explosion_Snd  JSR,   __dpD # PULS,   D U TFR,   ____D # PULS,   NEXT ;C \ addr -- ;
+CODE _Init_Music_chk    UYdp_ # PSHS,   D U TFR,   C8 # LDA,   A DPR TFR,   Init_Music_chk JSR,   UYdp_ # PULS,   ____D # PULS,   NEXT ;C \ addr -- ;
+CODE _Init_Music        UYdp_ # PSHS,   D U TFR,   C8 # LDA,   A DPR TFR,   Init_Music     JSR,   UYdp_ # PULS,   ____D # PULS,   NEXT ;C \ addr -- ;
+CODE _Init_Music_dft    UYdp_ # PSHS,   D U TFR,   C8 # LDA,   A DPR TFR,   Init_Music_x   JSR,   UYdp_ # PULS,   ____D # PULS,   NEXT ;C \ addr -- ; Note Init_Music_dft/Music_x
+CODE _Explosion_Snd     U_dp_ # PSHS,   D U TFR,   C8 # LDA,   A DPR TFR,   Explosion_Snd  JSR,   U_dp_ # PULS,   ____D # PULS,   NEXT ;C \ addr -- ;
 
 \ Vector brightness
 
