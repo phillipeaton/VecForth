@@ -32,11 +32,12 @@ include CamelForth\camelforth.fs
 include    Vectrex\vectrex_equ.fs
 include    Vectrex\vector_lists.fs
 include    Vectrex\bios_api.fs
+include    Vectrex\ym_commando.fs
 include    Vectrex\bios_api_tests.fs
 include CamelForth\latest.fs
 
 ONLY FORTH ALSO META
 \ HEX E000 2000 HEXFILE 6809.HEX   \ make hex file: start, length, filename )
-HEX 0000 3000 BINFILE 6809.BIN   \ make binary file: start, length, filename )
+HEX 0000 4000 BINFILE 6809.BIN   \ make binary file: start, length, filename )
 .MIRRORS                         \ print undef'd references
 BYE                              \ exit back to command prompt

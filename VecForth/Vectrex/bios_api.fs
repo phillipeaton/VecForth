@@ -60,9 +60,9 @@ CODE _Joy_Digital       __dpD # PSHU,   D0 # LDX,   X DPR TFR,                  
 
 \ Sound
 
-CODE _Sound_Byte        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
-CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Sound_Byte        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte       JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte_x     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
+CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte_raw   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
 CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                           Clear_Sound   JSR,                              __dpD # PULU,   NEXT ;C \     -- ;
 CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
 CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; Never Used?

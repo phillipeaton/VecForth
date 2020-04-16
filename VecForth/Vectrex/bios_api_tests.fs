@@ -93,7 +93,21 @@ $3F c, $01 c, $EF c, $02 c,
    until
 ;
 
-
+\ Sound_Byte test, i.e. a small music player
+\ ymlen/data/regs loaded from external YM music file
+: sb \ -- ;
+   ymlen @ 0 do         \ for each line of the YM file (j loop)
+      _Wait_Recal       \ one line per 20ms i.e. 50Hz
+      ." *"             \ show feedback at terminal
+      $B 0 do           \ store a line of music data to PSG registers (i loop)
+         ymdata j $B * + i + c@   \ -- data ; Get the data byte
+         ymregs i + c@            \ -- data reg# ; Get the register#
+         _Sound_Byte              \ -- ;
+      loop
+      key? if key drop leave then \ exit loop if key pressed
+   loop
+   $B 8 do 0 i _Sound_Byte loop   \ set volume 0 for channels 8,9,10
+;
 
 
 \ Print Ships(_x) test word
