@@ -8,6 +8,8 @@ HEX
 \ X is a scratchpad for Vectrex and forth, doesn't need saving
 \ general case ,save registers, set Do, arrange registers, combine where necessary, call routine, pull stack etc, note extra pulls to drop stack items at end
 \ Routines rougly in ROM address order as several run inte each other.
+\ Some of these routine entry points don't make sense from Forth
+\ Need to swap over the x and ys on stack
 
 \ Registers
 $06 equ ____D
@@ -65,7 +67,7 @@ CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____
 CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte_raw   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
 CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                           Clear_Sound   JSR,                              __dpD # PULU,   NEXT ;C \     -- ;
 CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
-CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; Never Used?
+CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
 CODE _Do_Sound          U_dpD # PSHS,              D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dpD # PULS,                   NEXT ;C \      -- ;
 CODE _Do_Sound_x        U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dp_ # PULS,   ____D # PULS,   NEXT ;C \  ptr -- ;
 \
@@ -78,11 +80,11 @@ CODE _Explosion_Snd     U_dp_ # PSHS,   D U TFR,   C8 # LDA,   A DPR TFR,   Expl
 
 \ Vector brightness
 
-CODE _Intensity_1F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_1F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
-CODE _Intensity_3F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_3F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
-CODE _Intensity_5F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_5F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
-CODE _Intensity_7F      __dpD # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_7F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
-CODE _Intensity_a       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   Intensity_a  JSR,   ____D # PULS,   __dpD # PULU,   NEXT ;C \ n -- ;
+CODE _Intensity_1F      __dpD # PSHU,   D0 # LDA,   A DPR TFR,              Intensity_1F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_3F      __dpD # PSHU,   D0 # LDA,   A DPR TFR,              Intensity_3F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_5F      __dpD # PSHU,   D0 # LDA,   A DPR TFR,              Intensity_5F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_7F      __dpD # PSHU,   D0 # LDA,   A DPR TFR,              Intensity_7F JSR,                   __dpD # PULU,   NEXT ;C \   -- ;
+CODE _Intensity_a       __dp_ # PSHU,   D0 # LDA,   A DPR TFR,   A B EXG,   Intensity_a  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ n -- ; n is intensity between 0 and $7F
 
 \ Drawing / Dot
 

@@ -2,6 +2,7 @@
 
 HEX
 
+\ Uncomment all these for turnkey application i.e. without serial port
 \ : KEY? 0 ;
 \ : KEY 1 ;
 \ : CR ;
@@ -63,20 +64,49 @@ S" HELLO WORLD" 80 C,
    key drop
 ;
 
-: ds \ -- ; Do_Sound test word
+\ Sound_Byte/_x/_raw and Clear_Sound test, i.e. a small music player
+\ ymlen/data/regs loaded from external YM music file
+: sb \ -- ;
+   ymlen @ 0 do         \ for each line of the YM file (j loop)
+      _Wait_Recal       \ one line per 20ms i.e. 50Hz
+      $2A emit           \ show feedback asterisk at terminal
+      $B 0 do           \ store a line of music data to PSG registers (i loop)
+         ymdata j $B * + i + c@   \ -- data ; Get the data byte
+         ymregs i + c@            \ -- data reg# ; Get the register#
+\         _Sound_Byte              \ -- ; comment out _Sound_byte, _byte_x or
+         Vec_Snd_Shadow _Sound_Byte_x \  or _byte_raw to test each of them
+\         _Sound_Byte_raw          \  individually
+      loop
+      key? if key drop leave then \ exit loop if key pressed
+   loop
+   _Clear_Sound         \ set all registers to 0
+;
+
+\ Do_Sound/_x and Init_music_chk test word, i.e. built-in music and player
+\ Not sure whath Init_Music and Init_Music_dft do, but interface same as _chk
+: ds \ -- ;
    1 Vec_Music_Flag c!
    begin
 \      yankee _Init_Music_chk
-      music1 _Init_Music_chk
+      music4 _Init_Music_chk \ music4 = scramble tune
       _Wait_Recal
-      _Do_Sound
+\      _Do_Sound             \ comment out on of the Do_Sound/_x lines to test
+       Vec_Snd_Shadow _Do_Sound_x
      key?
    until
    key drop
+   _Clear_Sound             \ set all registers to 0
+;
+
+: imb \ -- ; Init_Music_Buf test word
+   Vec_Music_Work 10 2A fill    \ Fill buffer so "It's full of stars"
+   Vec_Music_Work 10 dump       \ Display buffer full of stars
+   _Init_Music_Buf              \ Init buffer
+   Vec_Music_Work 10 dump       \ Buffer now clear, except for reg#6=$3f
 ;
 
 here equ ES_DATA
-$3F c, $01 c, $EF c, $02 c,
+  %00111111 c, $01 c, $EF c, $02 c,
 
 : es \ -- ; Explosion Sound test word
    ." Space to (re-)play explosion, any other key end"
@@ -93,21 +123,121 @@ $3F c, $01 c, $EF c, $02 c,
    until
 ;
 
-\ Sound_Byte test, i.e. a small music player
-\ ymlen/data/regs loaded from external YM music file
-: sb \ -- ;
-   ymlen @ 0 do         \ for each line of the YM file (j loop)
-      _Wait_Recal       \ one line per 20ms i.e. 50Hz
-      ." *"             \ show feedback at terminal
-      $B 0 do           \ store a line of music data to PSG registers (i loop)
-         ymdata j $B * + i + c@   \ -- data ; Get the data byte
-         ymregs i + c@            \ -- data reg# ; Get the register#
-         _Sound_Byte              \ -- ;
-      loop
-      key? if key drop leave then \ exit loop if key pressed
-   loop
-   $B 8 do 0 i _Sound_Byte loop   \ set volume 0 for channels 8,9,10
+: box \ len_x len_y start_x start_y -- ;
+   _Reset0Ref
+   _Moveto_d  \ -- lx ly ;
+   dup 0         _Draw_Line_d
+   over 0 swap   _Draw_Line_d
+   negate 0      _Draw_Line_d
+   negate 0 swap _Draw_Line_d
 ;
+
+: intensity \ -- ; Intensity words test
+   begin
+      _Wait_Recal
+      _Intensity_7F 7f 7f -$40 -$40 box
+      _Intensity_5F 5f 5f -$30 -$30 box
+      _Intensity_3F 3f 3f -$20 -$20 box
+      _Reset0Ref
+      $3f -$30 do \ Display a list of 7 HELLO WORLDS with decreasing intensity
+         i $40 + _Intensity_a
+         -$45 i HELLO-WORLD-STRING 3 + _Print_Str_d
+      $11 +loop   \ $11 spaces out the text nicely
+      key?
+   until
+   key drop
+;
+
+here equ dot_list
+       -50 c, -70 c,  \ seven dots, relative
+       -40 c,  10 c,  \ position, Y, X
+        0  c,  30 c,
+        40 c,  10 c,
+        10 c,  30 c,
+         5 c,  30 c,
+       -10 c,  40 c,
+
+here equ dot_list_packet
+ ff c,  70 c, -70 c,  \ seven dots, relative
+ ff c, -40 c,  10 c,  \ position, Y, X
+ ff c,  0  c,  30 c,
+ ff c,  40 c,  10 c,
+ ff c,  10 c,  30 c,
+ ff c,   5 c,  30 c,
+ ff c, -10 c,  40 c,
+ 01 c,                \ list terminator
+
+\ Dot drawing tests. Displays an approximate mirrored version of Ursa Major.
+\  Pad is a Forth temporary store area, mainly used for building strings.
+: dots \ -- ;
+   begin
+      _Wait_Recal
+      $40 VIA_t1_cnt_lo c!              \ set scaling factor
+      _Intensity_5F                     \ set intensity, works with dwell
+
+      _Dot_here                         \ dot in centre of screen
+
+      $10 8 _Dot_d                      \ dot $10 right, $8 up from previous dot
+
+      $1020 pad !                       \ setup yx co-ord parameter
+      pad _Dot_ix                       \ dot $20 right, $10 up from previous dot
+
+      $2040 pad !                       \ setup yx co-ord parameter
+      5 pad _Dot_ix_b                   \ dot $40 right, $20 up, with dwell 5
+
+      _Reset0Ref
+      dot_list_packet _Dot_List_Reset   \ display dot list, using terminator
+
+      _Reset0Ref
+      6 Vec_Misc_Count c!               \ 7 dots total, starting from 0
+      dot_list _Dot_List                \ display dot list, using counter
+
+      key? \ hit a key to exit
+   until
+   key drop
+;
+
+: mt \ -- ; Moveto tests. Display a dot at each moveto position.
+   begin
+      _Wait_Recal
+      _Intensity_5F
+
+      \ Use the seven different moveto's to position and then draw seven dots
+      \  in a horizontal line across display.
+      $4000 pad !  -$4000 pad cell+ !
+      pad _Moveto_x_7F _Dot_here
+
+      _Reset0Ref
+      -$30 $40 _Moveto_d_7F _Dot_here   \ x y on stack
+
+      _Reset0Ref
+      $20F0 pad !
+      pad _Moveto_ix_ff _Dot_here       \ y x in pad
+
+      _Reset0Ref
+      $40F0 pad !
+      pad _Moveto_ix_7F _Dot_here       \ y x in pad
+
+      _Reset0Ref
+      $4000 pad !
+      $7F pad _Moveto_ix_b _Dot_here    \ y x in pad
+
+      _Reset0Ref
+      $4010 pad !
+      pad _Moveto_ix _Dot_here          \ y x in pad
+
+      _Reset0Ref
+      $20 $40 _Moveto_d _Dot_here       \ x y on stack
+
+      key? \ hit a key to exit
+   until
+   key drop
+;
+
+
+
+
+
 
 
 \ Print Ships(_x) test word
@@ -125,6 +255,7 @@ $3F c, $01 c, $EF c, $02 c,
        #10 $69 0 0 _Print_Ships   \ #ships ship_char=spaceman x y
        key?                       \ press a key to end
    until
+   key drop
    cr s0 $10 - $20 dump     \ redump the stack, check under stack is same
 ;
 
@@ -134,99 +265,58 @@ $3F c, $01 c, $EF c, $02 c,
 
 \ Dec_3/6_Counters test. Counters are 8 bit.
 : dec36c \ -- ;
-     6 0 do                         \ for 6 counters
-        _random i Vec_Counters + c! \ store in a random number
-     loop
-     $ff 0 do                   \ decrement all counters to zero
-        _Dec_3_Counters         \ dec first three
-        _Dec_6_Counters         \ dec all six, thus first three dec'd twice
-        Vec_Counters $10 dump   \ dump the counters to terminal
-        key? if leave then      \ exit on key press
-     loop
+   6 0 do                         \ for 6 counters
+      _random i Vec_Counters + c! \ store in a random number
+   loop
+   $ff 0 do                   \ decrement all counters to zero
+      _Dec_3_Counters         \ dec first three
+      _Dec_6_Counters         \ dec all six, thus first three dec'd twice
+      Vec_Counters $10 dump   \ dump the counters to terminal
+      key? if leave then      \ exit on key press
+   loop
+   key drop
 ;
 
 \ Decrement Counters test. Decrements 1, then 2, 3, through to 6 counters.
 : decc \ -- ;
-    Vec_Counters 6 $ff fill           \ initialise counters to $ff
-    Vec_Counters $10 dump             \ Display counters
-    6 0 do                            \ Decrement 1 counter, 2 ,3...6
-       i Vec_Counters _Dec_Counters   \
-    loop
-    Vec_Counters $10 dump             \ Display counters again
+   Vec_Counters 6 $ff fill           \ initialise counters to $ff
+   Vec_Counters $10 dump             \ Display counters
+   6 0 do                            \ Decrement 1 counter, 2 ,3...6
+      i Vec_Counters _Dec_Counters   \
+   loop
+   Vec_Counters $10 dump             \ Display counters again
 ;
 
 \ Delay_n etc test. Probably unlikey to be used by Forth directly.
 : delays \ -- ;
-     _Delay_3 _Delay_2 _Delay_1 _Delay_0 _Delay_RTS
-     $ff _Delay_b \ Parameterised general delay
+   _Delay_3 _Delay_2 _Delay_1 _Delay_0 _Delay_RTS
+   $ff _Delay_b \ Parameterised general delay
 ;
 
 \ Bitmask_a test. Provide a number 1 to 8, get back the power of 2
 \ Forth alternative is LSHIFT e.g. 1 5 lshift = 32
 : bma \ bit_number -- bit_mask ; \ output gives 1 2 4 8 16 32 64 128
-     8 0 do i _Bitmask_a u. loop
+   8 0 do i _Bitmask_a u. loop
 ;
 
-here equ dot_list
-        60 c, -70 c,  \ seven dots, relative
-       -40 c,  10 c,  \ position, Y, X
-        0  c,  30 c,
-        40 c,  10 c,
-        10 c,  30 c,
-         5 c,  30 c,
-       -10 c,  40 c,
-
-here equ dot_list_packet
- ff c, -60 c, -70 c,  \ seven dots, relative
- 00 c, -40 c,  10 c,  \ position, Y, X
- ff c,  0  c,  30 c,
- 00 c,  40 c,  10 c,
- ff c,  10 c,  30 c,
- ff c,   5 c,  30 c,
- ff c, -10 c,  40 c,
- 01 c,                \ list terminator
-
-\ Dot_List test. Displays an approximate mirrored version of Ursa Major
-: dl \ -- ;
-     begin
-        _Wait_Recal
-        _Intensity_5F
-        #50 VIA_t1_cnt_lo c!   \ set scaling to 50 decimal
-
-        _Dot_here                        \ dot in centre of screen
-
-        $10 8 _Dot_d                     \ dot 10 right, 5 up from previous dot
-
-        $1020 pad !                      \ setup yx co-ord parameter
-        pad _Dot_ix                      \ dot 20 right, 10 up from previous dot
-
-        $1020 pad !                      \ setup yx co-ord parameter
-        $1f pad _Dot_ix_b                \ dot 20 right, 10 up, intensity 1f
-
-        dot_list_packet _Dot_List_Reset  \ display dot list, using terminator
-
-        #6 Vec_Misc_Count c!             \ 7 dots total, starting from 0
-        dot_list _Dot_List               \ display dot list, using counter
-
-        key? \ hit a key to exit
-     until
-;
+\ -----------------------------------------------------------------------------
 
 : DT \ -- ; Display turtles using vector list with two different BIOS calls
-  BEGIN
-    1+ DUP U.
-    _Wait_Recal
-    _Intensity_7F
+   BEGIN
+      1+ DUP U.
+      _Wait_Recal
+      _Intensity_7F
 
-    -1f 1f _Moveto_d
-    20 17 TURTLE _Draw_VL_ab    \ scale_factor count_of_vectors VL_addr
+      -1f 1f _Moveto_d
+      20 17 TURTLE _Draw_VL_ab    \ scale_factor count_of_vectors VL_addr
 
-    0 -7f _Moveto_d
-    0 -7f _Moveto_d
-    TURTLEcs _Draw_VLcs         \ draw vector list using BIOS call
+      0 -7f _Moveto_d
+      0 -7f _Moveto_d
+      TURTLEcs _Draw_VLcs         \ draw vector list using BIOS call
 
-    KEY?
+      KEY?
   UNTIL
+  key drop
   DROP
 ;
 
@@ -253,6 +343,7 @@ here equ dot_list_packet
 
     KEY?                \ terminal key press exits loop
   UNTIL
+  key drop
   DROP
 ;
 
@@ -280,6 +371,7 @@ here equ dot_list_packet
     (dg2)
     KEY?                \ terminal key press exits loop
   UNTIL
+  key drop
   DROP
 ;
 
@@ -311,6 +403,7 @@ here equ dot_list_packet
 
      KEY?                \ terminal key press exits loop
   UNTIL
+  key drop
   DROP
 ;
 
@@ -332,25 +425,4 @@ here equ dot_list_packet
    UNTIL
 ;
 
-: box \ len_x len_y start_x start_y -- ;
-   _Reset0Ref
-   _Moveto_d  \ -- lx ly ;
-   dup 0         _Draw_Line_d
-   over 0 swap   _Draw_Line_d
-   negate 0      _Draw_Line_d
-   negate 0 swap _Draw_Line_d
-;
-
-: intensity \ -- ;
-  BEGIN
-    _Wait_Recal
-    _Intensity_3F (dg2)
-    _Intensity_5F 50 50 -27 -28 box
-    80 0 do
-        I 100 * _Intensity_a
-        -44 i 30 - HELLO-WORLD-STRING 3 + _Print_Str_d
-    10 +loop
-    KEY?
-  UNTIL
-;
 
