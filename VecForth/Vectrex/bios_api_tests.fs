@@ -235,6 +235,50 @@ here equ dot_list_packet
 ;
 
 
+\ _Print_Str_hwyx
+\ _Print_Str_yx
+\ _Print_Str_d
+\ _Print_List_hw
+\ _Print_List
+\ _Print_List_chk
+\ _Print_Str
+
+\                 width  height  rel x, rel y   Char 1 2      3      Terminator
+here equ pstr_hwyx F8 c, 50 c,   70 c, -40 c,   41 c,  42 c,  43 c,  80 c, \ ABC
+here equ pstr_yx                 50 c, -40 c,   44 c,  45 c,  46 c,  80 c, \ DEF
+here equ pstr_d                                 47 c,  48 c,  49 c,  80 c, \ GHI
+here equ pstr                                   4A c,  4B c,  4C c,  80 c, \ JKL
+here equ plist_hw  F8 c, 50 c,  -10 c, -40 c,   4D c,  4E c,  4F c,  80 c, \ MNO
+                   F8 c, 50 c,  -10 c, -00 c,   50 c,  51 c,  52 c,  80 c, \ PQR
+                                                                     00 c, \ List end
+here equ plist                  -30 c, -40 c,   53 c,  54 c,  55 c,  80 c, \ STU
+                                -30 c, -00 c,   56 c,  57 c,  58 c,  80 c, \ VWX
+                                                                     00 c, \ List end
+here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
+                                -50 c, -00 c,   5C c,  5D c,  5E c,  80 c, \ \]^
+                                                                     00 c, \ List end
+
+: ps \ -- ;
+   begin
+      _Wait_Recal
+      _Intensity_7F
+                                              pstr_hwyx _Print_Str_hwyx \ ABC
+      _Reset0Ref                              pstr_yx   _Print_Str_yx   \ DEF
+      _Reset0Ref                      -$40 30 pstr_d    _Print_Str_d    \ GHI
+      _Reset0Ref   -$40 10 _Moveto_d          pstr      _Print_Str      \ JKL
+      _Reset0Ref                              plist_hw  _Print_List_hw  \ MNO PQR
+      _Reset0Ref                              plist     _Print_List     \ STU VWX
+      _Reset0Ref                              plist_chk _Print_List_chk \ YZ[ \]^
+      key?  \ press a key to end
+   until
+   key drop
+;
+
+
+
+
+
+
 
 
 
@@ -244,16 +288,16 @@ here equ dot_list_packet
 \ Includes a dump of $10 bytes before and after the stack as I saw some
 \ comments that Print_Ships BIOS/RUM routine underflows the stack, but it
 \ looks OK to me
-: ps \ -- ;
+: psh \ -- ;
    cr s0 $10 - $20 dump     \ dump the stack, s0 is base of stack
    $30a0 pad !              \ store y x coords for _x variant
 
    begin
-       _Wait_Recal
-       _Intensity_7F
-       #5  $68 pad _Print_Ships_x \ #ships ship_char=spaceship ptr_to_xy_coords
-       #10 $69 0 0 _Print_Ships   \ #ships ship_char=spaceman x y
-       key?                       \ press a key to end
+      _Wait_Recal
+      _Intensity_7F
+      #5  $68 pad _Print_Ships_x \ #ships ship_char=spaceship ptr_to_xy_coords
+      #10 $69 0 0 _Print_Ships   \ #ships ship_char=spaceman x y
+      key?                       \ press a key to end
    until
    key drop
    cr s0 $10 - $20 dump     \ redump the stack, check under stack is same

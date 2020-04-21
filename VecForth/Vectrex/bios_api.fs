@@ -107,13 +107,19 @@ CODE _Moveto_d          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   A B EXG,   S ,+
 
 \ Drawing / String
 
-CODE _Print_Str_hwyx    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_hwyx JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_Str_yx      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_yx   JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str_hwyx    _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_Str_hwyx JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str_yx      _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_Str_yx   JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
 CODE _Print_Str_d       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Str_d JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ x y c-addr -- ; Print single string to screen
-CODE _Print_List_hw     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_hw  JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_List        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List     JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_List_chk    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_chk JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-CODE _Print_Str         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str      JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_List_hw     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_List_hw  JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_List        _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_List     JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_List_chk    _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_List_chk JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
+CODE _Print_Str         _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_Str      JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
+\ CODE _Print_Str_hwyx    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_hwyx JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+\ CODE _Print_Str_yx      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_yx   JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+\ CODE _Print_List_hw     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_hw  JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+\ CODE _Print_List        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List     JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+\ CODE _Print_List_chk    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_chk JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
+
 
 \ Print Ships
 CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
