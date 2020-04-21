@@ -114,16 +114,15 @@ CODE _Print_List_hw     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U 
 CODE _Print_List        _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_List     JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
 CODE _Print_List_chk    _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_List_chk JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
 CODE _Print_Str         _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U TFR,   Print_Str      JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ c-addr -- ;
-\ CODE _Print_Str_hwyx    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_hwyx JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-\ CODE _Print_Str_yx      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_Str_yx   JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-\ CODE _Print_List_hw     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_hw  JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-\ CODE _Print_List        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List     JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-\ CODE _Print_List_chk    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   U D EXG,   ____D # PSHS,   Print_List_chk JSR,   ____D # PULS,  D U TFR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ c-addr -- ;
-
 
 \ Print Ships
-CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
-CODE _Print_Ships       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
+
+CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
+CODE _Print_Ships       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
+
+
+
+
 
 \ Drawing / Vector / Move and Draw
 
@@ -239,39 +238,3 @@ CODE _Obj_Will_Hit_u    _Y__D # PSHU,  A B EXG,   S ,++ ADDD,   D Y TFR,   ____D
 CODE _Obj_Will_Hit      NEXT ;C \ ********** NOT DONE YET
 CODE _Obj_Hit           NEXT ;C \ ********** NOT DONE YET
 
-\ VecFever Exit to menu
-
-C8A0 EQU ramfunction \ mem for persistent or modified functions
-
-\ the function below does the magic handshake with the cart,
-\ then waits for the new cart data to appear in the cart address
-\ space and jumps back to the menu
-ASM:
-HERE EQU ramfunctiondata
-   $7FF0     LDB,    \ notify the cart uProc
-   X 0,      LDB,    \ put command on the bus
-   0 #       LDX,
-   $6720 #   LDD,    \ ASCII "g "
-HERE EQU ramloop
-   X 0,      CMPD,   \ while the cart is setting up itself there is only one data byte
-   ramloop   BNE,    \ available, so check for .two. known and different ones
-   X $D ,    LEAX,   \ 0-A: "GCE xxxx",$80 / B+C: music pointer (could contain a zero..)
-HERE EQU ramloop2
-   X ,+      LDA,    \ look for end of menu cart header  ( ,x+)
-   ramloop2  BNE,
-   X PC      TFR,    \ return to menu code data
-HERE EQU ramfuncend
-NEXT, ;C
-
-\ ramfuncend ramfunctiondata - 1 + EQU #bytes
-\ + and - don't compile, not sure why, probably a vocabulary issue.
-\ Slimey hack, hardcode $19 bytes, you can use more for safety e.g. $30
-
-CODE Exit \ -- ; Exit back to VecFever menu system
-   ramfunctiondata # LDU,      \ source
-   ramfunction     # LDX,      \ destination
-   $19             # LDA,      \ #bytes = 1+ramfuncend-ramfunctiondata
-   Move_Mem_a        JSR,      \ copy the vec4ever switching function into place
-   $1000           # LDX,      \ the 'switch back to menu' command
-   ramfunction       JMP,      \ up up and away
-NEXT ;C

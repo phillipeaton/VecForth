@@ -274,16 +274,6 @@ here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
    key drop
 ;
 
-
-
-
-
-
-
-
-
-
-
 \ Print Ships(_x) test word
 \ Includes a dump of $10 bytes before and after the stack as I saw some
 \ comments that Print_Ships BIOS/RUM routine underflows the stack, but it
@@ -295,11 +285,12 @@ here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
    begin
       _Wait_Recal
       _Intensity_7F
-      #5  $68 pad _Print_Ships_x \ #ships ship_char=spaceship ptr_to_xy_coords
-      #10 $69 0 0 _Print_Ships   \ #ships ship_char=spaceman x y
-      key?                       \ press a key to end
+      #5  $68      pad _Print_Ships_x  \ #ships ship_char=spaceship ptr_to_xy_coords
+      #10 $69 $a0 -$30 _Print_Ships    \ #ships ship_char=spaceman x y
+      key?  \ press a key to end
    until
    key drop
+
    cr s0 $10 - $20 dump     \ redump the stack, check under stack is same
 ;
 

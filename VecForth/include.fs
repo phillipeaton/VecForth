@@ -25,15 +25,16 @@ include   Chromium\metacompiler.fs        \ META but a few jumps to TARGET and o
 
 include CamelForth\memory_map.fs          \ TARGET but one META
 include CamelForth\presumes.fs
+include    Vectrex\vectrex_equ.fs
 include    Vectrex\cartheader.fs
 include    Vectrex\vecfeverheader.fs
 include CamelForth\serial_io.fs
 include CamelForth\camelforth.fs
-include    Vectrex\vectrex_equ.fs
 include    Vectrex\vector_lists.fs
 include    Vectrex\bios_api.fs
 include    Vectrex\ym_commando.fs
 include    Vectrex\bios_api_tests.fs
+include    Vectrex\vecfever_exit.fs
 include CamelForth\latest.fs
 
 ONLY FORTH ALSO META
