@@ -120,10 +120,6 @@ CODE _Print_Str         _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U 
 CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
 CODE _Print_Ships       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
 
-
-
-
-
 \ Drawing / Vector / Move and Draw
 
 CODE _Mov_Draw_VLc_a    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Mov_Draw_VLc_a JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used

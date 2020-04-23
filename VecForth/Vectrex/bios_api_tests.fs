@@ -110,7 +110,7 @@ here equ ES_DATA
 
 : es \ -- ; Explosion Sound test word
    ." Space to (re-)play explosion, any other key end"
-   Begin
+   begin
       ES_DATA _Explosion_Snd
       _Wait_Recal
       _Do_Sound
@@ -234,15 +234,6 @@ here equ dot_list_packet
    key drop
 ;
 
-
-\ _Print_Str_hwyx
-\ _Print_Str_yx
-\ _Print_Str_d
-\ _Print_List_hw
-\ _Print_List
-\ _Print_List_chk
-\ _Print_Str
-
 \                 width  height  rel x, rel y   Char 1 2      3      Terminator
 here equ pstr_hwyx F8 c, 50 c,   70 c, -40 c,   41 c,  42 c,  43 c,  80 c, \ ABC
 here equ pstr_yx                 50 c, -40 c,   44 c,  45 c,  46 c,  80 c, \ DEF
@@ -258,7 +249,7 @@ here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
                                 -50 c, -00 c,   5C c,  5D c,  5E c,  80 c, \ \]^
                                                                      00 c, \ List end
 
-: ps \ -- ;
+: ps \ -- ; Print tests. Display string for each subroutine call type.
    begin
       _Wait_Recal
       _Intensity_7F
@@ -293,6 +284,67 @@ here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
 
    cr s0 $10 - $20 dump     \ redump the stack, check under stack is same
 ;
+
+
+
+here equ plane1
+-7f c, -7f c,   \ rel y, rel x, move to start
+ 00 c,  6E c,   \ rel y, rel x
+ 14 c, -1E c,
+ 00 c, -32 c,
+ 14 c, -1E c,
+-28 c,  00 c,
+
+here equ plane2
+ 05 c,  20 c,   \ count, scale
+-7f c, -7f c,   \ rel y, rel x, move to start
+ 00 c,  6E c,   \ rel y, rel x
+ 14 c, -1E c,
+ 00 c, -32 c,
+ 14 c, -1E c,
+-28 c,  00 c,
+
+here equ plane3
+ 06 c,          \ count
+-7f c, -7f c,   \ rel y, rel x, move to start
+ 00 c,  6E c,   \ rel y, rel x
+ 14 c, -1E c,
+ 00 c, -32 c,
+ 14 c, -1E c,
+-28 c,  00 c,
+
+
+: md_reset/move \ y -- ;
+   _Reset0Ref 0 swap _Moveto_d
+;
+
+: md \ -- ; Move Draw tests.
+   begin
+      _Wait_Recal
+      _Intensity_7F
+
+       $20 VIA_t1_cnt_lo c! \ Set scaling factor
+       $70 md_reset/move                                 plane3 _Mov_Draw_VLc_a
+       $50 md_reset/move  5 Vec_Misc_Count c!   $20      plane1 _Mov_Draw_VL_b
+       $30 md_reset/move                                 plane2 _Mov_Draw_VLcs
+       $10 md_reset/move                        $20    5 plane1 _Mov_Draw_VL_ab
+      -$10 md_reset/move                               5 plane1 _Mov_Draw_VL_a
+      -$30 md_reset/move  5 Vec_Misc_Count c!            plane1 _Mov_Draw_VL
+      -$50 md_reset/move  5 Vec_Misc_Count c!  -$7f -$7f plane1 _Mov_Draw_VL_d
+
+      key?  \ press a key to end
+   until
+   key drop
+;
+
+
+
+
+
+
+
+
+
 
 \ Random(_3) test words. Visually, rand3 looks more random
 : rand  begin cr _random   8 / 1+ 0 do ." *" loop key? until ;
