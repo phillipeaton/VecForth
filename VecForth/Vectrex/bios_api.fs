@@ -128,7 +128,7 @@ CODE _Mov_Draw_VLcs     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,       
 CODE _Mov_Draw_VL_ab    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Mov_Draw_VL_ab JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
 CODE _Mov_Draw_VL_a     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,                 Mov_Draw_VL_a  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Mov_Draw_VL       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Mov_Draw_VL    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Mov_Draw_VL_d     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Mov_Draw_VL_d  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
+CODE _Mov_Draw_VL_d     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Mov_Draw_VL_d  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \   x y addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
 
 \ Drawing / Vector / Draw only
 
@@ -146,7 +146,7 @@ CODE _Draw_VLp_b        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____
 CODE _Draw_VLp          __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp       JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Draw_Pat_VL_a     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,                 Draw_Pat_VL_a  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Draw_Pat_VL       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_Pat_VL    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Pat_VL_d     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Draw_Pat_VL_d  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
+CODE _Draw_Pat_VL_d     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Draw_Pat_VL_d  JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \   x y addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
 CODE _Draw_VL_mode      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VL_mode   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Draw_Grid_VL      _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   D Y TFR,                 Draw_Grid_VL   JSR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ addrY addrX -- ;
 

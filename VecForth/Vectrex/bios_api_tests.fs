@@ -314,6 +314,7 @@ here equ plane3
 -28 c,  00 c,
 
 
+
 : md_reset/move \ y -- ;
    _Reset0Ref 0 swap _Moveto_d
 ;
@@ -337,6 +338,78 @@ here equ plane3
    key drop
 ;
 
+here equ planeA
+ 00 c,  6E c,   \ rel y, rel x
+ 14 c, -1E c,
+ 00 c, -32 c,
+ 14 c, -1E c,
+-28 c,  00 c,
+
+here equ planeB
+ 04 c,  20 c,   \ count, scale
+ 00 c,  6E c,   \ rel y, rel x
+ 14 c, -1E c,
+ 00 c, -32 c,
+ 14 c, -1E c,
+-28 c,  00 c,
+
+here equ planeC
+ 04 c,          \ count
+ 00 c,  6E c,   \ rel y, rel x
+ 14 c, -1E c,
+ 00 c, -32 c,
+ 14 c, -1E c,
+-28 c,  00 c,
+
+here equ planeD
+ 02 c,  00 c,  6E c,   \ rel y, rel x
+ FF c,  14 c, -1E c,
+ 00 c,  00 c, -32 c,
+ FF c,  14 c, -1E c,
+ FF c, -28 c,  00 c,
+ 01 c,
+
+: md_reset/move2 \ y -- ;
+   _Reset0Ref -$7F swap _Moveto_d
+;
+
+: draw \ -- ; Draw tests.
+   begin
+      _Wait_Recal
+      _Intensity_7F
+
+       $20 VIA_t1_cnt_lo c! \ Set scaling factor
+       $F0 Vec_Pattern c!
+       $70 md_reset/move                                 planeC _Draw_VLc
+       $50 md_reset/move  4 Vec_Misc_Count c!   $20      planeA _Draw_VL_b
+       $30 md_reset/move                                 planeB _Draw_VLcs
+       $10 md_reset/move                        $20    4 planeA _Draw_VL_ab
+      -$10 md_reset/move                               4 planeA _Draw_VL_a
+      -$30 md_reset/move  4 Vec_Misc_Count c!            planeA _Draw_VL
+
+
+\ _Draw_VLp_FF
+\      -$50 md_reset/move                                 planeD _Draw_VLp_7F
+\ _Draw_VLp_scale
+\ _Draw_VLp_b
+\ _Draw_VLp
+       $70 md_reset/move2                                4 planeA _Draw_Pat_VL_a
+       $50 md_reset/move2 4 Vec_Misc_Count c!              planeA _Draw_Pat_VL
+       $30 md_reset/move2 5 Vec_Misc_Count c!     0      0 planeA _Draw_Pat_VL_d
+\ _Draw_VL_mode
+\ _Draw_Grid_VL
+
+\ _Draw_Line_d
+
+\ ;$FF ENABLES DOTTED LINE
+\ ;$00 REQUESTS BLANK LINE
+\ ;$02 IS SOLID LINE
+\ ;$01 DELIMIT
+
+           key?  \ press a key to end
+   until
+   key drop
+;
 
 
 
