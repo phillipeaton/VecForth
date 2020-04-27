@@ -157,10 +157,10 @@ CODE _Random            ____D # PSHS,   Random   JSR,   CLRB,   A B EXG,   NEXT 
 
 \ Memory Management / Memory clear
 
-CODE _Clear_x_b         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in bottom 8 bits only
+CODE _Clear_x_b         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ #bytes-1 addr -- ; #bytes stored in bottom 8 bits only
 CODE _Clear_C8_RAM      ____D # PSHU,              Clear_C8_RAM JSR,   ____D # PULS,   NEXT ;C \               -- ;
-CODE _Clear_x_256       D X TFR,                   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr          -- ; addr = start of RAM to be cleared
-CODE _Clear_x_d         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in 16 bits only
+CODE _Clear_x_256       D X TFR,                   Clear_x_256  JSR,   ____D # PULS,   NEXT ;C \          addr -- ; addr = start of RAM to be cleared
+CODE _Clear_x_d         D X TFR,   ____D # PULS,   Clear_x_d    JSR,   ____D # PULS,   NEXT ;C \ #bytes-1 addr -- ; #bytes stored in 16 bits only
 
 \ Memory Management / Memory fill
 

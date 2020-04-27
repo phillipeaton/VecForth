@@ -285,8 +285,6 @@ here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
    cr s0 $10 - $20 dump     \ redump the stack, check under stack is same
 ;
 
-
-
 here equ plane1
 -7f c, -7f c,   \ rel y, rel x, move to start
  00 c,  6E c,   \ rel y, rel x
@@ -312,8 +310,6 @@ here equ plane3
  00 c, -32 c,
  14 c, -1E c,
 -28 c,  00 c,
-
-
 
 : md_reset/move \ y -- ;
    _Reset0Ref 0 swap _Moveto_d
@@ -362,9 +358,18 @@ here equ planeC
 -28 c,  00 c,
 
 here equ planeD
- 02 c,  00 c,  6E c,   \ rel y, rel x
+ FF c,  00 c,  6E c,   \ rel y, rel x
  FF c,  14 c, -1E c,
- 00 c,  00 c, -32 c,
+ FF c,  00 c, -32 c,
+ FF c,  14 c, -1E c,
+ FF c, -28 c,  00 c,
+ 01 c,
+
+here equ planeE
+ 20 c,          \ scale
+ FF c,  00 c,  6E c,   \ rel y, rel x
+ FF c,  14 c, -1E c,
+ FF c,  00 c, -32 c,
  FF c,  14 c, -1E c,
  FF c, -28 c,  00 c,
  01 c,
@@ -373,55 +378,83 @@ here equ planeD
    _Reset0Ref -$7F swap _Moveto_d
 ;
 
+\ ;$00 REQUESTS BLANK LINE
+\ ;$01 DELIMIT
+\ ;$02 IS SOLID LINE
+\ ;$FF ENABLES DOTTED LINE
+
 : draw \ -- ; Draw tests.
    begin
       _Wait_Recal
       _Intensity_7F
 
        $20 VIA_t1_cnt_lo c! \ Set scaling factor
+
+      \ Standard vector lists
+       $70 md_reset/move                            planeC _Draw_VLc
+       $50 md_reset/move  4 Vec_Misc_Count c! $20   planeA _Draw_VL_b
+       $30 md_reset/move                            planeB _Draw_VLcs
+       $10 md_reset/move                      $20 4 planeA _Draw_VL_ab
+      -$10 md_reset/move                          4 planeA _Draw_VL_a
+      -$30 md_reset/move  4 Vec_Misc_Count c!       planeA _Draw_VL
+      _Reset0Ref 0 -$7F _Moveto_d             $7F 0        _Draw_Line_d
+
+      \ Patterned vector lists
        $F0 Vec_Pattern c!
-       $70 md_reset/move                                 planeC _Draw_VLc
-       $50 md_reset/move  4 Vec_Misc_Count c!   $20      planeA _Draw_VL_b
-       $30 md_reset/move                                 planeB _Draw_VLcs
-       $10 md_reset/move                        $20    4 planeA _Draw_VL_ab
-      -$10 md_reset/move                               4 planeA _Draw_VL_a
-      -$30 md_reset/move  4 Vec_Misc_Count c!            planeA _Draw_VL
 
+       $70 md_reset/move2                           planeE _Draw_VLp_scale
+       $50 md_reset/move2                     $20   planeD _Draw_VLp_b
+       $30 md_reset/move2                           planeD _Draw_VLp
 
-\ _Draw_VLp_FF
-\      -$50 md_reset/move                                 planeD _Draw_VLp_7F
-\ _Draw_VLp_scale
-\ _Draw_VLp_b
-\ _Draw_VLp
-       $70 md_reset/move2                                4 planeA _Draw_Pat_VL_a
-       $50 md_reset/move2 4 Vec_Misc_Count c!              planeA _Draw_Pat_VL
-       $30 md_reset/move2 5 Vec_Misc_Count c!     0      0 planeA _Draw_Pat_VL_d
-\ _Draw_VL_mode
-\ _Draw_Grid_VL
+       $10 md_reset/move2                         4 planeA _Draw_Pat_VL_a
+      -$10 md_reset/move2 4 Vec_Misc_Count c!       planeA _Draw_Pat_VL
+      -$30 md_reset/move2 4 Vec_Misc_Count c!   0 0 planeB _Draw_Pat_VL_d
+      -$50 md_reset/move2                           planeD _Draw_VL_mode
 
-\ _Draw_Line_d
+       $5F VIA_t1_cnt_lo c! \ Set scaling factor for move
+       _Reset0Ref -$7F  $5F _Moveto_d               planeD _Draw_VLp_7F
+       $5F VIA_t1_cnt_lo c! \ Set scaling factor for move
+       _Reset0Ref -$7F -$7F _Moveto_d               planeD _Draw_VLp_FF
 
-\ ;$FF ENABLES DOTTED LINE
-\ ;$00 REQUESTS BLANK LINE
-\ ;$02 IS SOLID LINE
-\ ;$01 DELIMIT
+      \ _Draw_Grid_VL \ Not sure what this is for, seems not well documented
 
-           key?  \ press a key to end
+      key?  \ press a key to end
    until
    key drop
+;
+
+\ Random(_3) test words. Visually, rand3 looks more random
+: rand  begin cr _random   8 / 1+ 0 do ." *" loop key? until ;
+: rand3 begin cr _random_3 8 / 1+ 0 do ." *" loop key? until ;
+
+
+
+\ CODE _Clear_x_b         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in bottom 8 bits only
+\ CODE _Clear_C8_RAM      ____D # PSHU,              Clear_C8_RAM JSR,   ____D # PULS,   NEXT ;C \               -- ;
+\ CODE _Clear_x_256       D X TFR,                   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr          -- ; addr = start of RAM to be cleared
+\ CODE _Clear_x_d         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in 16 bits only
+
+: clearxb \ -- ;
+   $1234 pad !  $5678 pad 2 + !                    \ add some data
+   pad $10 dump   1 pad _clear_x_b   pad $10 dump  \ show, clear, show again
+;
+
+: clearc8 \ -- ; CRASHES FORTH, use FILL instead
+\   $C800 $100 dump  _Clear_C8_RAM  cr $C800 $100 dump
+;
+
+: clearx256 \ -- ; CRASHES FORTH, use FILL instead
+\   $CB00 $100 dump  $CB00 _Clear_x_256  $CB00 $100 dump
+;
+
+: clearxd \ -- ;
+   $1234 pad !  $5678 pad 2 + !                    \ add some data
+   pad $10 dump   1 pad _clear_x_b   pad $10 dump  \ show, clear, show again
 ;
 
 
 
 
-
-
-
-
-
-\ Random(_3) test words. Visually, rand3 looks more random
-: rand  begin cr _random   8 / 1+ 0 do ." *" loop key? until ;
-: rand3 begin cr _random_3 8 / 1+ 0 do ." *" loop key? until ;
 
 \ Dec_3/6_Counters test. Counters are 8 bit.
 : dec36c \ -- ;
