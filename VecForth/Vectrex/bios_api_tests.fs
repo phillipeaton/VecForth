@@ -427,13 +427,6 @@ here equ planeE
 : rand  begin cr _random   8 / 1+ 0 do ." *" loop key? until ;
 : rand3 begin cr _random_3 8 / 1+ 0 do ." *" loop key? until ;
 
-
-
-\ CODE _Clear_x_b         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in bottom 8 bits only
-\ CODE _Clear_C8_RAM      ____D # PSHU,              Clear_C8_RAM JSR,   ____D # PULS,   NEXT ;C \               -- ;
-\ CODE _Clear_x_256       D X TFR,                   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr          -- ; addr = start of RAM to be cleared
-\ CODE _Clear_x_d         D X TFR,   ____D # PULS,   Clear_x_b    JSR,   ____D # PULS,   NEXT ;C \ addr #bytes-1 -- ; #bytes stored in 16 bits only
-
 : clearxb \ -- ;
    $1234 pad !  $5678 pad 2 + !                    \ add some data
    pad $10 dump   1 pad _clear_x_b   pad $10 dump  \ show, clear, show again
@@ -447,14 +440,26 @@ here equ planeE
 \   $CB00 $100 dump  $CB00 _Clear_x_256  $CB00 $100 dump
 ;
 
-: clearxd \ -- ;
-   $1234 pad !  $5678 pad 2 + !                    \ add some data
-   pad $10 dump   1 pad _clear_x_b   pad $10 dump  \ show, clear, show again
+: clearxd \ -- ; Test work to fill memory block with 0's.
+   $1234 pad !  $5678 pad 2 + ! \ add some data
+   pad $10 dump
+   1 pad _clear_x_d    \ 1=2 chars to fill with 0
+   pad $10 dump
 ;
 
+: clearxb80 \ -- ; Test work to fill memory block with $80's.
+   $1234 pad !  $5678 pad 2 + ! \ add some data
+   pad $10 dump
+   1 pad _clear_x_b_80  \ 1=2 chars to fill with $80
+   pad $10 dump
+;
 
-
-
+: clearxba \ -- ; Test work to fill memory block with bytes.
+   $1234 pad !  $5678 pad 2 + ! \ add some data
+   pad $10 dump
+   $AA01 pad _clear_x_b_a \ $AA=byte to fill with, $01=2 chars
+   pad $10 dump
+;
 
 \ Dec_3/6_Counters test. Counters are 8 bit.
 : dec36c \ -- ;
@@ -467,12 +472,12 @@ here equ planeE
       Vec_Counters $10 dump   \ dump the counters to terminal
       key? if leave then      \ exit on key press
    loop
-   key drop
+   key? if key drop then
 ;
 
 \ Decrement Counters test. Decrements 1, then 2, 3, through to 6 counters.
 : decc \ -- ;
-   Vec_Counters 6 $ff fill           \ initialise counters to $ff
+   Vec_Counters 6 $FF fill           \ initialise counters to $ff
    Vec_Counters $10 dump             \ Display counters
    6 0 do                            \ Decrement 1 counter, 2 ,3...6
       i Vec_Counters _Dec_Counters   \
@@ -483,7 +488,7 @@ here equ planeE
 \ Delay_n etc test. Probably unlikey to be used by Forth directly.
 : delays \ -- ;
    _Delay_3 _Delay_2 _Delay_1 _Delay_0 _Delay_RTS
-   $ff _Delay_b \ Parameterised general delay
+   $FF _Delay_b \ Parameterised general delay
 ;
 
 \ Bitmask_a test. Provide a number 1 to 8, get back the power of 2
@@ -491,6 +496,13 @@ here equ planeE
 : bma \ bit_number -- bit_mask ; \ output gives 1 2 4 8 16 32 64 128
    8 0 do i _Bitmask_a u. loop
 ;
+
+: absab \ 2_8-bit_numbers -- 2_8-bit_numbers_absolute ;
+   $8080 _abs_a_b u. ;
+
+: absb \ 8-bit_number -- 8-bit_number_absolute ;
+   $80 _abs_b u. ;
+
 
 \ -----------------------------------------------------------------------------
 

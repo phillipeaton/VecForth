@@ -164,8 +164,8 @@ CODE _Clear_x_d         D X TFR,   ____D # PULS,   Clear_x_d    JSR,   ____D # P
 
 \ Memory Management / Memory fill
 
-CODE _Clear_x_b_80      NEXT ;C \ Not needed for Forth, use FILL instead
-CODE _Clear_x_b_a       NEXT ;C \ Not needed for Forth, use FILL instead
+CODE _Clear_x_b_80      D X TFR,   ____D # PULS,   Clear_x_b_80 JSR,   ____D # PULS,   NEXT ;C \ #bytes-1 addr -- ; #bytes = $0-$FF, $00=$100. Fills with $80
+CODE _Clear_x_b_a       D X TFR,   ____D # PULS,   Clear_x_b_a  JSR,   ____D # PULS,   NEXT ;C \ #bytes-1 addr -- ; #bytes = $0-$FF, $00=$100. Fills with byte=in #bytes top 8 bits
 
 \ Counters
 
@@ -189,7 +189,7 @@ CODE _Bitmask_a         A B EXG,   Bitmask_a JSR,   A B EXG,   NEXT ;C \ bit_num
 \ Mathematical
 
 CODE _Abs_a_b           Abs_a_b JSR,   NEXT ;C \ n -- n' ; Returns abs value of two 8 bit numbers
-CODE _Abs_b             Abs_b   JSR,   NEXT ;C \ n -- n' ; Returns abs value of ONE 8 bit number (bottom 8 bits)
+CODE _Abs_b             Abs_b   JSR,   NEXT ;C \ n -- n' ; Returns abs value of one 8 bit number (bottom 8 bits)
 
 \ Vector object handling / Rotating
 
