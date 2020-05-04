@@ -39,6 +39,6 @@ include CamelForth\latest.fs
 
 ONLY FORTH ALSO META
 \ HEX E000 2000 HEXFILE 6809.HEX   \ make hex file: start, length, filename )
-HEX 0000 4000 BINFILE 6809.BIN   \ make binary file: start, length, filename )
+HEX 0000 5000 BINFILE 6809.BIN   \ make binary file: start, length, filename )
 .MIRRORS                         \ print undef'd references
 BYE                              \ exit back to command prompt

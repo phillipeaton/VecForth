@@ -193,13 +193,23 @@ CODE _Abs_b             Abs_b   JSR,   NEXT ;C \ n -- n' ; Returns abs value of 
 
 \ Vector object handling / Rotating
 
-CODE _Rise_Run_Angle    NEXT ;C \ ********** NOT DONE YET
-CODE _Get_Rise_Idx      NEXT ;C
-CODE _Get_Run_Idx       NEXT ;C
-CODE _Rise_Run_Idx      NEXT ;C
-CODE _Rise_Run_X        NEXT ;C
-CODE _Rise_Run_Y        NEXT ;C
-CODE _Rise_Run_Len      NEXT ;C
+\ // COMPAS   0xF593  CMPASS  Return angle for given delta 'Y:X'
+\ // COSGET   0xF5D9  COSINE  Calculate the cosine of 'A'
+\ // SINGET   0xF5DB  SINE    Calculate the sine of 'A'
+\ // SINCOS   0xF5EF  ---     Calculate the sine and cosine of 'ANGLE'
+\
+\ // RSINA    0xF65B  MSINE   Multiply 'A' by previous sine value
+\ // RSIN     0xF65D  LSINE   Multiply 'LEG' by previous sine value
+\ // RCOSA    0xF661  MCSINE  Multiply 'A' by previous cosine value
+\ // RCOS     0xF663  LCSINE  Multiply 'LEG' by previous cosine value
+
+CODE _Rise_Run_Angle    __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_Angle JSR,   __dp_ # PULU,   NEXT ;C \ run  rise -- angle ; angle is from X axis
+CODE _Get_Rise_Idx                                               A B EXG,                 Get_Rise_Idx   JSR,                   NEXT ;C \     angle -- value ; value  A=VALUE,B=SIGN/OVERFLOW
+CODE _Get_Run_Idx                                                A B EXG,                 Get_Run_Idx    JSR,                   NEXT ;C \     angle -- value ; value  A=VALUE,B=SIGN/OVERFLOW
+CODE _Rise_Run_Idx      __dpD # PSHU,   C8 # LDX,   X DPR TFR,                            Get_Rise_Run   JSR,   __dpD # PULU,   NEXT ;C \           --       ; Entry:Vec_Angle, Exit:Vec_Run_Index/Vec_Rise_Index(2 bytes each) Note: Rise_Run_Idx/Get_Rise_Run
+CODE _Rise_Run_X        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_X     JSR,   __dp_ # PULU,   NEXT ;C \ svv angle -- rise/run ; scaler_velocity_value
+CODE _Rise_Run_Y        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_Y     JSR,   __dp_ # PULU,   NEXT ;C \ svv angle -- rise/run ; scaler_velocity_value
+CODE _Rise_Run_Len      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                            Rise_Run_Len   JSR,   __dp_ # PULU,   NEXT ;C \     angle -- rise/run ;
 CODE _Rot_VL_ab         NEXT ;C
 CODE _Rot_VL            NEXT ;C
 CODE _Rot_VL_Mode       NEXT ;C

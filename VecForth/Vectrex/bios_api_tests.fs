@@ -503,6 +503,33 @@ here equ planeE
 : absb \ 8-bit_number -- 8-bit_number_absolute ;
    $80 _abs_b u. ;
 
+: rra \ -- ;
+   $30 1 do
+      $30 i - i 2dup cr ."  Run " . ."  Rise " .
+      _Rise_Run_Angle $FF and dup ."  Degrees64 " .
+      #360 swap $40 */ ."  Degrees360 " .
+   loop
+;
+
+
+: U.R \        \ u width -- ; Display u right-aligned in a field n characters wide.
+  >R <# 0 #S #> R> OVER - 0 MAX SPACES TYPE
+;
+
+: sine-wave \ -- ; Display a sine wave to the terminal
+   $80 0 do                             \ 360 degrees = $40 steps for Vectrex
+      i _get_run_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
+      >< dup 0< if                      \ -- 180sine-val ;
+         $FF and negate
+      else
+         $FF and
+      then                              \ -- 360sine-val ;
+      $10 / $10 + dup 2 space u.r space \ -- 360sine-val-low-res ; display val
+      ?dup if 0 do $2A emit loop then   \ -- ; Print stars to form sine wave
+   4 +loop ;                            \ Make super coarse
+
+
+
 
 \ -----------------------------------------------------------------------------
 
