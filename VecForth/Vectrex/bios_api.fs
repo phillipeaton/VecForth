@@ -66,10 +66,11 @@ CODE _Sound_Byte        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                  
 CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte_x     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
 CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte_raw   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
 CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                           Clear_Sound   JSR,                              __dpD # PULU,   NEXT ;C \     -- ;
-CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
-CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ;
+\ BOTH SOUND_BYTES NOT YET TESTED AND LOOK WRONG
+CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; ***********
+CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; ***********
 CODE _Do_Sound          U_dpD # PSHS,              D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dpD # PULS,                   NEXT ;C \      -- ;
-CODE _Do_Sound_x        U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dp_ # PULS,   ____D # PULS,   NEXT ;C \  ptr -- ;
+CODE _Do_Sound_x        U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound_x     JSR,   U_dp_ # PULS,   ____D # PULS,   NEXT ;C \  ptr -- ;
 \
 CODE _Init_Music_Buf    ____D # PSHS,                                       Init_Music_Buf JSR,                   ____D # PULS,   NEXT ;C \      -- ;
 \
@@ -207,11 +208,13 @@ CODE _Rise_Run_Angle    __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,+
 CODE _Get_Rise_Idx                                               A B EXG,                 Get_Rise_Idx   JSR,                   NEXT ;C \     angle -- value ; value  A=VALUE,B=SIGN/OVERFLOW
 CODE _Get_Run_Idx                                                A B EXG,                 Get_Run_Idx    JSR,                   NEXT ;C \     angle -- value ; value  A=VALUE,B=SIGN/OVERFLOW
 CODE _Rise_Run_Idx      __dpD # PSHU,   C8 # LDX,   X DPR TFR,                            Get_Rise_Run   JSR,   __dpD # PULU,   NEXT ;C \           --       ; Entry:Vec_Angle, Exit:Vec_Run_Index/Vec_Rise_Index(2 bytes each) Note: Rise_Run_Idx/Get_Rise_Run
-CODE _Rise_Run_X        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_X     JSR,   __dp_ # PULU,   NEXT ;C \ svv angle -- rise/run ; scaler_velocity_value
-CODE _Rise_Run_Y        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_Y     JSR,   __dp_ # PULU,   NEXT ;C \ svv angle -- rise/run ; scaler_velocity_value
-CODE _Rise_Run_Len      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                            Rise_Run_Len   JSR,   __dp_ # PULU,   NEXT ;C \     angle -- rise/run ;
-CODE _Rot_VL_ab         NEXT ;C
-CODE _Rot_VL            NEXT ;C
+
+CODE _Rise_Run_X        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_X     JSR,   __dp_ # PULU,   NEXT ;C \ angle svv -- rise/run ; scaler_velocity_value
+CODE _Rise_Run_Y        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_Y     JSR,   __dp_ # PULU,   NEXT ;C \ angle svv -- rise/run ; scaler_velocity_value
+CODE _Rise_Run_Len      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                            Rise_Run_Len   JSR,   __dp_ # PULU,   NEXT ;C \ angle     -- rise/run ;
+
+CODE _Rot_VL_ab         _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Rot_VL_ab JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #vectors angle vl_addr_before vl_addr_after -- ;
+CODE _Rot_VL            _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL    JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ vl_addr_before vl_addr_after -- ;
 CODE _Rot_VL_Mode       NEXT ;C
 CODE _Rot_VL_M_dft      NEXT ;C
 CODE _Xform_Run_a       NEXT ;C

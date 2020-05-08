@@ -73,7 +73,7 @@ S" HELLO WORLD" 80 C,
       $B 0 do           \ store a line of music data to PSG registers (i loop)
          ymdata j $B * + i + c@   \ -- data ; Get the data byte
          ymregs i + c@            \ -- data reg# ; Get the register#
-\         _Sound_Byte              \ -- ; comment out _Sound_byte, _byte_x or
+\         _Sound_Byte              \ -- ; comment out _Sound_byte, _byte_x
          Vec_Snd_Shadow _Sound_Byte_x \  or _byte_raw to test each of them
 \         _Sound_Byte_raw          \  individually
       loop
@@ -511,22 +511,68 @@ here equ planeE
    loop
 ;
 
-
-: U.R \        \ u width -- ; Display u right-aligned in a field n characters wide.
-  >R <# 0 #S #> R> OVER - 0 MAX SPACES TYPE
+: u.r \        \ u width -- ; Display u right-aligned in a field n characters wide.
+  >r <# 0 #s #> r> over - 0 max spaces type
 ;
 
-: sine-wave \ -- ; Display a sine wave to the terminal
+: sine-wave \ -- ; Display a sine wave to the terminal. Run=Sine, Rise=Cosine
    $80 0 do                             \ 360 degrees = $40 steps for Vectrex
-      i _get_run_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
+      i _get_rise_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
+\      i _get_run_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
       >< dup 0< if                      \ -- 180sine-val ;
          $FF and negate
       else
          $FF and
       then                              \ -- 360sine-val ;
-      $10 / $10 + dup 2 space u.r space \ -- 360sine-val-low-res ; display val
+      $10 / $10 + dup space 2 u.r space \ -- 360sine-val-low-res ; display val
       ?dup if 0 do $2A emit loop then   \ -- ; Print stars to form sine wave
-   4 +loop ;                            \ Make super coarse
+   4 +loop                              \ Make super coarse
+;
+
+\ C836   EQU   Vec_Angle       \ Angle for rise/run and rotation calculations
+\ C837   EQU   Vec_Run_Index   \ Index pair for run
+\ C839   EQU   Vec_Rise_Index  \ Index pair for rise
+: sincos \ -- ; Puts Sine and Cosine into memory for given angle in memory.
+   Vec_Angle 5 dump   $00 Vec_Angle c!   _Rise_Run_Idx
+   Vec_Angle 5 dump   $08 Vec_Angle c!   _Rise_Run_Idx
+   Vec_Angle 5 dump   $10 Vec_Angle c!   _Rise_Run_Idx
+   Vec_Angle 5 dump
+;
+
+: rrx \ -- ; Not sure what this is for...
+   $40 0 do
+      cr i .
+      i 1 _Rise_Run_X 5 u.r
+   loop
+;
+
+: rvl \ -- ;
+   begin
+      $40 0 do
+         _Wait_Recal
+         _Intensity_7F
+         $20 VIA_t1_cnt_lo c!  \ Set scaling factor
+
+         $17 Vec_Misc_Count c! \ Number of vectors - 1
+         i Vec_Angle c!        \ Angle to rotate by
+         TURTLE pad _Rot_VL    \ Rotate vector list
+
+         0 -$7f _Moveto_d
+         $17 pad _Draw_VL_a
+
+         _Reset0Ref
+
+         $17 i TURTLE pad      \ -- #vectors angle VL_source VL_rotated ;
+         _Rot_VL_ab            \ Rotate vector list
+
+         0 $7F _Moveto_d
+         $17 pad _Draw_VL_a
+
+      loop
+      key?  \ press a key to end
+   until
+   key drop
+;
 
 
 
@@ -535,7 +581,6 @@ here equ planeE
 
 : DT \ -- ; Display turtles using vector list with two different BIOS calls
    BEGIN
-      1+ DUP U.
       _Wait_Recal
       _Intensity_7F
 
@@ -549,7 +594,6 @@ here equ planeE
       KEY?
   UNTIL
   key drop
-  DROP
 ;
 
 : DG \ -- ; Draw grid line by line
