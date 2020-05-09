@@ -574,6 +574,37 @@ here equ planeE
    key drop
 ;
 
+: rvlm \ -- ;
+   begin
+      $40 0 do
+         _Wait_Recal
+         _Intensity_7F
+         $20 VIA_t1_cnt_lo c!  \ Set scaling factor
+         $F0 Vec_Pattern c!    \ Patterned vector lists
+
+
+\          $17 Vec_Misc_Count c! \ Number of vectors - 1
+\          i Vec_Angle c!        \ Angle to rotate by
+\          TURTLE pad _Rot_VL    \ Rotate vector list
+\
+\          0 -$7f _Moveto_d
+\          $17 pad _Draw_VL_a
+\
+         _Reset0Ref
+
+         i planeD pad            \ -- vectors angle VL_source VL_rotated ;
+         _Rot_VL_Mode            \ Rotate vector list
+
+         0 $7F _Moveto_d
+         pad _Draw_VL_mode
+
+      loop
+      key?  \ press a key to end
+   until
+   key drop
+;
+
+
 
 
 

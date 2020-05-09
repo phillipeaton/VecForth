@@ -213,10 +213,12 @@ CODE _Rise_Run_X        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,+
 CODE _Rise_Run_Y        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_Y     JSR,   __dp_ # PULU,   NEXT ;C \ angle svv -- rise/run ; scaler_velocity_value
 CODE _Rise_Run_Len      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                            Rise_Run_Len   JSR,   __dp_ # PULU,   NEXT ;C \ angle     -- rise/run ;
 
-CODE _Rot_VL_ab         _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Rot_VL_ab JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #vectors angle vl_addr_before vl_addr_after -- ;
-CODE _Rot_VL            _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL    JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ vl_addr_before vl_addr_after -- ;
-CODE _Rot_VL_Mode       NEXT ;C
-CODE _Rot_VL_M_dft      NEXT ;C
+CODE _Rot_VL_ab         _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Rot_VL_ab    JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #vectors angle vl_addr_before vl_addr_after -- ;
+CODE _Rot_VL            _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL       JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
+CODE _Rot_VL_Mode       _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,                 Rot_VL_Mode  JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \          angle vl_addr_before vl_addr_after -- ;
+
+\ CODE _Rot_VL_M_dft      _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL_M_dft JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
+
 CODE _Xform_Run_a       NEXT ;C
 CODE _Xform_Run         NEXT ;C
 CODE _Xform_Rise_a      NEXT ;C
