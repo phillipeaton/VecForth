@@ -2,19 +2,22 @@
 
 HEX
 
-\ Forth doesn't care about the X register, it's short term work space only, much like the vectrex.
-\ ********** Code saving to U can't store it on teh U stack, needs to go on Y or S stack. E.g. Display_Option, Add_Score etc.
-\ ***** Might be better to use some of these with S stack only, but used U due to parametnes. Some do only use S, where no paramenters.
+\ Forth doesn't care about the X register, it's short term work space only, much like the Vectrex.
+\ ********** Code saving to U can't store it on the U stack, needs to go on Y or S stack. E.g. Display_Option, Add_Score etc.
+\ ***** Might be better to use some of these with S stack only, but used U due to parameters. Some do only use S, where no parameters.
 \ X is a scratchpad for Vectrex and forth, doesn't need saving
 \ general case ,save registers, set Do, arrange registers, combine where necessary, call routine, pull stack etc, note extra pulls to drop stack items at end
-\ Routines rougly in ROM address order as several run inte each other.
+\ Routines roughly in ROM address order as several run into each other.
 \ Some of these routine entry points don't make sense from Forth
 \ Need to swap over the x and ys on stack
+\ And B Registers are tied together, you can't easily use them individually
+\ Sometimes the outreg's I just drop, maybe they could be added back if really needed
 
 \ Registers
 $06 equ ____D
 $08 equ __dp_
 $0E equ __dpD
+$20 equ _Y___
 $26 equ _Y__D
 $28 equ _Ydp_
 $2E equ _YdpD
@@ -215,24 +218,31 @@ CODE _Rise_Run_Len      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                  
 
 CODE _Rot_VL_ab         _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Rot_VL_ab    JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #vectors angle vl_addr_before vl_addr_after -- ;
 CODE _Rot_VL            _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL       JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
+\ ################## DOES ROT_VL_MODE NEED C8 DP?
 CODE _Rot_VL_Mode       _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,                 Rot_VL_Mode  JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \          angle vl_addr_before vl_addr_after -- ;
+CODE _Rot_VL_M_dft      _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL_M_dft JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
 
-\ CODE _Rot_VL_M_dft      _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL_M_dft JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
-
-CODE _Xform_Run_a       NEXT ;C
-CODE _Xform_Run         NEXT ;C
-CODE _Xform_Rise_a      NEXT ;C
-CODE _Xform_Rise        NEXT ;C
+CODE _Xform_Run_a       __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                   Xform_Run_a  JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \ length --  run_value ; Length for run
+CODE _Xform_Run         __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   ____D # PSHS,   Xform_Run    JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \        --  run_value ; Length for run already in $C83B Vec_RiseRun_Len
+CODE _Xform_Rise_a      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                   Xform_Rise_a JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \ length -- rise_value ; Length for rise
+CODE _Xform_Rise        __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   ____D # PSHS,   Xform_Rise   JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \        -- rise_value ; Length for rise already in $C83B Vec_RiseRun_Len
 
 \ Memory management / Memory copy
 
-CODE _Move_Mem_a_1      NEXT ;C \ Not need for Forth, use CMOVE or CMOVE> instead
-CODE _Move_Mem_a        NEXT ;C \ Not need for Forth, use CMOVE or CMOVE> instead
+CODE _Move_Mem_a_1      _Y___ # PSHU,   U Y TFR,   D X TFR,   ____D # PULS,   D U TFR,   ____D # PULS,   A B EXG,   Move_Mem_a_1 JSR,   Y U TFR,   ____D # PULS,   _Y___ # PULU,   NEXT ;C \ byte_count source destination -- ; Not need for Forth, use CMOVE or CMOVE> instead
+CODE _Move_Mem_a        _Y___ # PSHU,   U Y TFR,   D X TFR,   ____D # PULS,   D U TFR,   ____D # PULS,   A B EXG,   Move_Mem_a   JSR,   Y U TFR,   ____D # PULS,   _Y___ # PULU,   NEXT ;C \ byte_count source destination -- ; Not need for Forth, use CMOVE or CMOVE> instead
 
 \ Player option
 
-CODE _Select_Game       _Ydp_ # PSHU,                            A B EXG,   S ,++ ADDD,     Select_Game    JSR,   ____D # PULS,   _Ydp_ # PULU, NEXT ;C \ #game_versions #players_max -- ;
+CODE _Select_Game       _Ydp_ # PSHU,   A B EXG,   S ,++ ADDD,   U____ # PSHS,   Select_Game    JSR,   U____ # PULS,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #game_versions #players_max -- ;
+
+
+
+
 CODE _Display_Option    U_dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   ____D # PULS,   Display_Option JSR,   ____D # PULS,   U_dp_ # PULU, NEXT ;C \ option_val addr -- ;
+
+
+
 
 \ Score
 

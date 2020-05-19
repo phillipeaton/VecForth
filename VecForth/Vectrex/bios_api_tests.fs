@@ -574,23 +574,13 @@ here equ planeE
    key drop
 ;
 
-: rvlm \ -- ;
+: rvlm \ -- ; Rot_VL_M_dft not tested as it'll never be used from Forth
    begin
       $40 0 do
          _Wait_Recal
          _Intensity_7F
          $20 VIA_t1_cnt_lo c!  \ Set scaling factor
          $F0 Vec_Pattern c!    \ Patterned vector lists
-
-
-\          $17 Vec_Misc_Count c! \ Number of vectors - 1
-\          i Vec_Angle c!        \ Angle to rotate by
-\          TURTLE pad _Rot_VL    \ Rotate vector list
-\
-\          0 -$7f _Moveto_d
-\          $17 pad _Draw_VL_a
-\
-         _Reset0Ref
 
          i planeD pad            \ -- vectors angle VL_source VL_rotated ;
          _Rot_VL_Mode            \ Rotate vector list
@@ -604,8 +594,34 @@ here equ planeE
    key drop
 ;
 
+\ Not tested, no point in using
+\ _Rot_VL_M_dft
+\
 
+: xfruna \ -- ;
+   $0000 Vec_Run_Index !
+   $20 _Xform_Run_a u.
+;
 
+\ Not tested yet, need to check what uses them, can find any ASM that does
+\ _Xform_Run_a
+\ _Xform_Run
+\ _Xform_Rise_a
+\ _Xform_Rise
+
+: mma1 \ -- ; Test Move_Mem_a(_1)
+   $10 0 do i pad i + c! loop            \ Fill start of pad with sequence of numbers
+   pad $10 dump                          \ Display start of pad i.e. initial sequence
+   1 pad     pad 8  + _Move_Mem_a_1      \ Copy 2 bytes of pad to address pad+8
+   2 pad 4 + pad $c + _Move_Mem_a        \ Copy 2 bytes of pad to address pad+8
+   pad $10 dump                          \ Display start of pad i.e. after moves
+;
+
+: sg \ -- ; Select_Game, use buttons 1,2 and 3 to choose, 4 to end, 5 second timeout
+   3 4                      \ -- #game_versions #players_max ;
+   _select_game             \ -- ;
+   Vec_Num_Players 10 dump  \ $c879 = Vec_Num_Players, $c87a = Vec_Num_Game
+;
 
 
 \ -----------------------------------------------------------------------------
