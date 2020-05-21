@@ -623,6 +623,31 @@ here equ planeE
    Vec_Num_Players 10 dump  \ $c879 = Vec_Num_Players, $c87a = Vec_Num_Game
 ;
 
+: dopt \ -- ; Display_Option
+   $0000 pad !      \ y x relative to display option value
+   $0000 pad 2 + !  \ y x relative to display option string
+   $5859 pad 4 + !  \ "XY"
+   $5A80 pad 6 + !  \ "Z" + string terminator
+   begin
+      _Wait_Recal
+      _Intensity_7F
+      1 pad         \ -- option_value option_string ;
+      _Display_Option
+      key?  \ press a key to end
+   until
+   key drop
+;
+
+: .score \ string_addr -- ; Print a score
+   begin
+      dup c@ dup $80 <>
+   while
+      emit 1 +
+   repeat
+   2drop
+;
+
+
 
 \ -----------------------------------------------------------------------------
 

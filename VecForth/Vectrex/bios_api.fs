@@ -12,6 +12,8 @@ HEX
 \ Need to swap over the x and ys on stack
 \ And B Registers are tied together, you can't easily use them individually
 \ Sometimes the outreg's I just drop, maybe they could be added back if really needed
+\ DO I NEED TO REVIEW SAVING OF REGISTERS TO TEMP REGISTERS, MAYBE I CAN DO A 2ND PUSH/PULL LIKE SELECT_GAME?
+\ VecFever fast boot switch kills text
 
 \ Registers
 $06 equ ____D
@@ -235,14 +237,7 @@ CODE _Move_Mem_a        _Y___ # PSHU,   U Y TFR,   D X TFR,   ____D # PULS,   D 
 \ Player option
 
 CODE _Select_Game       _Ydp_ # PSHU,   A B EXG,   S ,++ ADDD,   U____ # PSHS,   Select_Game    JSR,   U____ # PULS,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #game_versions #players_max -- ;
-
-
-
-
-CODE _Display_Option    U_dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   ____D # PULS,   Display_Option JSR,   ____D # PULS,   U_dp_ # PULU, NEXT ;C \ option_val addr -- ;
-
-
-
+CODE _Display_Option    _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   ____D # PULS,   B A EXG,   U____ # PSHS,   Display_Option JSR,   U____ # PULS,   ____D # PULS,   _Ydp_ # PULU, NEXT ;C \ option_val addr -- ;
 
 \ Score
 
