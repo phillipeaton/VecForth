@@ -241,16 +241,24 @@ CODE _Display_Option    _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   D Y TFR,   ____
 
 \ Score
 
-CODE _Clear_Score       D X TFR,   Clear_Score   JSR,   ____D # PULS,   NEXT ;C \    addr -- ;
-CODE _Add_Score_a       U____ # PSHU,   D X TFR,   ____D # PULS,   D U TFR,   ____D # PULS,   Add_Score_a    JSR,   ____D # PULS,   U____ # PULU,   NEXT ;C \ binary# BCD ptr -- ;
-CODE _Add_Score_d                       D X TFR,   ____D # PULS,                              Add_Score_d    JSR,   ____D # PULS,                   NEXT ;C \         BCD ptr -- ;
-CODE _Strip_Zeros                       D X TFR,   ____D # PULS,                              Strip_Zeros    JSR,   ____D # PULS,                   NEXT ;C \      digit# ptr -- ; digit# 8 bit only
-CODE _Compare_Score     U____ # PSHU,   D X TFR,   ____D # PULS,   D U TFR,                   Compare_Score  JSR,   A B EXG,        U____ # PULU,   NEXT ;C \       ptr2 ptr1 -- 0|1|2; Same|1>2|2>1
-CODE _New_High_Score    U____ # PSHU,   D X TFR,   ____D # PULS,   D U TFR,                   New_High_Score JSR,   ____D # PULS,   U____ # PULU,   NEXT ;C \     addr2 addr1 -- ;
+CODE _Clear_Score       D X TFR,                                              Clear_Score    JSR,                   ____D # PULS,      NEXT ;C \    addr -- ;
+CODE _Add_Score_a       D X TFR,   ____D # PULS,   B A EXG,   U____ # PSHS,   Add_Score_a    JSR,   U____ # PULS,   ____D # PULS,      NEXT ;C \ decimal# ptr -- ; decimal# 8 bit only
+CODE _Add_Score_d       D X TFR,   ____D # PULS,              U____ # PSHS,   Add_Score_d    JSR,   U____ # PULS,   ____D # PULS,      NEXT ;C \      BCD ptr -- ;
+CODE _Strip_Zeros       D X TFR,   ____D # PULS,                              Strip_Zeros    JSR,                   ____D # PULS,      NEXT ;C \   digit# ptr -- ; digit# 8 bit only
+CODE _Compare_Score     D X TFR,   ____D # PULS,   U____ # PSHS,   D U TFR,   Compare_Score  JSR,   U____ # PULS,   A B TFR,   CLRA,   NEXT ;C \    ptr2 ptr1 -- 0|1|2; Same|1>2|2>1
+CODE _New_High_Score    D X TFR,   ____D # PULS,   U____ # PSHS,   D U TFR,   New_High_Score JSR,   U____ # PULS,   ____D # PULS,      NEXT ;C \  addr2 addr1 -- ; addr1=NewScore addr2=HighScore
 
 \ Vector object handling / Object collision detection
 
-CODE _Obj_Will_Hit_u    _Y__D # PSHU,  A B EXG,   S ,++ ADDD,   D Y TFR,   ____D # PSHS,   S ,++ ADDD,   D X TFR,   ____D # PSHS,   NEXT ;C \ height/2 width/2 ptr>movement x_mis y_mis x_obj y_obj -- f=collided ;
+CODE _Obj_Will_Hit_u    NEXT ;C \ height/2 width/2 ptr>movement x_mis y_mis x_obj y_obj -- f=collided ;
 CODE _Obj_Will_Hit      NEXT ;C \ ********** NOT DONE YET
-CODE _Obj_Hit           NEXT ;C \ ********** NOT DONE YET
+CODE _Obj_Hit           _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Obj_Hit JSR,   0 # LDD,   0 # ADCB,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
+\ CODE _Obj_Hit         _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
 
+\ CODE _Obj_Hit         _Y___ # PSHU,   ____D # PSHS,   hex 0505 # LDD,   1010 # LDX,   1515 # LDY,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
+\ CODE _Obj_Hit1        _Y___ # PSHU,   ____D # PSHS,   0505 # LDD,   1010 # LDX,   1515 # LDY,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
+\ CODE _Obj_Hit2        _Y___ # PSHU,   ____D # PSHS,   0505 # LDD,   1010 # LDX,   1616 # LDY,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
+
+\ WORKING WITH
+\ CODE _Obj_Hit1        _Y___ # PSHU,   ____D # PSHS,   hex 0505 # LDD,   1010 # LDX,   1515 # LDY,   Obj_Hit JSR,   CCR A TFR,   CCR B TFR,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
+\ CODE _Obj_Hit2        _Y___ # PSHU,   ____D # PSHS,   hex 0505 # LDD,   1010 # LDX,   1616 # LDY,   Obj_Hit JSR,   CCR A TFR,   CCR B TFR,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit

@@ -69,7 +69,7 @@ S" HELLO WORLD" 80 C,
 : sb \ -- ;
    ymlen @ 0 do         \ for each line of the YM file (j loop)
       _Wait_Recal       \ one line per 20ms i.e. 50Hz
-      $2A emit           \ show feedback asterisk at terminal
+      $2A emit          \ show feedback asterisk at terminal
       $B 0 do           \ store a line of music data to PSG registers (i loop)
          ymdata j $B * + i + c@   \ -- data ; Get the data byte
          ymregs i + c@            \ -- data reg# ; Get the register#
@@ -647,7 +647,77 @@ here equ planeE
    2drop
 ;
 
+: dump-pad/score pad 10 dump pad .score ;
 
+: addd_dump pad _Add_Score_d dump-pad/score ;
+: adda_dump pad _Add_Score_a dump-pad/score ;
+
+\ Add decimal score to 6 number ascii text score field.
+\ BIOS converts decimal score to BCD and then runs _Add_Score_d.
+: scorea \ -- ;
+                         pad 10 dump
+        pad _clear_score dump-pad/score
+   #003 adda_dump
+   #020 adda_dump
+   #100 adda_dump
+   #255 adda_dump
+;
+
+\ Add BCD score to 6 number ascii text score field.
+: scored \ -- ;
+   pad 10 dump
+   pad _clear_score dump-pad/score
+   $0004 addd_dump
+   $0030 addd_dump
+   $0200 addd_dump
+   $1000 addd_dump
+   $1234 addd_dump
+;
+
+: sz \ -- ; Strip Zeroes
+   pad 5 $30 fill
+   $3080 pad 5 + !
+   dump-pad/score
+   0 pad _Strip_Zeros
+   dump-pad/score
+;
+
+: cs \ -- ;
+   pad     _clear_score
+   pad 8 + _clear_score
+
+   pad 10 dump
+   pad pad 8 + _Compare_Score 4 u.r
+
+   $31 pad $d + c!
+   pad 10 dump
+   pad pad 8 + _Compare_Score 4 u.r
+
+   $32 pad 5 + c!
+   pad 10 dump
+   pad pad 8 + _Compare_Score 4 u.r
+;
+
+: nhs \ -- ; New_High_Score
+   pad     _clear_score     \ Score 1
+   pad 8 + _clear_score     \ Score 2
+
+   $1000 pad      _Add_Score_d dump-pad/score \ Set score 1 = 1000 decimal
+   $1234 pad 8 +  _Add_Score_d dump-pad/score \ Set score 2 = 1234 decimal
+
+   pad 8 + pad     _New_High_Score pad 10 dump \ New high score? No
+   pad     pad 8 + _New_High_Score pad 10 dump \ New high score? Yes, set high score = score
+;
+
+: oh \ -- ; Obj_Hit test
+   $05 $05 $1010 $1515 \ -- box_x box_y pos_obj_yx pos_missile_yx \ 1515=hit
+   _Obj_Hit            \ -- f ; f = hit
+   cr .                \ Display result on a newline
+
+   $05 $05 $1010 $1616 \ 1616=no_hit
+   _Obj_Hit
+   cr .
+;
 
 \ -----------------------------------------------------------------------------
 
