@@ -14,6 +14,8 @@ HEX
 \ Sometimes the outreg's I just drop, maybe they could be added back if really needed
 \ DO I NEED TO REVIEW SAVING OF REGISTERS TO TEMP REGISTERS, MAYBE I CAN DO A 2ND PUSH/PULL LIKE SELECT_GAME?
 \ VecFever fast boot switch kills text
+\ Sort out where to put the vector lists
+\ Move out the old tests words into a separate file draw_grid etc
 
 \ Registers
 $06 equ ____D
@@ -250,15 +252,6 @@ CODE _New_High_Score    D X TFR,   ____D # PULS,   U____ # PSHS,   D U TFR,   Ne
 
 \ Vector object handling / Object collision detection
 
-CODE _Obj_Will_Hit_u    NEXT ;C \ height/2 width/2 ptr>movement x_mis y_mis x_obj y_obj -- f=collided ;
-CODE _Obj_Will_Hit      NEXT ;C \ ********** NOT DONE YET
-CODE _Obj_Hit           _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Obj_Hit JSR,   0 # LDD,   0 # ADCB,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
-\ CODE _Obj_Hit         _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
-
-\ CODE _Obj_Hit         _Y___ # PSHU,   ____D # PSHS,   hex 0505 # LDD,   1010 # LDX,   1515 # LDY,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
-\ CODE _Obj_Hit1        _Y___ # PSHU,   ____D # PSHS,   0505 # LDD,   1010 # LDX,   1515 # LDY,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
-\ CODE _Obj_Hit2        _Y___ # PSHU,   ____D # PSHS,   0505 # LDD,   1010 # LDX,   1616 # LDY,   Obj_Hit JSR,   CCR B TFR,   1 # ANDB,   CLRA,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
-
-\ WORKING WITH
-\ CODE _Obj_Hit1        _Y___ # PSHU,   ____D # PSHS,   hex 0505 # LDD,   1010 # LDX,   1515 # LDY,   Obj_Hit JSR,   CCR A TFR,   CCR B TFR,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
-\ CODE _Obj_Hit2        _Y___ # PSHU,   ____D # PSHS,   hex 0505 # LDD,   1010 # LDX,   1616 # LDY,   Obj_Hit JSR,   CCR A TFR,   CCR B TFR,   _Y___ # PULU,   NEXT ;C \ box_x box_y pos_obj_yx pos_missile_yx -- f ; f = hit
+CODE _Obj_Will_Hit_u    _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,   D U EXG,   ____D # PSHS,   S 2 , LDD,   Obj_Will_Hit_u JSR,   ____D # PULS,   D U TFR,   ____D # PULS,   0 # LDD,   0 # ADCB,   _Y___ # PULU,   NEXT ;C \ box_yx movement_yx_addr pos_obj_yx pos_missile_yx -- f ; f = hit
+CODE _Obj_Will_Hit      _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,   D U EXG,   ____D # PSHS,   S 2 , LDD,   Obj_Will_Hit   JSR,   ____D # PULS,   D U TFR,   ____D # PULS,   0 # LDD,   0 # ADCB,   _Y___ # PULU,   NEXT ;C \ box_yx movement_yx      pos_obj_yx pos_missile_yx -- f ; f = hit
+CODE _Obj_Hit           _Y___ # PSHU,   D X TFR,   ____D # PULS,   D Y TFR,   ____D # PULS,                                           Obj_Hit        JSR,                                              0 # LDD,   0 # ADCB,   _Y___ # PULU,   NEXT ;C \ box_yx                  pos_obj_yx pos_missile_yx -- f ; f = hit

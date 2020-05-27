@@ -517,7 +517,7 @@ here equ planeE
 
 : sine-wave \ -- ; Display a sine wave to the terminal. Run=Sine, Rise=Cosine
    $80 0 do                             \ 360 degrees = $40 steps for Vectrex
-      i _get_rise_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
+      i _get_rise_idx dup cr 4 u.r      \ -- 180sine-val&negative-flags ;
 \      i _get_run_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
       >< dup 0< if                      \ -- 180sine-val ;
          $FF and negate
@@ -710,11 +710,31 @@ here equ planeE
 ;
 
 : oh \ -- ; Obj_Hit test
-   $05 $05 $1010 $1515 \ -- box_x box_y pos_obj_yx pos_missile_yx \ 1515=hit
-   _Obj_Hit            \ -- f ; f = hit
-   cr .                \ Display result on a newline
+   $0404 pad !            \ 0404=no_hit
+   $0505 pad $1010 $1A1A  \ -- box_yx  movement_xy_addr  pos_obj_yx  pos_missile_yx
+   _Obj_Will_Hit_u        \ -- f ; f = hit
+   cr .                   \ Display result on a newline
 
-   $05 $05 $1010 $1616 \ 1616=no_hit
+   $0505 pad !            \ 0505=hit
+   $0505 pad $1010 $1A1A
+   _Obj_Will_Hit_u
+   cr .
+
+
+   $0505 $0404 $1010 $1A1A \ -- box_yx  movement_xy      pos_obj_yx  pos_missile_yx \ 0404=no_hit
+   _Obj_Will_Hit
+   cr .
+
+   $0505 $0505 $1010 $1A1A                                                          \ 0505=hit
+   _Obj_Will_Hit
+   cr .
+
+
+   $0505 $1010 $1616       \ -- box_yx                 pos_obj_yx pos_missile_yx    \ 1616=no_hit
+   _Obj_Hit
+   cr .
+
+   $0505 $1010 $1515                                                                \ 1515=hit
    _Obj_Hit
    cr .
 ;
@@ -842,5 +862,3 @@ here equ planeE
      KEY 1B =
    UNTIL
 ;
-
-
