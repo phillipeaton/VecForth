@@ -3,19 +3,21 @@
 HEX
 
 \ Forth doesn't care about the X register, it's short term work space only, much like the Vectrex.
-\ ********** Code saving to U can't store it on the U stack, needs to go on Y or S stack. E.g. Display_Option, Add_Score etc.
 \ ***** Might be better to use some of these with S stack only, but used U due to parameters. Some do only use S, where no parameters.
-\ X is a scratchpad for Vectrex and forth, doesn't need saving
 \ general case ,save registers, set Do, arrange registers, combine where necessary, call routine, pull stack etc, note extra pulls to drop stack items at end
 \ Routines roughly in ROM address order as several run into each other.
 \ Some of these routine entry points don't make sense from Forth
-\ Need to swap over the x and ys on stack
-\ And B Registers are tied together, you can't easily use them individually
+\ Need to swap over the x and ys on stack, but B Registers are tied together, you can't easily use them individually
 \ Sometimes the outreg's I just drop, maybe they could be added back if really needed
 \ DO I NEED TO REVIEW SAVING OF REGISTERS TO TEMP REGISTERS, MAYBE I CAN DO A 2ND PUSH/PULL LIKE SELECT_GAME?
 \ VecFever fast boot switch kills text
 \ Sort out where to put the vector lists
 \ Move out the old tests words into a separate file draw_grid etc
+\ Add timestamp and version to files automatically when saving tho Git.
+\ Fix stack comments e.g. addr, ptr, flag etc.
+\ Mention how key? key drop is used.
+\ Put Address of each function and alt name
+\ macro for set dp
 
 \ Registers
 $06 equ ____D
@@ -30,9 +32,6 @@ $48 equ U_dp_    $48 equ S_dp_
 $4E equ U_dpD    $4E equ S_dpD
 $68 equ UYdp_    $68 equ SYdp_
 $6E equ UYdpD    $6E equ SYdpD
-
-
-
 
 \ Reset and initialization
 
@@ -69,13 +68,12 @@ CODE _Joy_Digital       __dpD # PSHU,   D0 # LDX,   X DPR TFR,                  
 
 \ Sound
 
-CODE _Sound_Byte        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte       JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Sound_Byte_x     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
-CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Sound_Byte_raw   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
-CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                           Clear_Sound   JSR,                              __dpD # PULU,   NEXT ;C \     -- ;
-\ BOTH SOUND_BYTES NOT YET TESTED AND LOOK WRONG
-CODE _Sound_Bytes       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes   JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; ***********
-CODE _Sound_Bytes_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U   TFR,   Sound_Bytes_x JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ ptr -- ; ***********
+CODE _Sound_Byte        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,     Sound_Byte     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Sound_Byte_x      __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,     Sound_Byte_x   JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# shadow-addr -- ;
+CODE _Sound_Byte_raw    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,     Sound_Byte_raw JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data reg# -- ;
+CODE _Clear_Sound       __dpD # PSHU,   D0 # LDA,   A DPR TFR,                                                         Clear_Sound    JSR,                   __dpD # PULU,   NEXT ;C \     -- ;
+CODE _Sound_Bytes       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              U____ # PSHS,   D U TFR,   Sound_Bytes    JSR,   U____ # PULS,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data_addr             -- ;
+CODE _Sound_Bytes_x     __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   U____ # PSHS,   D U TFR,   Sound_Bytes_x  JSR,   U____ # PULS,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sound_byte_data_addr AY_reg_addr -- ;
 CODE _Do_Sound          U_dpD # PSHS,              D0 # LDA,   A DPR TFR,   Do_Sound       JSR,   U_dpD # PULS,                   NEXT ;C \      -- ;
 CODE _Do_Sound_x        U_dp_ # PSHS,   D X TFR,   D0 # LDA,   A DPR TFR,   Do_Sound_x     JSR,   U_dp_ # PULS,   ____D # PULS,   NEXT ;C \  ptr -- ;
 \
@@ -125,8 +123,8 @@ CODE _Print_Str         _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,   U Y TFR,   D U 
 
 \ Print Ships
 
-CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ; Underflows stack?
-CODE _Print_Ships       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char x y  -- ; Underflows stack?
+CODE _Print_Ships_x     _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,                            D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships_x JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char addr -- ;
+CODE _Print_Ships       _Ydp_ # PSHU,   D0 # LDX,   X DPR TFR,  U Y TFR,   A B EXG,   S ,++ ADDD,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Print_Ships   JSR,   ____D # PULS,   Y U TFR,   _Ydp_ # PULU,   NEXT ;C \ #ships ship_char x y  -- ;
 
 \ Drawing / Vector / Move and Draw
 
@@ -222,7 +220,6 @@ CODE _Rise_Run_Len      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                  
 
 CODE _Rot_VL_ab         _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Rot_VL_ab    JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \ #vectors angle vl_addr_before vl_addr_after -- ;
 CODE _Rot_VL            _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL       JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
-\ ################## DOES ROT_VL_MODE NEED C8 DP?
 CODE _Rot_VL_Mode       _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,   ____D # PULS,   A B EXG,                 Rot_VL_Mode  JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \          angle vl_addr_before vl_addr_after -- ;
 CODE _Rot_VL_M_dft      _Ydp_ # PSHU,   U Y TFR,   D U   TFR,   ____D # PULS,   D X TFR,                                            Rot_VL_M_dft JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
 

@@ -71,15 +71,31 @@ S" HELLO WORLD" 80 C,
       _Wait_Recal       \ one line per 20ms i.e. 50Hz
       $2A emit          \ show feedback asterisk at terminal
       $B 0 do           \ store a line of music data to PSG registers (i loop)
-         ymdata j $B * + i + c@   \ -- data ; Get the data byte
-         ymregs i + c@            \ -- data reg# ; Get the register#
-\         _Sound_Byte              \ -- ; comment out _Sound_byte, _byte_x
-         Vec_Snd_Shadow _Sound_Byte_x \  or _byte_raw to test each of them
-\         _Sound_Byte_raw          \  individually
+         ymdata j $B * + i + c@       \ -- data ; Get the data byte
+         ymregs i + c@                \ -- data reg# ; Get the register#
+
+\         _Sound_Byte                  \ -- ; comment out _Sound_byte, _byte_x
+         Vec_Snd_Shadow _Sound_Byte_x \ -- ;  or _byte_raw to test each of them
+\         _Sound_Byte_raw              \ -- ;  individually
+
       loop
       key? if key drop leave then \ exit loop if key pressed
    loop
    _Clear_Sound         \ set all registers to 0
+;
+
+: sbs \ -- ; Sound_Bytes test, modified version of Sound_Byte test
+   ymlen2 @ 0 do         \ for each line of the YM file (j loop)
+      _Wait_Recal        \ one line per 20ms i.e. 50Hz
+      $2A emit           \ show feedback asterisk at terminal
+      ymdata2 i $17 * +  \ -- data ; Get the next register/data pair data block
+
+                     _Sound_Bytes     \ -- ; comment out _Sound_bytes or _byte_x
+\      Vec_Snd_Shadow _Sound_Bytes_x \ -- ;  line to test each of them
+
+      key? if key drop leave then   \ exit loop if key pressed
+   loop
+   _Clear_Sound          \ set all registers to 0
 ;
 
 \ Do_Sound/_x and Init_music_chk test word, i.e. built-in music and player
