@@ -59,23 +59,3 @@ ONLY FORTH DEFINITIONS     \ extensions
 VOCABULARY META  ALSO META DEFINITIONS    \ metacompiler
 VOCABULARY ASSEMBLER                      \ cross-assembler
 VOCABULARY TARGET                         \ target words
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

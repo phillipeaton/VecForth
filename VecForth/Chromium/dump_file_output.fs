@@ -26,13 +26,10 @@ HEX
 \ Block 25 -----------------------------------------------------
 \ ( Intel hex files, ANS FILE words)  HEX       ( 07 feb 93 bjr)
 \
-FORTH DEFINITIONS
-
-META DEFINITIONS
 VARIABLE IHANDLE   IHANDLE OFF
 
-CREATE HEXTBL  30 C, 31 C, 32 C, 33 C, 34 C, 35 C, 36 C, 37 C,
-               38 C, 39 C, 41 C, 42 C, 43 C, 44 C, 45 C, 46 C,
+\ CREATE HEXTBL  30 C, 31 C, 32 C, 33 C, 34 C, 35 C, 36 C, 37 C,
+\                38 C, 39 C, 41 C, 42 C, 43 C, 44 C, 45 C, 46 C,
 
 \ Block 26 -----------------------------------------------------
 \ ( Intel hex files, ANS FILE words)  HEX       ( 07 feb 93 bjr)
@@ -59,7 +56,8 @@ CREATE HEXTBL  30 C, 31 C, 32 C, 33 C, 34 C, 35 C, 36 C, 37 C,
 \
 : BINFILE ( a n -- )
    BL WORD COUNT W/O CREATE-FILE
-   0<> ABORT" Open err"  IHANDLE !  \ e000 2000
-   OVER + SWAP                      \ 10000 e000
-   DO I TC@ IHANDLE @ EMIT-FILE 0<> ABORT" Write err" LOOP
+   0<> ABORT" Open err"  IHANDLE !
+   OVER + SWAP DO
+      I TC@ IHANDLE @ EMIT-FILE 0<> ABORT" Write err"
+   LOOP
    IHANDLE @ CLOSE-FILE DROP ;

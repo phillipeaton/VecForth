@@ -1,28 +1,14 @@
-\ load camelforth blocks file and compile it
-\ from gforth:
-\ include gforth_shim.fs
+\ ***************************************************************************************
+\ This file provided by Neal Crook for enabling the Chromium cross compiler to work using
+\ Gforth instead of F83, plus some issues issues he found in teh process of doing so.
+\ ***************************************************************************************
 
-\ TODO in screen 120, valueof #INIT does not account for HP and 0 , for HP is
-\ NOT needed. Removed from my code.
-
-\ coded and tested hex dump in ans_hex.fs and ported it into the chromium_ans source.
-\
-\ todo: fix comments in col 63 properly/cleanly
-\ todo: in my source, delete duplicate >< word in assembler.
-\ todo: review 28/29 (image to target machine)
-\        and    3/27 (image to disk)
-\ to make sure they look symmetric
 
 \ DEFINED is used but is not a standard word.
 \ F83 and gforth definitions differ -- gforth has it as an immediate word that
 \ returns a flag. F83 is not immediate and has more compex effect. Get F83
-\ behaviour..
+\ behaviour.
 \ : DEFINED ( -- here 0 | cfa [ -1 | 1 ] ) BL WORD FIND ;
-
-\
-\ TODO DUMP screen 24 should be renamed IDUMP (in code and documentation)
-
-
 
 
 \ F83 and gforth have different entries in Root. The absence of DEFINITIONS causes the
@@ -37,7 +23,6 @@
 \ ' bye         Alias bye
 \
 \ Forth definitions
-
 
 
 \ in F83 but not in ANS or gforth
@@ -97,14 +82,9 @@ VARIABLE END?
 DECIMAL
 \ set all locations in blk n of current block file to 0
 : ZEROBLK ( n - ) BLOCK 1024 0 FILL UPDATE ;
-: CLEARVM 63 FOR I 192 + ZEROBLK NEXT FLUSH ;
+: CLEARVM 63 FOR I ZEROBLK NEXT FLUSH ;
 CLEARVM
 
-
-
-
-\ for multicomp use 45 load. Do "1 load" for vanilla (sm2) system
-\ 1 load
 
 \ Portability bug in IMMED: it used "2 +" where it should have used CELL +. A real
 \ Brad bug!! Fixed!!

@@ -7,12 +7,10 @@ HEX
 \ general case ,save registers, set Do, arrange registers, combine where necessary, call routine, pull stack etc, note extra pulls to drop stack items at end
 \ Routines roughly in ROM address order as several run into each other.
 \ Some of these routine entry points don't make sense from Forth
-\ Need to swap over the x and ys on stack, but B Registers are tied together, you can't easily use them individually
 \ Sometimes the outreg's I just drop, maybe they could be added back if really needed
 \ DO I NEED TO REVIEW SAVING OF REGISTERS TO TEMP REGISTERS, MAYBE I CAN DO A 2ND PUSH/PULL LIKE SELECT_GAME?
 \ VecFever fast boot switch kills text
 \ Sort out where to put the vector lists
-\ Move out the old tests words into a separate file draw_grid etc
 \ Add timestamp and version to files automatically when saving tho Git.
 \ Fix stack comments e.g. addr, ptr, flag etc.
 \ Mention how key? key drop is used.
@@ -144,7 +142,7 @@ CODE _Draw_VLcs         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,       
 CODE _Draw_VL_ab        __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,   S ,++ ADDD,   Draw_VL_ab     JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \ sf #v addr -- ; addr = vector list in format: rel y, rel x, rel y, rel x, ...
 CODE _Draw_VL_a         __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,   ____D # PULS,   A B EXG,                 Draw_VL_a      JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \    #v addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Draw_VL           __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VL        JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
-CODE _Draw_Line_d       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Draw_Line_d    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \        x y -- ;
+CODE _Draw_Line_d       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,                              A B EXG,   S ,++ ADDD,   Draw_Line_d    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \   x y      -- ;
 CODE _Draw_VLp_FF       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp_FF    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Draw_VLp_7F       __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp_7F    JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used
 CODE _Draw_VLp_scale    __dp_ # PSHU,   D0 # LDX,   X DPR TFR,   D X TFR,                                            Draw_VLp_scale JSR,   ____D # PULS,   __dp_ # PULU,   NEXT ;C \       addr -- ; addr = vector list in format: count, rel y, rel x, rel y, rel x, ...  current scaling factor is used

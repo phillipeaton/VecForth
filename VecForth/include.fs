@@ -12,16 +12,21 @@
 \ 6809 CamelForth (c) 1995 B.J.Rodriguez
 \  described in The Computer Journal, #59,60,62,64,67,69,72
 
-use chromium_ans.scr                      \ Target image gets built in this file
+\ ****************************************************************
+\ To compile target image:
+\ from command prompt: gforth include.fs
+\ from within gforth: include include.fs
+\ ****************************************************************
+
+use image.scr                             \ Target image gets built in this file
                                           \ Vocabualary compiled into:
-include   Chromium\gforth_shim.fs         \
+include   Chromium\gforth_shim.fs         \ Forth
 
 include   Chromium\extensions_vocab.fs    \ ROOT & FORTH
-include   Chromium\image_to_disk.fs       \ META
-include   Chromium\dump_file_output.fs    \ META
 include   Chromium\target_model.fs        \ META
+include   Chromium\dump_file_output.fs    \ META
 include   Chromium\assembler.fs           \ ASSEMBLER
-include   Chromium\metacompiler.fs        \ META but a few jumps to TARGET and one ASSEMBLER
+include   Chromium\metacompiler.fs        \ META with TARGET PRESUMES and ASSEMBLER AKA
 
 include CamelForth\memory_map.fs          \ TARGET but one META
 include CamelForth\presumes.fs
