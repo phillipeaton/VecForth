@@ -189,11 +189,11 @@ ALSO TARGET DEFINITIONS  PRESUME LIT  PREVIOUS DEFINITIONS
 : ,EQU ( - )    @EQU TLITERAL ;
 : EQU  ( n - )   ['] @EQU ['] ,EQU ROT MIRROR ;
 
-VARIABLE DUAL   0 DUAL !            \ true=generate host "dual"
-: DUAL?   DUAL @ TSTATE @ AND ;     \ true if dual & compiling
-TARGET ' DOCREATE ." ->" .s META @ CONSTANT MIRROR-CF    \ F83
-: DUAL, ( xt -- )  DUP @ MIRROR-CF =                     \ F83
-    IF >BODY HOST-EXEC @ THEN  ( xt) COMPILE, ;          \ F83
+\ VARIABLE DUAL   0 DUAL !            \ true=generate host "dual"
+\ : DUAL?   DUAL @ TSTATE @ AND ;     \ true if dual & compiling
+TARGET ' DOCREATE META @ CONSTANT MIRROR-CF                \ F83
+\ : DUAL, ( xt -- )  DUP @ MIRROR-CF =                     \ F83
+\     IF >BODY HOST-EXEC @ THEN  ( xt) COMPILE, ;          \ F83
 
 \ Block 14 -----------------------------------------------------
 \   Meta compiler engine                    F83  (c) 18apr95 bjr
@@ -302,13 +302,14 @@ ALSO TARGET DEFINITIONS  PRESUME DOCOLON IS-CF
 
 : T:   M+HEADER                       \ targ.header & mirror
     [ TARGET ] ['] DOCOLON [ META ] MCOMPILE,   \ build colondef
-    DUAL? IF
-        :NONAME                        \ F83
-        'MIRROR @ HOST-EXEC !          \ start dual definition
-    THEN T] ;
+\     DUAL? IF
+\         :NONAME                        \ F83
+\         'MIRROR @ HOST-EXEC !          \ start dual definition
+\     THEN
+    T] ;
 
 : T;  [ TARGET ] ['] EXIT [ META ] MCOMPILE,   \ compile EXIT
-    DUAL? IF  POSTPONE ; THEN                   \ F83??
+\     DUAL? IF  POSTPONE ; THEN                   \ F83??
      T[ ;
 
 : TIMMEDIATE    (TIMMEDIATE) MIMMEDIATE ;
@@ -347,7 +348,8 @@ VARIABLE TARG-DOES       \ to remember adrs of target DOES code
     THERE TARG-DOES !  T[ ALSO ASSEMBLER ;
 : TDOES>   [ TARGET ] ['] (DOES>) [ META ] MCOMPILE,
     THERE TARG-DOES !   [ TARGET ] DODOES [ META ]
-    DUAL? IF [COMPILE] MDOES> THEN  ;
+\     DUAL? IF [COMPILE] MDOES> THEN
+;
 
 \ Block 18 -----------------------------------------------------
 \   Initial target vocabulary: directives        (c) 18apr95 bjr
@@ -369,18 +371,20 @@ VARIABLE TARG-DOES       \ to remember adrs of target DOES code
 \ CODE  to create a code header and select META ASSEMBLER
 \
 ALSO TARGET DEFINITIONS  META
+
 AKA META META    AKA TARGET TARGET    AKA ASSEMBLER ASSEMBLER
 AKA LOAD LOAD    AKA \ \              AKA \S \S
 AKA CODE CODE    AKA EQU EQU          AKA ;C ;C
 AKA T;CODE ;CODE     AKA BYE BYE
 AKA RESOLVES RESOLVES   AKA ORG ORG   AKA THRU THRU
-AKA [TCOMPILE] [COMPILE]   AKA ( (    AKA ASM: ASM:
+AKA [TCOMPILE] [COMPILE]   AKA ASM: ASM: AKA ( ( \ )
 AKA EMULATES EMULATES      AKA EMULATE: EMULATE:
 AKA ;EMULATE ;EMULATE IMMEDIATE   AKA DICTIONARY DICTIONARY
 AKA PRESUME PRESUME        AKA IS-CF IS-CF   AKA AKA AKA
 
-: +DUAL  DUAL ON ;    : -DUAL  DUAL OFF ;
-: +HEADS HEADS ON ;   : -HEADS HEADS OFF ;
+\ : +DUAL  DUAL ON ;    : -DUAL  DUAL OFF ;
+\ : +HEADS HEADS ON ;   : -HEADS HEADS OFF ;
+
 META
 
 \ Block 19 -----------------------------------------------------
@@ -457,20 +461,22 @@ PREVIOUS DEFINITIONS
 \ Block 23 -----------------------------------------------------
 \ Show mirror words                              (c) 18apr95 bjr
 \
-\ Normally, EVERYONE is 0 and .MIRRORS - executed at the end of
+\ Normally, SHOW-MIRROR is 0 and .MIRRORS - executed at the end of
 \ the build process - only reports unresolved words (which
 \ represent errors).
 \
-\ With EVERYONE set to 1, .MIRRORS reports all of the mirror
+\ With SHOW-MIRROR set to 1, .MIRRORS reports all of the mirror
 \ words. This can be useful for debug of the metacompiler itself
 \ or of errors arising from the addition of new code to CamelForth
 \ itself.
 \
-VARIABLE EVERYONE  1 EVERYONE !  DECIMAL
+VARIABLE SHOW-MIRROR  0 SHOW-MIRROR !
+
+DECIMAL
 
 : .MIRRORS   'MIRROR @
    BEGIN DUP WHILE  ( - ma )
-    DUP FWD-LIST @  EVERYONE @ OR  IF
+    DUP FWD-LIST @  SHOW-MIRROR @ OR  IF
       DUP           CR BODY>           20 .XTID
       DUP           @   ." : value="    5 U.R
       DUP FWD-LIST  @   ."  fwdlist="   5 U.R

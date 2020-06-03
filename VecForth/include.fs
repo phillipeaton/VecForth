@@ -22,11 +22,11 @@ use image.scr                             \ Target image gets built in this file
                                           \ Vocabualary compiled into:
 include   Chromium\gforth_shim.fs         \ Forth
 
-include   Chromium\extensions_vocab.fs    \ ROOT & FORTH
+include   Chromium\extensions_vocab.fs    \ ROOT, FORTH, META
 include   Chromium\target_model.fs        \ META
 include   Chromium\dump_file_output.fs    \ META
 include   Chromium\assembler.fs           \ ASSEMBLER
-include   Chromium\metacompiler.fs        \ META with TARGET PRESUMES and ASSEMBLER AKA
+include   Chromium\metacompiler.fs        \ META, TARGET, ASSEMBLER
 
 include CamelForth\memory_map.fs          \ TARGET but one META
 include CamelForth\presumes.fs
@@ -45,5 +45,5 @@ include CamelForth\latest.fs
 ONLY FORTH ALSO META
 \ HEX E000 2000 HEXFILE 6809.HEX   \ make hex file: start, length, filename )
 HEX 0000 5000 BINFILE 6809.BIN   \ make binary file: start, length, filename )
-.MIRRORS                         \ print undef'd references
+1 SHOW-MIRROR ! .MIRRORS         \ print undef'd references
 BYE                              \ exit back to command prompt

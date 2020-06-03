@@ -28,7 +28,7 @@ HEX 0000 FFFF DICTIONARY ROM  ROM
     CA00 EQU UP-INIT      \ UP must be page aligned.  Stacks,
     CA   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
 
-    C900 EQU DP-INIT      \ starting RAM adrs for dictionary
+    C880 EQU DP-INIT      \ starting RAM adrs for dictionary
    \ Vectrex memory map with 1K RAM: C800-CBFF RAM, Dxx0-DxxF I/O
 
 \  0000 +--------------------+

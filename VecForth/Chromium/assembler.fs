@@ -1,6 +1,6 @@
 HEX
 
-ALSO META ASSEMBLER DEFINITIONS
+ALSO ASSEMBLER DEFINITIONS
 
 \ Block 30 -----------------------------------------------------
 \   6809 assembler: utilities                         01apr15nac

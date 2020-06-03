@@ -59,13 +59,16 @@ CODE NIP     \ x1 x2 -- x2            per stack diagram
 
 CODE TUCK    \ x1 x2 -- x2 x1 x2      per stack diagram
     S 0, LDX,   S 0, STD,   HEX 10 # ( X) PSHS,   NEXT ;C
+
 CODE PICK    \ x2 x1 x0 n -- x2 x1 x0 xn
     ASLB, ROLA,   S D, LDD,           NEXT ;C
 
 CODE >R      \ x --   R: -- x        push to return stack
     6 # ( D) PSHU,   6 # ( D) PULS,   NEXT ;C
+
 CODE R>      \ -- x   R: x --        pop from return stack
     6 # ( D) PSHS,   6 # ( D) PULU,   NEXT ;C
+
 \ \\   6809 DTC: stack operations                   (c) 31mar95 bjr
 CODE R@     \ -- x   R: x -- x   fetch from return stack
     6 # ( D) PSHS,   U 0, LDD,   NEXT ;C
@@ -143,6 +146,7 @@ CODE 2/     \ x1 -- x2              arithmetic right shift
 CODE +!     \ n/u a-addr --         add cell to memory
     D X TFR,   6 # ( D) PULS,   X 0, ADDD,   X 0, STD,
     6 # ( D) PULS,   NEXT ;C
+
 \ \\   6809 DTC: arithmetic operations              (c) 31mar95 bjr
 CODE LSHIFT    \ x1 u -- x2      logical shift left u places
     D X TFR,   6 # ( D) PULS,   X 0, LEAX,   NE IF,
@@ -214,6 +218,7 @@ CODE I        \ -- n   R: sys1 sys2 -- sys1 sys2     loop index
 
 CODE J        \ -- n   R: 4*sys -- 4*sys         2nd loop index
     6 # ( D) PSHS,   U 4 , LDD,   U 6 , SUBD,   NEXT ;C
+
 \ \\   6809 DTC: multiply                                24mar15nac
 CODE UM*      \ u1 u2 -- ud   16*16->32 unsigned multiply
    HEX 16 # ( X,D) PSHS,                    \ push temporary, u2
@@ -242,6 +247,7 @@ CODE UM/MOD      \ ud u1 -- rem quot   32/16->16 divide
    S 4 , LDD,  COMA,  COMB,   \ invert to get true quot in D
    S 2 , LDX,  S 4 , STX,  S 4 , LEAS,   \ save rem, clean stack
    NEXT ;C
+
 \ \\   6809 DTC: block and string operations        (c) 31mar95 bjr
 CODE FILL   \ c-addr u char --    fill mem with char
     HEX 20 # ( Y) PSHU,   30 # ( X,Y) PULS,   \ D=char X=u Y=adr
@@ -287,7 +293,6 @@ CODE SCAN   \ c-addr u c -- c-addr' u'   find matching char
     EQ UNTIL,   THEN,   SKIPDONE BRA,  ;C
 
 \ \\   6809 DTC: system dependencies                (c) 21apr95 bjr
-
 
 \ These words are shorter in CODE than as colon definitions!
 CODE ALIGNED  NEXT ;C               \ a1 -- a2  align address
@@ -373,6 +378,7 @@ EMULATE:  M['] BRANCH T,  T, ;EMULATE   IMMEDIATE
 EMULATE:  M['] ?BRANCH T,  THERE DUP T, ;EMULATE  IMMEDIATE
 
 \ \\   High level: control structures               (c) 21apr95 bjr
+
 \ adrs1 adrs2 ---   resolve WHILE loop
 : REPEAT              SWAP [COMPILE] AGAIN [COMPILE] THEN ;
 EMULATE:  SWAP  M['] BRANCH T,  T,
@@ -388,7 +394,9 @@ EMULATE: M['] (DO) T,  THERE  0 T>L  ;EMULATE  IMMEDIATE
 : LEAVE  ['] UNLOOP COMPILE,    ['] BRANCH ,BRANCH   HERE DUP ,DEST  >L ;
 EMULATE:  M['] UNLOOP T,
     M['] BRANCH T,  THERE DUP T, T>L  ;EMULATE   IMMEDIATE
+
 \ \\   High level: control structures               (c) 21apr95 bjr
+
  \ adrs xt --  L: 0 a1 a2 .. aN --
 : ENDLOOP   ,BRANCH ,DEST       BEGIN L> ?DUP WHILE [COMPILE] THEN REPEAT ;
 
@@ -433,32 +441,31 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
 
 \ \\   High level: arithmetic operators             (c) 31mar95 bjr
 
-\ n -- d   single -> double precision
-: S>D             DUP 0< ;
+: S>D        \ n -- d   single -> double precision
+    DUP 0< ;
 
-\ n1 n2 -- n3   negate n1 if n2 negative
-: ?NEGATE         0< IF NEGATE THEN ;
+: ?NEGATE    \ n1 n2 -- n3   negate n1 if n2 negative
+    0< IF NEGATE THEN ;
 
-\ n1 -- n2      absolute value
-: ABS    DUP ?NEGATE ;
+: ABS        \ n1 -- n2      absolute value
+    DUP ?NEGATE ;
 
-\ d1 -- d2      negate, double precision
-: DNEGATE    SWAP INVERT SWAP INVERT 1 M+ ;
+: DNEGATE    \ d1 -- d2      negate, double precision
+    SWAP INVERT SWAP INVERT 1 M+ ;
 
-\ d1 n -- d2    negate d1 if n negative
-: ?DNEGATE    0< IF DNEGATE THEN ;
+: ?DNEGATE   \ d1 n -- d2    negate d1 if n negative
+    0< IF DNEGATE THEN ;
 
-\ d1 -- d2      absolute value, double precision
-: DABS    DUP ?DNEGATE ;
+: DABS       \ d1 -- d2      absolute value, double precision
+    DUP ?DNEGATE ;
 
 \ \\   High level: arithmetic operators             (c) 31mar95 bjr
 
-\ n1 n2 -- d       signed 16*16->32 multiply
-: M*              2DUP XOR >R    SWAP ABS SWAP ABS UM*    R> ?DNEGATE ;
 
+: M*         \ n1 n2 -- d       signed 16*16->32 multiply
+    2DUP XOR >R    SWAP ABS SWAP ABS UM*    R> ?DNEGATE ;
 
-\ d1 n1 -- n2 n3   symmetric signed division
-: SM/REM
+: SM/REM     \ d1 n1 -- n2 n3   symmetric signed division
     2DUP XOR >R
     OVER >R
     ABS >R DABS R> UM/MOD
@@ -476,35 +483,45 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
 
 : *          \ n1 n2 -- n3        signed multiply
     M* DROP ;
+
 : /MOD       \ n1 n2 -- n3 n4     signed divide/remainder
     >R S>D R> FM/MOD ;
+
 : /          \ n1 n2 -- n3        signed divide
     /MOD NIP ;
 
 \ \\   High level: arithmetic operators             (c) 31mar95 bjr
 : MOD         \ n1 n2 -- n3       signed remainder
     /MOD DROP ;
+
 : */MOD       \ n1 n2 n3 -- n4 n5   n1*n2/n3, remainder&quotient
     >R M* R> FM/MOD ;
+
 : */          \ n1 n2 n3 -- n4      n1*n2/n3
     */MOD NIP ;
 
 : MAX         \ n1 n2 -- n3         signed maximum
     2DUP < IF SWAP THEN DROP ;
+
 : MIN         \ n1 n2 -- n3         signed minimum
     2DUP > IF SWAP THEN DROP ;
 
 \ \\   High level: double operators                 (c) 31mar95 bjr
 : 2@          \ a-addr -- x1 x2     fetch 2 cells
     DUP CELL+ @ SWAP @ ;
+
 : 2!          \ x1 x2 a-addr --     store 2 cells
     SWAP OVER ! CELL+ ! ;
+
 : 2DROP       \ x1 x2 --            drop 2 cells
     DROP DROP ;
+
 : 2DUP        \ x1 x2 -- x1 x2 x1 x2   dup top 2 cells
     OVER OVER ;
+
 : 2SWAP       \ x1 x2 x3 x4 -- x3 x4 x1 x2    per diagram
     ROT >R ROT R> ;
+
 : 2OVER       \ x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2   per diagram
     >R >R 2DUP R> R> 2SWAP ;
 
@@ -512,14 +529,19 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
 HEX
 : COUNT       \ c-addr1 -- c-addr2 u    counted->addr/length
     DUP CHAR+ SWAP C@ ;
+
 : CR          \ --                      output newline
     0D EMIT 0A EMIT ;
+
 : SPACE       \ --                      output a space
     BL EMIT ;
+
 : SPACES      \ u --                    output u spaces
     BEGIN DUP WHILE SPACE 1- REPEAT DROP ;
+
 : UMIN        \ u1 u2 -- u              unsigned minimum
     2DUP U> IF SWAP THEN DROP ;
+
 : UMAX        \ u1 u2 -- u              unsigned maximum
     2DUP U< IF SWAP THEN DROP ;
 
@@ -539,6 +561,7 @@ HEX
     ?DUP IF
         OVER + SWAP DO I C@ EMIT LOOP
     ELSE DROP THEN ;
+
 \ \\   High level: input/output                     (c) 31mar95 bjr
 : (S")        \ -- c-addr u        run-time code for S"
     R> COUNT 2DUP + ALIGN >R ;
@@ -555,53 +578,70 @@ EMULATE:  M['] (S") T,  TS"  ;EMULATE   IMMEDIATE
 : ."          \ --             compile string to print
     [COMPILE] S" ['] TYPE COMPILE, ;
 EMULATE:  M['] (S") T,  TS"  M['] TYPE T,  ;EMULATE  IMMEDIATE
+
 \ \\   High level: numeric output                   (c) 31mar95 bjr
 : UD/MOD      \ ud1 u2 -- u3 ud4     32/16->32 divide
     >R 0 R@ UM/MOD  ROT ROT R> UM/MOD ROT ;
+
 : UD*         \ ud1 u2 -- ud3        32*16->32 multiply
     DUP >R UM* DROP  SWAP R> UM* ROT + ;
+
 : HOLD        \ char --             add char to output string
     -1 HP +!  HP @ C! ;
+
 : <#          \ --                  begin numeric conversion
     PAD HP ! ;
+
 : >DIGIT      \ n -- c              convert to 0..9A..Z
     DUP 9 > 7 AND + 30 + ;
+
 : #           \ ud1 -- ud2          convert 1 digit of output
     BASE @ UD/MOD ROT >DIGIT HOLD ;
+
 : #S          \ ud1 -- ud2          convert remaining digits
     BEGIN # 2DUP OR 0= UNTIL ;
 
 \ \\   High level: numeric output                   (c) 31mar95 bjr
 : #>          \ ud1 -- c-addr u      end conversion, get string
     2DROP HP @ PAD OVER - ;
+
 : SIGN        \ n --                 add minus sign if n<0
     0< IF 2D HOLD THEN ;
+
 : U.          \ u --                 display u unsigned
     <# 0 #S #> TYPE SPACE ;
+
 : .           \ n --                 display n signed
     <# DUP ABS 0 #S ROT SIGN #> TYPE SPACE ;
 : DECIMAL     \ --                   set number base to decimal
     0A BASE ! ;
+
 : HEX         \ --                   set number base to hex
     10 BASE ! ;
 
 \ \\   High level: dictionary management            (c) 31mar95 bjr
 : HERE        \ -- addr              returns dictionary ptr
     DP @ ;
+
 : ALLOT       \ n --             allocate n adr units in dict
     DP +! ;
+
 : ,           \ x --             append cell to dict
     HERE !  1 CELLS ALLOT ;
+
 : C,          \ char --          append char to dict
     HERE C!  1 CHARS ALLOT ;
 
 \ \\   High level: interpreter                      (c) 31mar95 bjr
 : SOURCE      \ -- adr n         current input buffer
     'SOURCE 2@ ;
+
 : /STRING     \ a u n -- a+n u-n           trim string
     ROT OVER + ROT ROT - ;
+
 : >COUNTED    \ src n dst --        copy to counted string
     2DUP C! CHAR+ SWAP CMOVE ;
+
 : WORD        \ char -- c-addr      word delim'd by char
     DUP  SOURCE >IN @ /STRING
     DUP >R   ROT SKIP
@@ -611,11 +651,14 @@ EMULATE:  M['] (S") T,  TS"  M['] TYPE T,  ;EMULATE  IMMEDIATE
     TUCK -
     HERE >COUNTED   HERE
     BL OVER COUNT + C! ;
+
 \ \\   High level: interpreter                           01apr15nac
 : NFA>LFA     \ nfa -- lfa      name adr -> link field
     2 - ;
+
 : NFA>CFA     \ nfa -- cfa      name adr -> code field
     COUNT 3F AND + ;
+
 : IMMED?      \ nfa -- f        fetch immediate flag
     C@ 40 AND ;
 
@@ -641,6 +684,7 @@ EMULATE:  M['] (S") T,  TS"  M['] TYPE T,  ;EMULATE  IMMEDIATE
     DUP IF                      \ if found, check immed status
         NIP DUP NFA>CFA         \ -- nfa xt
         SWAP IMMED?  0= 1 OR  THEN ;
+
 \ \\   High level: interpreter                      (c) 31mar95 bjr
 : LITERAL     \ x --       append numeric literal
     STATE @ IF  ['] LIT COMPILE,  I, THEN ;
@@ -691,6 +735,7 @@ CREATE NUM-BASES 0A ,  10 ,  2 ,  0A ,
     ELSE  2DROP NIP R>
         IF NEGATE THEN -1  \ -- n -1   (ok)
     THEN ;
+
 \ \\   High level: interpreter                      (c) 31mar95 bjr
 : INTERPRET   \ i*x c-addr u -- j*x   interpret given buffer
     'SOURCE 2!  0 >IN !
@@ -707,6 +752,7 @@ CREATE NUM-BASES 0A ,  10 ,  2 ,  0A ,
 : EVALUATE   \ i*x c-addr u -- j*x   interpret string
     0 BLK !  'SOURCE 2@ >R >R  >IN @ >R   INTERPRET
     R> >IN !  R> R> 'SOURCE 2!  ;
+
 \ \\   High level: interpreter                      (c) 07may95 bjr
 : QUIT        \ --   R: i*x --    interpret from keyboard
     L0 LP !  R0 RP!  0 STATE !    \ reset stacks, state
@@ -718,16 +764,21 @@ CREATE NUM-BASES 0A ,  10 ,  2 ,  0A ,
 
 : ABORT       \ i*x --  R: j*x --   clear stack and QUIT
     S0 SP!  QUIT ;
+
 : ?ABORT      \ f c-addr u --       abort and print message
     ROT IF TYPE ABORT THEN 2DROP ;
+
 : ABORT"      \ i*x 0 -- i*x        abort, print inline msg
     [COMPILE] S" ['] ?ABORT COMPILE, ;
 EMULATE:  M['] (S") T,  TS"  M['] ?ABORT T,  ;EMULATE IMMEDIATE
+
 \ \\   High level: interpreter                           24feb16nac
 : '           \ -- xt        find word in dictionary
     BL WORD FIND   0= ABORT" ?" ;
+
 : CHAR        \ -- char      parse ASCII character
     BL WORD 1+ C@ ;
+
 : [CHAR]      \ --           compile character literal
     CHAR  ['] LIT COMPILE,  I, ;  IMMEDIATE
 ( *host action?* )
@@ -741,6 +792,7 @@ EMULATE:  M['] (S") T,  TS"  M['] ?ABORT T,  ;EMULATE IMMEDIATE
         >IN @ DUP 40 MOD 40 SWAP - + >IN ! EXIT
     THEN
     SOURCE >IN ! DROP ; IMMEDIATE
+
 \ \\   High level: compiler                              01apr15nac
 : CREATE      \ --        create an empty definition
     LATEST @ I,             \ link field
@@ -754,6 +806,7 @@ EMULATE:  M['] (S") T,  TS"  M['] ?ABORT T,  ;EMULATE IMMEDIATE
 
 : [           \ --        enter interpretive state
     0 STATE ! ;  IMMEDIATE
+
 : ]           \ --        enter compiling state
     -1 STATE ! ;
 
@@ -761,10 +814,13 @@ EMULATE:  M['] (S") T,  TS"  M['] ?ABORT T,  ;EMULATE IMMEDIATE
 HEX
 : HIDE        \ --        "hide" latest definition
     LATEST @ DUP  IC@ 80 OR SWAP IC! ;
+
 : REVEAL      \ --        "reveal" latest definition
     LATEST @ DUP  IC@ 7F AND SWAP IC! ;
+
 : IMMEDIATE   \ --        make last definition immediate
     LATEST @ DUP  IC@ 40 OR  SWAP IC! ;
+
 : [']         \ --        find word and compile as literal
     '  ['] LIT COMPILE,  I, ;  IMMEDIATE
 
@@ -829,6 +885,7 @@ HEX
 : .B  ( a - a+1 )   DUP C@ .HH SPACE 1+ ;
 : .A  ( a - a+1 )   DUP C@ DUP 20 7F WITHIN 0= IF
   DROP 2E ( . ) THEN EMIT 1+ ;
+
 : DUMP ( a n - )  0 DO CR DUP H. SPACE DUP
     .B .B .B .B .B .B .B .B SPACE .B .B .B .B .B .B .B .B
     DROP SPACE
@@ -850,7 +907,7 @@ ASM: HERE EQU ENTRY   HEX
    ' COLD JMP,   ;C           \ enter top-level Forth word
 
 
-ENTRY ENTRY-ADDR ! \ Insert entry address into Vectrex boot code ********
+ENTRY ENTRY-ADDR ! \ Insert entry address into VECTREX boot code
 
 
 ASM: HERE EQU IRET   RTI,  ;C
