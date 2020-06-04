@@ -19,8 +19,8 @@
 \ ****************************************************************
 
 use image.scr                             \ Target image gets built in this file
-                                          \ Vocabualary compiled into:
-include   Chromium\gforth_shim.fs         \ Forth
+                                          \ Compiled into vocabualary:
+include   Chromium\gforth_shim.fs         \ FORTH
 
 include   Chromium\extensions_vocab.fs    \ ROOT, FORTH, META
 include   Chromium\target_model.fs        \ META
@@ -29,7 +29,7 @@ include   Chromium\assembler.fs           \ ASSEMBLER
 include   Chromium\metacompiler.fs        \ META, TARGET, ASSEMBLER
 
 include CamelForth\memory_map.fs          \ TARGET but one META
-include CamelForth\presumes.fs
+include CamelForth\synonyms.fs
 include    Vectrex\vectrex_equ.fs
 include    Vectrex\cartheader.fs
 include    Vectrex\vecfeverheader.fs
@@ -42,8 +42,9 @@ include    Vectrex\bios_api_tests.fs
 include    Vectrex\vecfever_exit.fs
 include CamelForth\latest.fs
 
+ENTRY ENTRY-ADDR !                 \ Insert entry address into VECTREX boot code
+
 ONLY FORTH ALSO META
-\ HEX E000 2000 HEXFILE 6809.HEX   \ make hex file: start, length, filename )
-HEX 0000 5000 BINFILE 6809.BIN   \ make binary file: start, length, filename )
-1 SHOW-MIRROR ! .MIRRORS         \ print undef'd references
-BYE                              \ exit back to command prompt
+HEX 0000 5000 BINFILE 6809.BIN     \ make binary file: start, length, filename )
+SHOW-MIRROR OFF .MIRRORS           \ print undef'd references
+BYE                                \ exit back to command prompt

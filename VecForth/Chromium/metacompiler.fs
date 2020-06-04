@@ -438,7 +438,6 @@ PREVIOUS DEFINITIONS
 \ Block 21 -----------------------------------------------------
 \ Support for CamelForth DO loops                (c) 25apr95 bjr
 \
-CR ORDER
 CREATE LOOPSTACK  20 CELL * ALLOT
 VARIABLE TLP      LOOPSTACK TLP !       \ target loop stack ptr
 

@@ -29,40 +29,46 @@ HEX 0000 FFFF DICTIONARY ROM  ROM
     CA   EQU UP-INIT-HI   \   TIB, etc. init'd relative to UP.
 
     C880 EQU DP-INIT      \ starting RAM adrs for dictionary
-   \ Vectrex memory map with 1K RAM: C800-CBFF RAM, Dxx0-DxxF I/O
 
-\  0000 +--------------------+
-\       |                    |
-\       | Forth kernel ROM   |
-\       |                    |
-\  8000 +--------------------+
-\       |*     UNMAPPED     *|
-\  C800 +--------------------+
-\       |*RUM RAM (TO C87F) *|
-\  C900 +--------------------+
-\       |Forth RAM dictionary|
-\  C980 +--------------------+
-\       |        TIB         |
-\  CA00 +--------------------+
-\       |     user area      |
-\  CA80 +--------------------+
-\       |  parameter stack |S|
-\  CB00 +--------------------+ Initial SP
-\       |   HOLD,PAD areas   |
-\  CB80 +--------------------+
-\       |    return stack  |U|
-\  CBEA +--------------------+
-\       |*BIOS HOUSEKEEPING *|
-\  CC00 +--------------------+
-\       |*   RAM MIRROR     *|
-\  D000 +--------------------+
-\       |*   6522VIAx128    *|
-\  D800 +--------------------+
-\       |*    DO NOT USE    *|
-\  E000 +--------------------+
-\       |*    MINESTORM     *|
-\  F000 +--------------------+
-\       |*       RUM        *|
-\  FFF0 +--------------------+
-\       |*6809 reset vectors*|
-\  FFFF +--------------------+
+\ Vectrex memory map has 1K RAM: C800-CBFF RAM, Dxx0-DxxF I/O
+\ Lines enclosed with * denotes VECTREX memory map
+\ Without * denotes Forth-related memory map, i.e. ROM and RAM
+\ Stacks grow downwards in memory
+
+\  0000 +---------------------+
+\       |                     |
+\       |  Forth kernel ROM   |
+\       |                     |
+\  8000 +---------------------+
+\       |                     |
+\       |*     UNMAPPED      *|
+\       |                     |
+\  C800 +=====================+
+\       |*   RUM/BIOS RAM    *| Sound reg's, controllers etc
+\  C880 +---------------------+
+\       |Forth RAM dictionary | Newly-compiled words
+\  C980 +---------------------+
+\       |         TIB         | Text Input Buffer
+\  CA00 +---------------------+
+\       |      user area      |
+\  CA80 +---------------------+
+\       |   parameter stack |S|
+\  CB00 +---------------------+ Initial SP
+\       |   HOLD,PAD areas    | Forth working RAM
+\  CB80 +---------------------+
+\       |    return stack   |U|
+\  CBEA +---------------------+ Initial SP
+\       |* BIOS HOUSEKEEPING *| Interrupt vectors
+\  CC00 +=====================+
+\       |*    RAM MIRROR     *|
+\  D000 +=====================+
+\       |*    6522VIAx128    *|
+\  D800 +=====================+
+\       |*    DO NOT USE     *|
+\  E000 +---------------------+
+\       |*     MINESTORM     *|
+\  F000 +---------------------+
+\       |*     RUM/BIOS      *|
+\  FFF0 +---------------------+
+\       |*6809 reset vectors *|
+\  FFFF +---------------------+

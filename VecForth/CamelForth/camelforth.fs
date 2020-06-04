@@ -124,17 +124,17 @@ CODE OR     \ x1 x2 -- x3     logical OR
 CODE XOR    \ x1 x2 -- c3     logical XOR
     S ,+ EORA,   S ,+ EORB,   NEXT ;C
 
-CODE INVERT   \ x1 -- x2       bitwise inversion
+CODE INVERT   \ x1 -- x2      bitwise inversion
     COMA,   COMB,   NEXT ;C
 
 CODE ><       \ x1 -- x2      swap bytes
     A B EXG,   NEXT ;C
 
 \ \\   6809 DTC: arithmetic operations              (c) 31mar95 bjr
-CODE 1+     \ n1/u1 -- n2/u2         add 1 to TOS
+CODE 1+     \ n1/u1 -- n2/u2        add 1 to TOS
     1 # ADDD,   NEXT ;C
 
-CODE 1-     \ n1/u1 -- n2/u2         subtract 1 from TOS
+CODE 1-     \ n1/u1 -- n2/u2        subtract 1 from TOS
     1 # SUBD,   NEXT ;C
 
 CODE 2*     \ x1 -- x2              arithmetic left shift
@@ -187,7 +187,7 @@ CODE U>     \ n1 n2 -- flag     test n1>n2, unsigned
     S ,++ SUBD,   TOSTRUE BLO,   CLRA,   CLRB,   NEXT ;C
 
 \ \\   6809 DTC: branch and loop operations         (c) 31mar95 bjr
-CODE BRANCH   \ --         branch always
+CODE BRANCH   \ --        branch always
     Y 0, LDY,   NEXT ;C
 
 CODE ?BRANCH  \ x --      branch if TOS zero
@@ -526,7 +526,6 @@ HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
     >R >R 2DUP R> R> 2SWAP ;
 
 \ \\   High level: input/output                     (c) 31mar95 bjr
-HEX
 : COUNT       \ c-addr1 -- c-addr2 u    counted->addr/length
     DUP CHAR+ SWAP C@ ;
 
@@ -872,7 +871,7 @@ EMULATES .S
 : COLD        \ -- ; cold start Forth system
 
     UINIT U0 #INIT CMOVE
-    CR ." VecForth v0.04 2020-03-26"
+    CR ." VecForth v0.05 2020-06-05 Phillip Eaton"
     CR ." based on 6809 CamelForth v1.1 2016-03-20"
     CR ." OK-0 " ABORT ;
 
@@ -894,21 +893,11 @@ HEX
 
 \ \\   6809 DTC: reset initialization               (c) 25apr95 bjr
 ASM: HERE EQU ENTRY   HEX
-\   CLRA,  F000 STA,  INCA,  E000 STA,  INCA,  D000 STA,
-\   INCA,  C000 STA,  INCA,  B000 STA,  INCA,  A000 STA,
-\   INCA,  9000 STA,  INCA,  8000 STA,  \ init mem mapping
    UP-INIT-HI # LDA,   A DPR TFR,   \ initial UP
    UP-INIT 100 + # LDS,             \ initial SP
-   UP-INIT 1E9 + # LDU,             \ initial RP - Avoid Vectrex BIOS area
-\   UP-INIT 200 + # LDU,             \ initial RP
-\ Words for Scroungemaster II computer UART initialization
-\   SCCATBL # LDX,  SCCINIT JSR,     \ init serial ports
-\   SCCBTBL # LDX,  SCCINIT JSR,
-   ' COLD JMP,   ;C           \ enter top-level Forth word
-
-
-ENTRY ENTRY-ADDR ! \ Insert entry address into VECTREX boot code
-
+   UP-INIT 1EA + # LDU,             \ initial RP - Avoid Vectrex BIOS area
+   \ Init UAT code goes here if needed
+   ' COLD JMP,   ;C                 \ enter top-level Forth word
 
 ASM: HERE EQU IRET   RTI,  ;C
 HERE  0FFF0 ORG    \ 6809 hardware vectors

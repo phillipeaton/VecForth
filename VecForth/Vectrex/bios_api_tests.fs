@@ -164,7 +164,7 @@ here equ ES_DATA
    key drop
 ;
 
-here equ dot_list
+here equ dots_list
        -50 c, -70 c,  \ seven dots, relative
        -40 c,  10 c,  \ position, Y, X
         0  c,  30 c,
@@ -173,7 +173,7 @@ here equ dot_list
          5 c,  30 c,
        -10 c,  40 c,
 
-here equ dot_list_packet
+here equ dots_list_packet
  ff c,  70 c, -70 c,  \ seven dots, relative
  ff c, -40 c,  10 c,  \ position, Y, X
  ff c,  0  c,  30 c,
@@ -202,11 +202,11 @@ here equ dot_list_packet
       5 pad _Dot_ix_b                   \ dot $40 right, $20 up, with dwell 5
 
       _Reset0Ref
-      dot_list_packet _Dot_List_Reset   \ display dot list, using terminator
+      dots_list_packet _Dot_List_Reset  \ display dot list, using terminator
 
       _Reset0Ref
       6 Vec_Misc_Count c!               \ 7 dots total, starting from 0
-      dot_list _Dot_List                \ display dot list, using counter
+      dots_list _Dot_List               \ display dot list, using counter
 
       key? \ hit a key to exit
    until
