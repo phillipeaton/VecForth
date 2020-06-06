@@ -103,10 +103,10 @@ S" HELLO WORLD" 80 C,
 : ds \ -- ;
    1 Vec_Music_Flag c!
    begin
-\      yankee _Init_Music_chk
-      music4 _Init_Music_chk \ music4 = scramble tune
+      yankee _Init_Music_chk
+\      music4 _Init_Music_chk \ music4 = scramble tune
       _Wait_Recal
-\      _Do_Sound             \ comment out on of the Do_Sound/_x lines to test
+\      _Do_Sound             \ comment out one of the Do_Sound/_x lines to test
        Vec_Snd_Shadow _Do_Sound_x
      key?
    until

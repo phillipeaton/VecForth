@@ -13,3 +13,6 @@
 
 # Textpad text editor workspace file
 *.tws
+
+# Excel temp files
+~$*.xls*

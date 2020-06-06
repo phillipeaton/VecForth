@@ -1,3 +1,104 @@
+\ Yankee tune
+DECIMAL
+HERE EQU yankee
+$FEE8 , $FEB6 ,           \ ADSR and twang address tables, in Vectrex ROM
+2 c, 12 c,
+0 c, 12 c,                \ first byte is a note, to be
+2 c, 12 c,                \ found in vectrex rom, is a
+0 c, 12 c,                \ 64 byte table...
+2 c,  6 c,                \ last byte is length of note
+0 c,  6 c,
+2 c,  6 c,
+0 c,  6 c,
+2 c,  6 c,
+0 c,  6 c,
+2 c, 12 c,
+0 c, 12 c,
+2 c, 12 c,
+0 c, 12 c,
+2 c, 12 c,
+0 c, 12 c,
+2 c,  6 c,
+0 c,  6 c,
+2 c,  6 c,
+0 c,  6 c,
+2 c,  6 c,
+0 c,  6 c,
+2 c,  6 c,
+0 c,  6 c,
+2 c, 12 c,
+0 c, 12 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  2 H+ c,   128 31 H+ c,   31 12 H- c,   12 c, \ a 128 means the next byte is
+128  0 H+ c,   128 33 H+ c,   33 12 H- c,   12 c, \ a note for the next channel
+128  2 H+ c,   128 35 H+ c,   35 12 H- c,   12 c, \ channel...
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  2 H+ c,   128 35 H+ c,   35 12 H- c,   12 c,
+128  0 H+ c,   128 33 H+ c,   33 12 H- c,   12 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  2 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  0 H+ c,   128 33 H+ c,   33 12 H- c,   12 c,
+128  2 H+ c,   128 35 H+ c,   35 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+     2    c,                                12 c,
+128  0 H+ c,   128 30 H+ c,   30 12 H- c,   12 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  2 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  0 H+ c,   128 33 H+ c,   33 12 H- c,   12 c,
+128  2 H+ c,   128 35 H+ c,   35 12 H- c,   12 c,
+128  0 H+ c,   128 36 H+ c,   36 12 H- c,   12 c,
+128  2 H+ c,   128 35 H+ c,   35 12 H- c,   12 c,
+128  0 H+ c,   128 33 H+ c,   33 12 H- c,   12 c,
+128  2 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  0 H+ c,   128 30 H+ c,   30 12 H- c,   12 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  0 H+ c,   128 28 H+ c,   28 12 H- c,   12 c,
+128  2 H+ c,   128 30 H+ c,   30 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+     2    c,                                12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+     2    c,                                12 c,
+128  0 H+ c,   128 28 H+ c,   28 12 H- c,   18 c,
+128 30 H+ c,    30 12 H- c,                 06 c,
+128  2 H+ c,   128 28 H+ c,   28 12 H- c,   12 c,
+128  0 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  2 H+ c,   128 28 H+ c,   28 12 H- c,   12 c,
+128  0 H+ c,   128 30 H+ c,   30 12 H- c,   12 c,
+128  2 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+     0    c,                                12 c,
+128  0 H+ c,   128 26 H+ c,   26 12 H- c,   18 c,
+128 28 H+ c,    28 12 H- c,                 06 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  0 H+ c,   128 24 H+ c,   24 12 H- c,   12 c,
+128  2 H+ c,   128 23 H+ c,   23 12 H- c,   12 c,
+     0    c,                                12 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+     0    c,                                12 c,
+128  2 H+ c,   128 28 H+ c,   28 12 H- c,   18 c,
+128 30 H+ c,    30 12 H- c,                 06 c,
+128  0 H+ c,   128 28 H+ c,   28 12 H- c,   12 c,
+128  2 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  0 H+ c,   128 28 H+ c,   28 12 H- c,   12 c,
+128  2 H+ c,   128 30 H+ c,   30 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  2 H+ c,   128 28 H+ c,   28 12 H- c,   12 c,
+128  0 H+ c,   128 26 H+ c,   26 12 H- c,   12 c,
+128  2 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+128  0 H+ c,   128 30 H+ c,   30 12 H- c,   12 c,
+128  2 H+ c,   128 33 H+ c,   33 12 H- c,   12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+     2    c,                                12 c,
+128  0 H+ c,   128 31 H+ c,   31 12 H- c,   12 c,
+     2    c,                                12 c,
+    19    c,
+   $80    c,    \ $80 is end marker for music
+               \ (high byte set)
+
+\ Commando tune, uncompressed
+hex
 here equ ymlen
    $0100 ,
 here equ ymregs
@@ -260,6 +361,7 @@ here equ ymdata
    $F7 c, $09 c, $8E c, $00 c, $E1 c, $00 c, $10 c, $38 c, $0C c, $08 c, $0D c, \ 254
    $F7 c, $09 c, $1C c, $01 c, $E6 c, $00 c, $10 c, $38 c, $0C c, $08 c, $0D c, \ 255
 
+\ Commando tune, uncompressed, string format terminated with negative value
 here equ ymlen2
    $0020 ,
 here equ ymdata2

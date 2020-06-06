@@ -36,15 +36,15 @@ include    Vectrex\vecfeverheader.fs
 include CamelForth\serial_io.fs
 include CamelForth\camelforth.fs
 include    Vectrex\vector_lists.fs
+include    Vectrex\ym_music_data.fs
 include    Vectrex\bios_api.fs
-include    Vectrex\ym_commando.fs
 include    Vectrex\bios_api_tests.fs
 include    Vectrex\vecfever_exit.fs
 include CamelForth\latest.fs
 
-ENTRY ENTRY-ADDR !                 \ Insert entry address into VECTREX boot code
+entry entry-addr !                 \ Insert entry address into VECTREX boot code
 
-ONLY FORTH ALSO META
-HEX 0000 5000 BINFILE 6809.BIN     \ make binary file: start, length, filename )
-SHOW-MIRROR OFF .MIRRORS           \ print undef'd references
-BYE                                \ exit back to command prompt
+only forth also meta
+hex 0000 5000 binfile 6809.bin     \ make binary file: start, length, filename )
+show-mirror off .mirrors           \ print undef'd references
+bye                                \ exit back to command prompt

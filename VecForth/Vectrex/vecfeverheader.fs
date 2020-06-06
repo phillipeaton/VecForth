@@ -12,7 +12,7 @@ HEX
 \  MAGIC CARTHEADER SECTION
 \       DO NOT CHANGE THIS STRUCT
 \ ***************************************************************************
-HEX
+
 30 ORG
 
 \ T   h     G     S

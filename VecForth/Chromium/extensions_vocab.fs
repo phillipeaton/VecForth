@@ -26,10 +26,8 @@ ROOT DEFINITIONS \ Expand ROOT to include..
    ' ONLY        ALIAS ONLY
    ' BYE         ALIAS BYE
    ' INCLUDE     ALIAS INCLUDE
-\   ' DBG         ALIAS DBG
-\   ' CR          ALIAS CR
-\   ' ."          ALIAS ."
-\   ' BREAK:      ALIAS BREAK:
+   ' +           ALIAS H+   \ Host +
+   ' -           ALIAS H-   \ Host -
 
 \ OFFSET  defines simple data-structure words.
 \ AKA  defines a synonym word.  Usage:  AKA oldword newname
