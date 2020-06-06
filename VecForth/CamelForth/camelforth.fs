@@ -417,22 +417,18 @@ HEX  2 CONSTANT CELL     \ system dependent constant
 
 HEX -80 USER TIB      \ -- a-addr   Terminal Input Buffer
       0 USER U0       \ -- a-addr   current user area adrs
-      2 USER BASE     \ -- a-addr   holds conversion radix
-      4 USER DP       \ -- a-addr   holds dictionary pointer
-      6 USER BLK      \ -- a-addr   holds 0 or blk being int'd
-      8 USER SCR      \ -- a-addr   blk most recently LISTed
-      A USER BLKADRS  \ -- a-addr   two cells: lba2 lba10
-      E USER BSTATE   \ -- a-addr   5 cells: f b0 b1 b2 b3
-     18 USER LATEST   \ -- a-addr   last word in dictionary
+      2 USER >IN      \ -- a-addr   holds offset into TIB
+      4 USER BASE     \ -- a-addr   holds conversion radix
+      6 USER STATE    \ -- a-addr   holds compiler state
+      8 USER DP       \ -- a-addr   holds dictionary pointer
+     0A USER 'SOURCE  \ -- a-addr   two cells: length, address
+     0C USER BLK      \ -- a-addr   probably obselete now
+     10 USER LATEST   \ -- a-addr   last word in dictionary
 
-\ ^-variables from U0 to here initialised by UINIT in scr120 -^
+\ ^-variables from U0 to here initialised by UINIT and TLATEST -^
 
-     1A USER >IN      \ -- a-addr   holds offset into TIB
-     1C USER STATE    \ -- a-addr   holds compiler state
-     1E USER 'SOURCE  \ -- a-addr   two cells: length, address
-     22 USER HP       \ -- a-addr   HOLD pointer
-     24 USER LP       \ -- a-addr   leave-stack pointer
-
+     12 USER HP       \ -- a-addr   HOLD pointer
+     14 USER LP       \ -- a-addr   leave-stack pointer
 
     100 USER S0       \ -- a-addr   end of parameter stack
     128 USER PAD      \ -- a-addr   user PAD buffer/end of hold

@@ -31,7 +31,7 @@ HEX 0000 FFFF DICTIONARY ROM  ROM
     C880 EQU DP-INIT      \ starting RAM adrs for dictionary
 
 \ Vectrex memory map has 1K RAM: C800-CBFF RAM, Dxx0-DxxF I/O
-\ Lines enclosed with * denotes VECTREX memory map
+\ Lines enclosed by * denote VECTREX memory map
 \ Without * denotes Forth-related memory map, i.e. ROM and RAM
 \ Stacks grow downwards in memory
 
@@ -46,7 +46,7 @@ HEX 0000 FFFF DICTIONARY ROM  ROM
 \  C800 +=====================+
 \       |*   RUM/BIOS RAM    *| Sound reg's, controllers etc
 \  C880 +---------------------+
-\       |Forth RAM dictionary | Newly-compiled words
+\       |Forth RAM dictionary |
 \  C980 +---------------------+
 \       |         TIB         | Text Input Buffer
 \  CA00 +---------------------+

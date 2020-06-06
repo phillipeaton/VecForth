@@ -168,160 +168,160 @@ D00E   EQU   VIA_int_enable  \ VIA interrupt enable register
 \ *       7 IER set/clear control
 D00F   EQU   VIA_port_a_nohs \ VIA port A data I/O register (no handshaking)
 
-                             \ DP    Inreg   Outreg  Trashreg
-                             \ ----- ------- ------- --------
-F000   EQU   Cold_Start      \ --            --      --
-F06C   EQU   Warm_Start      \ --            --      --
-F14C   EQU   Init_VIA        \ =D0           DP      D,X
-F164   EQU   Init_OS_RAM     \ =C8           DP      D,X
-F18B   EQU   Init_OS         \ =D0           DP      D,X
-F192   EQU   Wait_Recal      \ =D0           DP      D,X
-F1A2   EQU   Set_Refresh     \ D0                    D
-F1AA   EQU   DP_to_D0        \ =D0           A,DP
-F1AF   EQU   DP_to_C8        \ =C8           A,DP
-F1B4   EQU   Read_Btns_Mask  \ D0    A       A       B,X
-F1BA   EQU   Read_Btns       \ D0            A       B,X
-F1F5   EQU   Joy_Analog      \ D0                    D,X
-F1F8   EQU   Joy_Digital     \ D0                    D,X
-F256   EQU   Sound_Byte      \ D0            X       D
-F259   EQU   Sound_Byte_x    \ D0    A,B,X           D
-F25B   EQU   Sound_Byte_raw  \ D0
-F272   EQU   Clear_Sound     \ D0                    D,X
-F27D   EQU   Sound_Bytes     \ D0    U               D,X,U
-F284   EQU   Sound_Bytes_x   \ D0    X,U             D,X,U
-F289   EQU   Do_Sound        \ D0                    D,X,U
-F28C   EQU   Do_Sound_x      \ D0                    D,X,U
-F29D   EQU   Intensity_1F    \ D0                    D
-F2A1   EQU   Intensity_3F    \ D0                    D
-F2A5   EQU   Intensity_5F    \ D0                    D
-F2A9   EQU   Intensity_7F    \ D0                    D
-F2AB   EQU   Intensity_a     \ D0    A               D
-F2BE   EQU   Dot_ix_b        \ D0    B,X             D
-F2C1   EQU   Dot_ix          \ D0    X               D
-F2C3   EQU   Dot_d           \ D0    A,B             D
-F2C5   EQU   Dot_here        \ D0                    D
-F2D5   EQU   Dot_List        \ D0    X       X       D
-F2DE   EQU   Dot_List_Reset  \ D0    X       X       D
-F2E6   EQU   Recalibrate     \ D0                    D,X
-F2F2   EQU   Moveto_x_7F     \ D0    X               D
-F2FC   EQU   Moveto_d_7F     \ D0    A,B             D
-F308   EQU   Moveto_ix_FF    \ D0    X       X       D
-F30C   EQU   Moveto_ix_7F    \ D0    X       X       D
-F30E   EQU   Moveto_ix_b     \ D0    X,A     X       D
-F310   EQU   Moveto_ix       \ D0    X       X       D
-F312   EQU   Moveto_d        \ D0            A,B     D
-F34A   EQU   Reset0Ref_D0    \ =D0           DP      D
-F34F   EQU   Check0Ref       \ D0                    D
-F354   EQU   Reset0Ref       \ D0                    D
-F35B   EQU   Reset_Pen       \ D0                    D
-F36B   EQU   Reset0Int       \ D0                    D
-F373   EQU   Print_Str_hwyx  \ D0    U       U       D,X
-F378   EQU   Print_Str_yx    \ D0    U       U       D,X
-F37A   EQU   Print_Str_d     \ D0    A,B,U   U       D,X
-F385   EQU   Print_List_hw   \ D0    U       U       D,X
-F38A   EQU   Print_List      \ D0    U       U       D,X
-F38C   EQU   Print_List_chk  \ D0    U       U       D,X
-F391   EQU   Print_Ships_x   \ D0    A,B,X           D,X,U
-F393   EQU   Print_Ships     \ D0    A,B,X           D,X,U
-F3AD   EQU   Mov_Draw_VLc_a  \ D0    X       X       D       count y x y x ...
-F3B1   EQU   Mov_Draw_VL_b   \ D0    B,X     X       D       y x y x ...
-F3B5   EQU   Mov_Draw_VLcs   \ D0    X       X       D       count scale y x ...
-F3B7   EQU   Mov_Draw_VL_ab  \ D0    A,B,X   X       D       y x y x ...
-F3B9   EQU   Mov_Draw_VL_a   \ D0    A,X     X       D       y x y x ...
-F3BC   EQU   Mov_Draw_VL     \ D0    X       X       D       y x y x ...
-F3BE   EQU   Mov_Draw_VL_d   \ D0    D,X     X       D       y x y x ...
-F3CE   EQU   Draw_VLc        \ D0    X       X       D       count y x y x ...
-F3D2   EQU   Draw_VL_b       \ D0    B,X     X       D       y x y x ...
-F3D6   EQU   Draw_VLcs       \ D0    X       X       D       count scale y x ...
-F3D8   EQU   Draw_VL_ab      \ D0    A,B,X   X       D       y x y x ...
-F3DA   EQU   Draw_VL_a       \ D0    A,X     X       D       y x y x ...
-F3DD   EQU   Draw_VL         \ D0    X       X       D       y x y x ...
-F3DF   EQU   Draw_Line_d     \ D0    A,B     X       D       y x y x ...
-F404   EQU   Draw_VLp_FF     \ D0    X       X       D       pat y x ... $01
-F408   EQU   Draw_VLp_7F     \ D0    X       X       D       pat y x ... $01
-F40C   EQU   Draw_VLp_scale  \ D0    X       X       D       scale pat y x ... $01
-F40E   EQU   Draw_VLp_b      \ D0    B,X     X       D       pat y x ... $01
-F410   EQU   Draw_VLp        \ D0    X       X       D       pat y x ... $01
-F434   EQU   Draw_Pat_VL_a   \ D0    A,X     X       D       y x y x ...
-F437   EQU   Draw_Pat_VL     \ D0    X       X       D       y x y x ...
-F439   EQU   Draw_Pat_VL_d   \ D0    D,X     X       D       y x y x ...
-F46E   EQU   Draw_VL_mode    \ D0    X       X       D       mode y x ... $01
-F495   EQU   Print_Str       \ D0    U       U       D,X
-F511   EQU   Random_3        \ --            A
-F517   EQU   Random          \ --            A
-F533   EQU   Init_Music_Buf  \ --                    D,X
-F53F   EQU   Clear_x_b       \ --    B,X     D
-F542   EQU   Clear_C8_RAM    \ --            D,X
-F545   EQU   Clear_x_256     \ --    X       D
-F548   EQU   Clear_x_d       \ --    D,X     D
-F550   EQU   Clear_x_b_80    \ --    B,X     A,B
-F552   EQU   Clear_x_b_a     \ --    A,B,X   B
-F55A   EQU   Dec_3_Counters  \ --            X,B
-F55E   EQU   Dec_6_Counters  \ --            X,B
-F563   EQU   Dec_Counters    \ --    B,X     B
-F56D   EQU   Delay_3         \ --            B               30 cycles
-F571   EQU   Delay_2         \ --            B               25 cycles
-F575   EQU   Delay_1         \ --            B               20 cycles
-F579   EQU   Delay_0         \ --            B               12 cycles
-F57A   EQU   Delay_b         \ --    B       B               5*B + 10 cycles
-F57D   EQU   Delay_RTS       \ --                            5 cycles
-F57E   EQU   Bitmask_a       \ --    A       A       X
-F584   EQU   Abs_a_b         \ --    A,B     A,B
-F58B   EQU   Abs_b           \ --    B       B
-F593   EQU   Rise_Run_Angle  \ C8    A,B     A,B
-F5D9   EQU   Get_Rise_Idx    \ --    A       A,B     X
-F5DB   EQU   Get_Run_Idx     \ --    A       A,B     X
-F5EF   EQU   Get_Rise_Run    \ C8                    D
-F5FF   EQU   Rise_Run_X      \ C8    A,B
-F601   EQU   Rise_Run_Y      \ C8    A,B
-F603   EQU   Rise_Run_Len    \ C8    A,B     A,B
 
-F610   EQU   Rot_VL_ab       \ =C8   A,B,X,U DP,X,U  D       y x y x ...
-F616   EQU   Rot_VL          \ =C8   X,U     DP,X,U  D       y x y x ...
-F61F   EQU   Rot_VL_Mode     \ C8    A,X,U   X,U     D       mode y x ... $01
-F62B   EQU   Rot_VL_M_dft    \ C8    X,U     X,U     D       mode y x ... $01
-F637   EQU   Rot_VL_dft      \ (Needs chceking)
 
-\ F61F   EQU   Rot_VL_Mode_a   \ (Needs chceking)
-\ F62B   EQU   Rot_VL_Mode     \ (Needs chceking)
+F000   EQU   Cold_Start
+F06C   EQU   Warm_Start
+F14C   EQU   Init_VIA
+F164   EQU   Init_OS_RAM
+F18B   EQU   Init_OS
+F192   EQU   Wait_Recal
+F1A2   EQU   Set_Refresh
+F1AA   EQU   DP_to_D0
+F1AF   EQU   DP_to_C8
+F1B4   EQU   Read_Btns_Mask
+F1BA   EQU   Read_Btns
+F1F5   EQU   Joy_Analog
+F1F8   EQU   Joy_Digital
+F256   EQU   Sound_Byte
+F259   EQU   Sound_Byte_x
+F25B   EQU   Sound_Byte_raw
+F272   EQU   Clear_Sound
+F27D   EQU   Sound_Bytes
+F284   EQU   Sound_Bytes_x
+F289   EQU   Do_Sound
+F28C   EQU   Do_Sound_x
+F29D   EQU   Intensity_1F
+F2A1   EQU   Intensity_3F
+F2A5   EQU   Intensity_5F
+F2A9   EQU   Intensity_7F
+F2AB   EQU   Intensity_a
+F2BE   EQU   Dot_ix_b
+F2C1   EQU   Dot_ix
+F2C3   EQU   Dot_d
+F2C5   EQU   Dot_here
+F2D5   EQU   Dot_List
+F2DE   EQU   Dot_List_Reset
+F2E6   EQU   Recalibrate
+F2F2   EQU   Moveto_x_7F
+F2FC   EQU   Moveto_d_7F
+F308   EQU   Moveto_ix_FF
+F30C   EQU   Moveto_ix_7F
+F30E   EQU   Moveto_ix_b
+F310   EQU   Moveto_ix
+F312   EQU   Moveto_d
+F34A   EQU   Reset0Ref_D0
+F34F   EQU   Check0Ref
+F354   EQU   Reset0Ref
+F35B   EQU   Reset_Pen
+F36B   EQU   Reset0Int
+F373   EQU   Print_Str_hwyx
+F378   EQU   Print_Str_yx
+F37A   EQU   Print_Str_d
+F385   EQU   Print_List_hw
+F38A   EQU   Print_List
+F38C   EQU   Print_List_chk
+F391   EQU   Print_Ships_x
+F393   EQU   Print_Ships
+F3AD   EQU   Mov_Draw_VLc_a
+F3B1   EQU   Mov_Draw_VL_b
+F3B5   EQU   Mov_Draw_VLcs
+F3B7   EQU   Mov_Draw_VL_ab
+F3B9   EQU   Mov_Draw_VL_a
+F3BC   EQU   Mov_Draw_VL
+F3BE   EQU   Mov_Draw_VL_d
+F3CE   EQU   Draw_VLc
+F3D2   EQU   Draw_VL_b
+F3D6   EQU   Draw_VLcs
+F3D8   EQU   Draw_VL_ab
+F3DA   EQU   Draw_VL_a
+F3DD   EQU   Draw_VL
+F3DF   EQU   Draw_Line_d
+F404   EQU   Draw_VLp_FF
+F408   EQU   Draw_VLp_7F
+F40C   EQU   Draw_VLp_scale
+F40E   EQU   Draw_VLp_b
+F410   EQU   Draw_VLp
+F434   EQU   Draw_Pat_VL_a
+F437   EQU   Draw_Pat_VL
+F439   EQU   Draw_Pat_VL_d
+F46E   EQU   Draw_VL_mode
+F495   EQU   Print_Str
+F511   EQU   Random_3
+F517   EQU   Random
+F533   EQU   Init_Music_Buf
+F53F   EQU   Clear_x_b
+F542   EQU   Clear_C8_RAM
+F545   EQU   Clear_x_256
+F548   EQU   Clear_x_d
+F550   EQU   Clear_x_b_80
+F552   EQU   Clear_x_b_a
+F55A   EQU   Dec_3_Counters
+F55E   EQU   Dec_6_Counters
+F563   EQU   Dec_Counters
+F56D   EQU   Delay_3
+F571   EQU   Delay_2
+F575   EQU   Delay_1
+F579   EQU   Delay_0
+F57A   EQU   Delay_b
+F57D   EQU   Delay_RTS
+F57E   EQU   Bitmask_a
+F584   EQU   Abs_a_b
+F58B   EQU   Abs_b
+F593   EQU   Rise_Run_Angle
+F5D9   EQU   Get_Rise_Idx
+F5DB   EQU   Get_Run_Idx
+F5EF   EQU   Get_Rise_Run
+F5FF   EQU   Rise_Run_X
+F601   EQU   Rise_Run_Y
+F603   EQU   Rise_Run_Len
 
-F65B   EQU   Xform_Run_a     \ C8    A       A       B
-F65D   EQU   Xform_Run       \ C8            A       B
-F661   EQU   Xform_Rise_a    \ C8    A       A       B
-F663   EQU   Xform_Rise      \ C8            A       B
-F67F   EQU   Move_Mem_a_1    \ --    A,X,U   A,B
-F683   EQU   Move_Mem_a      \ --    A,X,U   A,B
-F687   EQU   Init_Music_chk  \ C8    U               D,X,Y,U
-F68D   EQU   Init_Music      \ C8    U               D,X,Y,U
-F692   EQU   Init_Music_x    \ C8    U               D,X,Y,U
-F7A9   EQU   Select_Game     \ =C8   A,B     DP      D,X,Y
-F835   EQU   Display_Option  \ D0    A,Y             D,X,U
-F84F   EQU   Clear_Score     \ --    X               D
-F85E   EQU   Add_Score_a     \ --    A,X,U           D
-F87C   EQU   Add_Score_d     \ --    D,X,U           D
-F8B7   EQU   Strip_Zeros     \ --    B,X             D
-F8C7   EQU   Compare_Score   \ --    X,U     A       B
-F8D8   EQU   New_High_Score  \ --    X,U             X,U,D
-F8E5   EQU   Obj_Will_Hit_u  \ --    D,X,Y,U C-flag
-F8F3   EQU   Obj_Will_Hit    \ --    D,X,Y,U C-flag
-F8FF   EQU   Obj_Hit         \ --    D,X,Y   C-flag
-F92E   EQU   Explosion_Snd   \ C8    U               D,X
-FF9F   EQU   Draw_Grid_VL    \ D0    X,Y     X,Y     D
+F610   EQU   Rot_VL_ab
+F616   EQU   Rot_VL
+F61F   EQU   Rot_VL_Mode
+F62B   EQU   Rot_VL_M_dft
+F637   EQU   Rot_VL_dft
 
-FD0D   EQU   music1          \
-FD1D   EQU   music2          \
-FD81   EQU   music3          \
-FDD3   EQU   music4          \
-FE38   EQU   music5          \
-FE76   EQU   music6          \
-FEC6   EQU   music7          \
-FEF8   EQU   music8          \
-FF26   EQU   music9          \
-FF44   EQU   musica          \
-FF62   EQU   musicb          \
-FF7A   EQU   musicc          \
-FF8F   EQU   musicd          \
-F9F4   EQU   Char_Table      \
-FBD4   EQU   Char_Table_End  \
+\ F61F   EQU   Rot_VL_Mode_a
+\ F62B   EQU   Rot_VL_Mode
+
+F65B   EQU   Xform_Run_a
+F65D   EQU   Xform_Run
+F661   EQU   Xform_Rise_a
+F663   EQU   Xform_Rise
+F67F   EQU   Move_Mem_a_1
+F683   EQU   Move_Mem_a
+F687   EQU   Init_Music_chk
+F68D   EQU   Init_Music
+F692   EQU   Init_Music_x
+F7A9   EQU   Select_Game
+F835   EQU   Display_Option
+F84F   EQU   Clear_Score
+F85E   EQU   Add_Score_a
+F87C   EQU   Add_Score_d
+F8B7   EQU   Strip_Zeros
+F8C7   EQU   Compare_Score
+F8D8   EQU   New_High_Score
+F8E5   EQU   Obj_Will_Hit_u
+F8F3   EQU   Obj_Will_Hit
+F8FF   EQU   Obj_Hit
+F92E   EQU   Explosion_Snd
+FF9F   EQU   Draw_Grid_VL
+
+FD0D   EQU   music1
+FD1D   EQU   music2
+FD81   EQU   music3
+FDD3   EQU   music4
+FE38   EQU   music5
+FE76   EQU   music6
+FEC6   EQU   music7
+FEF8   EQU   music8
+FF26   EQU   music9
+FF44   EQU   musica
+FF62   EQU   musicb
+FF7A   EQU   musicc
+FF8F   EQU   musicd
+F9F4   EQU   Char_Table
+FBD4   EQU   Char_Table_End
 
 \ END OF FILE

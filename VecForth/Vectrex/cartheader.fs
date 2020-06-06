@@ -1,12 +1,11 @@
-
-\ start of vectrex memory with cartridge name...
+\ start of vectrex memory with cartridge name
 \ ***************************************************************************
 \ VECTREX CART HEADER SECTION
 \ ***************************************************************************
 
 HEX
-\ g         G     C     E           2     0     1     8
-67 C, 20 C, 47 C, 43 C, 45 C, 20 C, 32 C, 30 C, 31 C, 38 C, 80 C,
+\ g         G     C     E           2     0     2     0
+67 C, 20 C, 47 C, 43 C, 45 C, 20 C, 32 C, 30 C, 32 C, 30 C, 80 C,
 FD C, 0D C,             \ Intro Music
 F8 C, 50 C, 20 C, 80 C, \ Height Width etc.
 \ V   E     C     F     O     R     T     H
