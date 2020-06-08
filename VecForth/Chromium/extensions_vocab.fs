@@ -26,8 +26,8 @@ ROOT DEFINITIONS \ Expand ROOT to include..
    ' ONLY        ALIAS ONLY
    ' BYE         ALIAS BYE
    ' INCLUDE     ALIAS INCLUDE
-   ' +           ALIAS H+   \ Host +
-   ' -           ALIAS H-   \ Host -
+   ' +           ALIAS +
+   ' -           ALIAS -
 
 \ OFFSET  defines simple data-structure words.
 \ AKA  defines a synonym word.  Usage:  AKA oldword newname

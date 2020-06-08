@@ -24,7 +24,7 @@ HEX
 \    compiling to disk, this simply prints an error message.
 \ >T T>  move data to and from the target stack (future use).
 \
-DECIMAL 0 CONSTANT BASE-SCREEN  HEX
+0 CONSTANT BASE-SCREEN
 : >< ( n - n)   0 100 UM/MOD  SWAP 100 * + ;
 : VIRTUAL ( a - a)   0 400 UM/MOD BASE-SCREEN + BLOCK + ;
 : TC@ ( a - c)  VIRTUAL C@ ;
@@ -81,7 +81,9 @@ VARIABLE 'TDP  \ dictionary pointer
 : T, ( n)      THERE ?FULL T!  TCELL   TALLOT ;
 : TC, ( n)     THERE ?FULL TC! TCHAR   TALLOT ;
 : ORG ( n)     TDP !  ;
-
+: TSTR" ( - )  22 PARSE TUCK      \ #chars source #chars
+               THERE SWAP >TCMOVE \ #chars
+               TALLOT ;
 
 \ Block 06 -----------------------------------------------------
 \   target threading model            6809 DTC   (c) 17apr95 bjr

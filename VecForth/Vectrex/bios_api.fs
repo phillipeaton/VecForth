@@ -1,4 +1,4 @@
-\ Vectrex Forth Application
+\ Vectrex Forth BIOS Application Programming Interface
 
 HEX
 

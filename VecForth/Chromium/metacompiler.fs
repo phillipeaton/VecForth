@@ -416,6 +416,7 @@ PRESUME C,        EMULATES TC,
 PRESUME HERE      EMULATES THERE
 PRESUME ALLOT     EMULATES TALLOT
 PRESUME CREATE    EMULATES TCREATE
+PRESUME STR"      EMULATES TSTR"
 
 \ Block 20 -----------------------------------------------------
 \   Initial target vocabulary: synonyms          (c) 1

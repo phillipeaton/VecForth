@@ -15,8 +15,7 @@ HEX
 
 30 ORG
 
-\ T   h     G     S
-54 C, 68 C, 47 C, 53 C,             \ magic handshake marker
+STR" ThGS"                          \ magic handshake marker
 HERE EQU v4ecartversion     0001 ,  \ I always have a version
                                     \ in comm. structs
 \ $800 KILLS TEXT \ HERE EQU v4ecartflags       18F0 ,  \ v4e flags:
@@ -70,8 +69,7 @@ HERE EQU v4eStorageLoaded   0000 ,  \ set by v4e: return size for a load
                                     \ at the start shows whether something was
                                     \ loaded via 'populate storage upon start'
 HERE EQU v4eStorageID
-\ T   E     S     T
-54 C, 45 C, 53 C, 54 C,             \ 4 bytes storage identifier
+STR" TEST"                          \ 4 bytes storage identifier
 \
 \ variables for the v4e bank switching, only populated for 'V4EB' carts
 \ or for carts using serial communication

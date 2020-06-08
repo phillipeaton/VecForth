@@ -4,14 +4,10 @@ HEX
 
 \ Uncomment all these for turnkey application i.e. without serial port
 \ : KEY? 0 ;
-\ : KEY 1 ;
-\ : CR ;
 \ : EMIT DROP ;
-\ : U. DROP ;
-\ : .S ;
 
 HERE EQU HELLO-WORLD-STRING
-S" HELLO WORLD" 80 C,
+STR" HELLO WORLD€"
 
 \ Reset and initialization
 \ No test words for cold and warm start, as no params passed just run direct
@@ -157,7 +153,7 @@ here equ ES_DATA
       _Reset0Ref
       $3f -$30 do \ Display a list of 7 HELLO WORLDS with decreasing intensity
          i $40 + _Intensity_a
-         -$45 i HELLO-WORLD-STRING 3 + _Print_Str_d
+         -$45 i HELLO-WORLD-STRING _Print_Str_d
       $11 +loop   \ $11 spaces out the text nicely
       key?
    until

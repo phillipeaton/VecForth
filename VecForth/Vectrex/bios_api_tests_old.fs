@@ -112,7 +112,7 @@
         ." Hello World! "
         I 7 MOD 10 * v4eLEDReg C!
         51 -50 DO
-           J 40 - I HELLO-WORLD-STRING 3 + _Print_Str_d
+           J 40 - I HELLO-WORLD-STRING _Print_Str_d
         LOOP
      20 +LOOP
      CR ." Escape to end, any other to continue"

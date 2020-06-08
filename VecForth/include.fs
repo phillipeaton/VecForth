@@ -28,17 +28,18 @@ include   Chromium\dump_file_output.fs    \ META
 include   Chromium\assembler.fs           \ ASSEMBLER
 include   Chromium\metacompiler.fs        \ META, TARGET, ASSEMBLER
 
-include CamelForth\memory_map.fs          \ TARGET but one META
+include CamelForth\memory_map.fs          \ TARGET
 include CamelForth\synonyms.fs
 include    Vectrex\vectrex_equ.fs
 include    Vectrex\cartheader.fs
 include    Vectrex\vecfeverheader.fs
+include    Vectrex\ym_music_data.fs
+include    Vectrex\vector_lists.fs
 include CamelForth\serial_io.fs
 include CamelForth\camelforth.fs
-include    Vectrex\vector_lists.fs
-include    Vectrex\ym_music_data.fs
 include    Vectrex\bios_api.fs
 include    Vectrex\bios_api_tests.fs
+include    Vectrex\bios_api_tests_old.fs
 include    Vectrex\vecfever_exit.fs
 include CamelForth\latest.fs
 
