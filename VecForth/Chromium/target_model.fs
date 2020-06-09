@@ -81,8 +81,8 @@ VARIABLE 'TDP  \ dictionary pointer
 : T, ( n)      THERE ?FULL T!  TCELL   TALLOT ;
 : TC, ( n)     THERE ?FULL TC! TCHAR   TALLOT ;
 : ORG ( n)     TDP !  ;
-: TSTR" ( - )  22 PARSE TUCK      \ #chars source #chars
-               THERE SWAP >TCMOVE \ #chars
+: TSTR" ( - )  [CHAR] " PARSE TUCK \ #chars source #chars
+               THERE SWAP >TCMOVE  \ #chars
                TALLOT ;
 
 \ Block 06 -----------------------------------------------------
