@@ -1,6 +1,6 @@
 HEX
 
-\ \\   6809 DTC: user area initialization                24feb16nac
+\   6809 DTC: user area initialization                24feb16nac
 DECIMAL 18 CONSTANT #INIT   \ # bytes of user area init data
 
 CREATE UINIT  HEX

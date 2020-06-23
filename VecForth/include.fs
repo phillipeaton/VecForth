@@ -19,6 +19,7 @@
 \ ****************************************************************
 
 use image.scr                             \ Target image gets built in this file
+
                                           \ Compiled into vocabualary:
 include   Chromium\gforth_shim.fs         \ FORTH
 

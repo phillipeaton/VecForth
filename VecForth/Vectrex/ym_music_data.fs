@@ -1,6 +1,8 @@
+\ Sound data for YM Programmable Sound Generator tests
+
 \ Yankee tune
-DECIMAL
-HERE EQU yankee
+decimal
+here equ YANKEE
 $FEE8 , $FEB6 ,           \ ADSR and twang address tables, in Vectrex ROM
 2 c, 12 c,
 0 c, 12 c,                \ first byte is a note, to be
@@ -99,11 +101,11 @@ $FEE8 , $FEB6 ,           \ ADSR and twang address tables, in Vectrex ROM
 
 \ Commando tune, uncompressed
 hex
-here equ ymlen
+here equ YMLEN
    $0100 ,
-here equ ymregs
+here equ YMREGS
    $00 c, $01 c, $02 c, $03 c, $04 c, $05 c, $06 c, $07 c, $08 c, $09 c, $0A c, $ff c,
-here equ ymdata
+here equ YMDATA
    $E0 c, $08 c, $38 c, $02 c, $E1 c, $00 c, $10 c, $38 c, $0F c, $0F c, $0F c, \ 0
    $E0 c, $08 c, $1C c, $01 c, $E1 c, $00 c, $10 c, $38 c, $0F c, $0F c, $0F c, \ 1
    $E0 c, $08 c, $1C c, $01 c, $E1 c, $00 c, $10 c, $38 c, $0F c, $0E c, $0E c, \ 2
@@ -362,9 +364,9 @@ here equ ymdata
    $F7 c, $09 c, $1C c, $01 c, $E6 c, $00 c, $10 c, $38 c, $0C c, $08 c, $0D c, \ 255
 
 \ Commando tune, uncompressed, string format terminated with negative value
-here equ ymlen2
+here equ YMLEN2
    $0020 ,
-here equ ymdata2
+here equ YMDATA2
   $00 c, $E0 c, $01 c, $08 c, $02 c, $38 c, $03 c, $02 c, $04 c, $E1 c, $05 c, $00 c, $06 c, $10 c, $07 c, $38 c, $08 c, $0F c, $09 c, $0F c, $0A c, $0F c, $FF c, \ 0
   $00 c, $E0 c, $01 c, $08 c, $02 c, $1C c, $03 c, $01 c, $04 c, $E1 c, $05 c, $00 c, $06 c, $10 c, $07 c, $38 c, $08 c, $0F c, $09 c, $0F c, $0A c, $0F c, $FF c, \ 1
   $00 c, $E0 c, $01 c, $08 c, $02 c, $1C c, $03 c, $01 c, $04 c, $E1 c, $05 c, $00 c, $06 c, $10 c, $07 c, $38 c, $08 c, $0F c, $09 c, $0E c, $0A c, $0E c, $FF c, \ 2

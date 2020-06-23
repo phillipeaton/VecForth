@@ -1,8 +1,6 @@
-\ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-\ ; this file contains includes for vectrex BIOS functions and variables      ;
-\ ; it was written by Bruce Tomlin, slightly changed by Malban                ;
-\ ; then converted to Forth by Phillip Eaton                                  ;
-\ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+\ This file contains includes for vectrex BIOS functions and variables
+\ it was written by Bruce Tomlin, slightly changed by Malban
+\ then converted to Forth by Phillip Eaton
 
 HEX
 

@@ -1,9 +1,7 @@
-\ start of vectrex memory with cartridge name
-\ ***************************************************************************
-\ VECTREX CART HEADER SECTION
-\ ***************************************************************************
+\ Standard Vectrex cartridge header that must be present at $0000
 
 HEX
+
 STR" g GCE 2020€"
 FD C, 0D C,             \ Intro Music
 F8 C, 50 C, 20 C, 80 C, \ Height Width etc.

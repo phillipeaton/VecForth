@@ -1,3 +1,6 @@
+\ Standard VecFever cartridge header block that must be present at
+\ $0030 for the VecFever to be setup and run correctly
+
 HEX
 
 \ 10 equ v4eRED

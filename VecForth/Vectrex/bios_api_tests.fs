@@ -1,21 +1,58 @@
-\ Vectrex Forth Application
+\ Vectrex Forth BIOS Application Programming Interface Test Words
 
 HEX
 
-\ Uncomment all these for turnkey application i.e. without serial port
-\ : KEY? 0 ;
-\ : EMIT DROP ;
+\ -----------------------------------------------------------------------------
+\ FORTH WORD NAMES
+\
+\ Forth typically uses dash in word names, not underscore like e.g. C,
+\ which is handy for Vectrex Forth programming because anything with an
+\ underscore is easily identifiable as either a Vectrex BIOS call or memory
+\ address. Typically I use upper case name for constants e.g. memory addresses.
+\
+\ CODE COMMENTS
+\
+\ I've commented the first handful of words fully to give you an idea of what's
+\ going on. I don't comment the remaining words to the same degree as it's just
+\ repeating the same. See the CamelForth source files for more info or Google it.
+\ The \ -- ; at the start of a word is a stack comment. Anything before the --
+\ is consumed by the word, anything after the -- is returned by the word.
+\ Where you see a stack comment in the rest of the code, it's showing the stack
+\ contents once that line has completed.
+\
+\ COMMON FORTH WORDS
+\
+\ The test words in this file use a few common Forth words quite often. Note,
+\ all the words below consume parameters from or return results to the S stack:
+\ dump      - Displays memory locations from given address and number of bytes
+\ key?      - Checks terminal input buffer for a key and returns a flag
+\ key       - Key a key from the terminal input buffer and put it on the stack
+\ drop      - Discard the top item off the S stack
+\ do..loop  - Like BASIC for/next loop, refer to the index with 'i'. +loop=step
+\ if        - Not like other languages! If decides based on top of stack boolean
+\ then      - Not like other languages! It's just like Endif in other languages
+\
+\ PAD USAGE
+\
+\ The Forth PAD is an area of RAM that Forth uses for short term storage,
+\ typically for building formatted strings for display. It's handy for stashing
+\ some variables for passing to the Vectrex BIOS routines, e.g. a vector list.
+\ The 'pad' Forth word returns the address of the start of the Pad.
+\ -----------------------------------------------------------------------------
 
-HERE EQU HELLO-WORLD-STRING
-STR" HELLO WORLD€"
 
 \ Reset and initialization
-\ No test words for cold and warm start, as no params passed just run direct
+\ No test words needed for cold and warm start, as no params passed. You can just
+\ run them directly from the command line.
 : inits \ -- ;
   _Init_VIA  _Init_OS_RAM  _Init_OS
 ;
 
 \ Calibration/Vector Reset
+\ Test the various entry points, several of these are a supersets of the other
+\ routines, e.g. the Wait_Recal continues into the Set_Refresh code, which
+\ calls Recalibrate, which calls Reset0Int and Reset0Ref, which continues into
+\ Reset_Pen...you get the idea.
 : c/vr \ -- ;
    _Wait_Recal
    _Set_Refresh
@@ -27,27 +64,29 @@ STR" HELLO WORLD€"
    _Reset0Int
 ;
 
-\ Read Buttons/mask. Display all the bytes that are set by the read.
-\ The u. is displayed on the console at the end of the line as dump includes a CR.
+\ Read Buttons/mask.
+\ Display all the bytes that are set by the read.
+\ The dump command starts by sending a CR to the terminal, so the u. is shown at
+\ the end of the previous line.
 \ The $0033 sets 3 & 4 to NOT be momentary read for _mask, default setting is $FF.
 : rbm begin $33 _Read_Btns_mask u. Vec_Btn_State $10 dump key? until key drop ;
 : rb  begin     _Read_Btns      u. Vec_Btn_State $10 dump key? until key drop ;
 
 \ Joystick read routines
-: jsetup \ -- ; Joystick setup
-   $00   Vec_Joy_Resltn c! \ Set resolution $00=highest, $80=lowest
+: jsetup \ -- ; Joystick setup, used by analog and digital
+   $00   Vec_Joy_Resltn c! \ Set resolution. $00=highest, $80=lowest
    $0103 Vec_Joy_Mux_1_X ! \ Set joystick read routines
-   $0507 Vec_Joy_Mux_2_X ! \   to do X & Y for Joy 1 & 2
+   $0507 Vec_Joy_Mux_2_X ! \   to do X & Y for Joystick 1 & 2
 ;
 
 : jd \ -- ; \ Read Joystick Digital
-   jsetup
+   jsetup           \ Setup which joystick resolution and directions to read
    begin
-      _Joy_Digital
-      Vec_Joy_1_X $10 dump
-      key?
-   until
-   key drop
+      _Joy_Digital          \ Call the Vectrex BIOS routine
+      Vec_Joy_1_X $10 dump  \ Show the memory locations updated by Joy_Digital
+      key?                  \ Returns a true flag if key input at terminal
+   until                    \ Until true i.e. in this case if a key at terminal
+   key drop                 \ get key from terminal buffer and they ignore it
 ;
 
 : ja \ -- ; \ Read Joystick Analogue
@@ -63,58 +102,61 @@ STR" HELLO WORLD€"
 \ Sound_Byte/_x/_raw and Clear_Sound test, i.e. a small music player
 \ ymlen/data/regs loaded from external YM music file
 : sb \ -- ;
-   ymlen @ 0 do         \ for each line of the YM file (j loop)
-      _Wait_Recal       \ one line per 20ms i.e. 50Hz
-      $2A emit          \ show feedback asterisk at terminal
-      $B 0 do           \ store a line of music data to PSG registers (i loop)
-         ymdata j $B * + i + c@       \ -- data ; Get the data byte
-         ymregs i + c@                \ -- data reg# ; Get the register#
+   YMLEN @ 0 do         \ For each line of the YM file (j loop)
+      _Wait_Recal       \ Call Vectrex BIOS routine. One line per 20ms i.e. 50Hz
+      $2A emit          \ Show feedback asterisk at terminal
+      $B 0 do           \ Store a line of music data to PSG registers (i loop)
+         YMDATA j $B * + i + c@       \ -- data ; Get the data byte
+         YMREGS i + c@                \ -- data reg# ; Get the register#
 
-\         _Sound_Byte                  \ -- ; comment out _Sound_byte, _byte_x
-         Vec_Snd_Shadow _Sound_Byte_x \ -- ;  or _byte_raw to test each of them
-\         _Sound_Byte_raw              \ -- ;  individually
+         \ Uncomment out one of these below lines to store the byte to register
+         \ using one of the three different Vectrex BIOS calls
+         \              _Sound_Byte     \ -- ;
+         Vec_Snd_Shadow _Sound_Byte_x   \ -- ;
+         \              _Sound_Byte_raw \ -- ;
 
       loop
       key? if key drop leave then \ exit loop if key pressed
    loop
-   _Clear_Sound         \ set all registers to 0
+   _Clear_Sound         \ Vectrex BIOS call to set all registers to 0
 ;
 
 : sbs \ -- ; Sound_Bytes test, modified version of Sound_Byte test
-   ymlen2 @ 0 do         \ for each line of the YM file (j loop)
+   YMLEN2 @ 0 do         \ for each line of the YM file (j loop)
       _Wait_Recal        \ one line per 20ms i.e. 50Hz
       $2A emit           \ show feedback asterisk at terminal
-      ymdata2 i $17 * +  \ -- data ; Get the next register/data pair data block
+      YMDATA2 i $17 * +  \ -- addr ; Get  next register/data pair data block
 
-                     _Sound_Bytes     \ -- ; comment out _Sound_bytes or _byte_x
-\      Vec_Snd_Shadow _Sound_Bytes_x \ -- ;  line to test each of them
+      \ Uncomment one of these two lines out to use either Vectrex BIOS call
+                       _Sound_Bytes   \ -- ;
+      \ Vec_Snd_Shadow _Sound_Bytes_x \ -- ;
 
       key? if key drop leave then   \ exit loop if key pressed
    loop
    _Clear_Sound          \ set all registers to 0
 ;
 
-\ Do_Sound/_x and Init_music_chk test word, i.e. built-in music and player
-\ Not sure whath Init_Music and Init_Music_dft do, but interface same as _chk
+\ Do_Sound/_x and Init_music_chk test word, i.e. built-in music player
+\ Not sure what Init_Music and Init_Music_dft do, but interface same as _chk
 : ds \ -- ;
-   1 Vec_Music_Flag c!
+   1 Vec_Music_Flag c!          \ Required to make it work
    begin
-      yankee _Init_Music_chk
-\      music4 _Init_Music_chk \ music4 = scramble tune
+      YANKEE _Init_Music_chk    \ Comment one of these two music lines out
+\     music4 _Init_Music_chk    \ music4 = Scramble intro tune in BIOS ROM
       _Wait_Recal
-\      _Do_Sound             \ comment out one of the Do_Sound/_x lines to test
-       Vec_Snd_Shadow _Do_Sound_x
-     key?
+\     _Do_Sound                 \ Comment out one of the Do_Sound/_x lines out
+      Vec_Snd_Shadow _Do_Sound_x
+      key?
    until
    key drop
-   _Clear_Sound             \ set all registers to 0
+   _Clear_Sound                 \ set all registers to 0
 ;
 
 : imb \ -- ; Init_Music_Buf test word
    Vec_Music_Work 10 2A fill    \ Fill buffer so "It's full of stars"
    Vec_Music_Work 10 dump       \ Display buffer full of stars
    _Init_Music_Buf              \ Init buffer
-   Vec_Music_Work 10 dump       \ Buffer now clear, except for reg#6=$3f
+   Vec_Music_Work 10 dump       \ Buffer now clear, except for reg#6=$3F
 ;
 
 here equ ES_DATA
@@ -126,85 +168,71 @@ here equ ES_DATA
       ES_DATA _Explosion_Snd
       _Wait_Recal
       _Do_Sound
-      key? dup if                \ -- flag ;
-         key $20 = if            \ -- flag ; key pressed was space?
-            drop 0               \ -- ff ;
-            -1 Vec_Expl_Flag c!  \ -- ff ; Start (re-)playing sound
+      key? dup if                \ -- flag ; Key pressed?
+         key $20 = if            \ -- flag ; Key pressed was a space?
+            drop 0               \ -- f ; False flag
+            -1 Vec_Expl_Flag c!  \ -- f ; Start (re-)playing sound
          then
       then
    until
 ;
 
-: box \ len_x len_y start_x start_y -- ;
+: box \ len_x len_y start_x start_y -- ; Simple box drawing word
    _Reset0Ref
-   _Moveto_d  \ -- lx ly ;
-   dup 0         _Draw_Line_d
-   over 0 swap   _Draw_Line_d
-   negate 0      _Draw_Line_d
-   negate 0 swap _Draw_Line_d
+   _Moveto_d  \ -- len_x len_y ; Consumes start_x start_y
+   dup 0         _Draw_Line_d   \ -- len_x len_y ;
+   over 0 swap   _Draw_Line_d   \ -- len_x len_y ;
+   negate 0      _Draw_Line_d   \ -- len_x ; Negate makes it draw backwards
+   negate 0 swap _Draw_Line_d   \ -- ;
 ;
+
+here equ HELLO-WORLD-STRING
+str" HELLO WORLD€"  \ str" is custom word to compile chars up to " to ROM, €=$80
 
 : intensity \ -- ; Intensity words test
    begin
       _Wait_Recal
-      _Intensity_7F 7f 7f -$40 -$40 box
-      _Intensity_5F 5f 5f -$30 -$30 box
+      _Intensity_7F 7f 7f -$40 -$40 box \ Draw concentric boxes with decreasing
+      _Intensity_5F 5f 5f -$30 -$30 box \   intensities
       _Intensity_3F 3f 3f -$20 -$20 box
       _Reset0Ref
       $3f -$30 do \ Display a list of 7 HELLO WORLDS with decreasing intensity
          i $40 + _Intensity_a
          -$45 i HELLO-WORLD-STRING _Print_Str_d
-      $11 +loop   \ $11 spaces out the text nicely
+      $11 +loop   \ $11 spaces-out the text nicely
       key?
    until
    key drop
 ;
 
-here equ dots_list
-       -50 c, -70 c,  \ seven dots, relative
-       -40 c,  10 c,  \ position, Y, X
-        0  c,  30 c,
-        40 c,  10 c,
-        10 c,  30 c,
-         5 c,  30 c,
-       -10 c,  40 c,
-
-here equ dots_list_packet
- ff c,  70 c, -70 c,  \ seven dots, relative
- ff c, -40 c,  10 c,  \ position, Y, X
- ff c,  0  c,  30 c,
- ff c,  40 c,  10 c,
- ff c,  10 c,  30 c,
- ff c,   5 c,  30 c,
- ff c, -10 c,  40 c,
- 01 c,                \ list terminator
-
-\ Dot drawing tests. Displays an approximate mirrored version of Ursa Major.
-\  Pad is a Forth temporary store area, mainly used for building strings.
+\ Dot drawing tests.
 : dots \ -- ;
    begin
       _Wait_Recal
-      $40 VIA_t1_cnt_lo c!              \ set scaling factor
-      _Intensity_5F                     \ set intensity, works with dwell
+      $40 VIA_t1_cnt_lo c!   \ Set scaling factor
+      _Intensity_5F          \ Set intensity, works with default dwell value
 
-      _Dot_here                         \ dot in centre of screen
+      \ Display four dots, starting from centre, moving in a line right and up
+      _Dot_here              \ Dot in centre of screen
 
-      $10 8 _Dot_d                      \ dot $10 right, $8 up from previous dot
+      $10 8 _Dot_d           \ Dot $10 right, $8 up from previous dot
 
-      $1020 pad !                       \ setup yx co-ord parameter
-      pad _Dot_ix                       \ dot $20 right, $10 up from previous dot
+      $1020 pad !            \ Setup yx co-ord parameter in pad
+      pad _Dot_ix            \ Dot $20 right, $10 up from previous dot
 
-      $2040 pad !                       \ setup yx co-ord parameter
-      5 pad _Dot_ix_b                   \ dot $40 right, $20 up, with dwell 5
+      $2040 pad !            \ Setup yx co-ord parameter in pad
+      5 pad _Dot_ix_b        \ Dot $40 right, $20 up, with dwell 5
 
+      \ Displays an approximate mirrored version of Ursa Major
       _Reset0Ref
-      dots_list_packet _Dot_List_Reset  \ display dot list, using terminator
+      DOTS_LIST_PACKET _Dot_List_Reset \ Display dot list, using terminator
 
+      \ Displays an approximate mirrored version of Ursa Major, 2nd time
       _Reset0Ref
-      6 Vec_Misc_Count c!               \ 7 dots total, starting from 0
-      dots_list _Dot_List               \ display dot list, using counter
+      6 Vec_Misc_Count c!    \ 7 dots total, starting from 0
+      DOTS_LIST _Dot_List    \ Display dot list, using counter
 
-      key? \ hit a key to exit
+      key?
    until
    key drop
 ;
@@ -215,64 +243,60 @@ here equ dots_list_packet
       _Intensity_5F
 
       \ Use the seven different moveto's to position and then draw seven dots
-      \  in a horizontal line across display.
+      \  in a horizontal line across display. _7F/_FF sets the scale factor
       $4000 pad !  -$4000 pad cell+ !
       pad _Moveto_x_7F _Dot_here
 
       _Reset0Ref
       -$30 $40 _Moveto_d_7F _Dot_here   \ x y on stack
 
-      _Reset0Ref
-      $20F0 pad !
-      pad _Moveto_ix_ff _Dot_here       \ y x in pad
+      _Reset0Ref   $20F0 pad !
+      pad _Moveto_ix_FF _Dot_here       \ y x in pad. _FF so move 20
 
-      _Reset0Ref
-      $40F0 pad !
-      pad _Moveto_ix_7F _Dot_here       \ y x in pad
+      _Reset0Ref   $40F0 pad !
+      pad _Moveto_ix_7F _Dot_here       \ y x in pad. _7F so move 40
 
-      _Reset0Ref
-      $4000 pad !
+      _Reset0Ref   $4000 pad !
       $7F pad _Moveto_ix_b _Dot_here    \ y x in pad
 
-      _Reset0Ref
-      $4010 pad !
+      _Reset0Ref   $4010 pad !
       pad _Moveto_ix _Dot_here          \ y x in pad
 
       _Reset0Ref
       $20 $40 _Moveto_d _Dot_here       \ x y on stack
 
-      key? \ hit a key to exit
+      key?
    until
    key drop
 ;
 
-\                 width  height  rel x, rel y   Char 1 2      3      Terminator
-here equ pstr_hwyx F8 c, 50 c,   70 c, -40 c,   41 c,  42 c,  43 c,  80 c, \ ABC
-here equ pstr_yx                 50 c, -40 c,   44 c,  45 c,  46 c,  80 c, \ DEF
-here equ pstr_d                                 47 c,  48 c,  49 c,  80 c, \ GHI
-here equ pstr                                   4A c,  4B c,  4C c,  80 c, \ JKL
-here equ plist_hw  F8 c, 50 c,  -10 c, -40 c,   4D c,  4E c,  4F c,  80 c, \ MNO
-                   F8 c, 50 c,  -10 c, -00 c,   50 c,  51 c,  52 c,  80 c, \ PQR
-                                                                     00 c, \ List end
-here equ plist                  -30 c, -40 c,   53 c,  54 c,  55 c,  80 c, \ STU
-                                -30 c, -00 c,   56 c,  57 c,  58 c,  80 c, \ VWX
-                                                                     00 c, \ List end
-here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
-                                -50 c, -00 c,   5C c,  5D c,  5E c,  80 c, \ \]^
-                                                                     00 c, \ List end
+\ Print_Str/_List tests, character reference in John Hall RUM disassembly listing
+\                 width  height  rel x, rel y   Chars+Terminator
+here equ PSTR_HWYX F8 c, 50 c,   70 c, -40 c,   str" ABC€"
+here equ PSTR_YX                 50 c, -40 c,   str" DEF€"
+here equ PSTR_D                                 str" GHI€"
+here equ PSTR                                   str" JKL€"
 
-: ps \ -- ; Print tests. Display string for each subroutine call type.
+here equ PLIST_HW  F8 c, 50 c,  -10 c, -40 c,   str" MNO€"
+                   F8 c, 50 c,  -10 c, -00 c,   str" PQR€"   00 c,  \ List end
+here equ PLIST                  -30 c, -40 c,   str" STU€"
+                                -30 c, -00 c,   str" VWX€"   00 c,  \ List end
+here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
+                                -50 c, -00 c,   str" \]^€"   00 c,  \ List end
+
+: ps \ -- ; Print tests. Display string for each subroutine call type
    begin
       _Wait_Recal
       _Intensity_7F
-                                              pstr_hwyx _Print_Str_hwyx \ ABC
-      _Reset0Ref                              pstr_yx   _Print_Str_yx   \ DEF
-      _Reset0Ref                      -$40 30 pstr_d    _Print_Str_d    \ GHI
-      _Reset0Ref   -$40 10 _Moveto_d          pstr      _Print_Str      \ JKL
-      _Reset0Ref                              plist_hw  _Print_List_hw  \ MNO PQR
-      _Reset0Ref                              plist     _Print_List     \ STU VWX
-      _Reset0Ref                              plist_chk _Print_List_chk \ YZ[ \]^
-      key?  \ press a key to end
+                                        PSTR_HWYX _Print_Str_hwyx \ ABC
+      _Reset0Ref                        PSTR_YX   _Print_Str_yx   \ DEF
+      _Reset0Ref   -$40 $30             PSTR_D    _Print_Str_d    \ GHI
+      _Reset0Ref   -$40 $10 _Moveto_d   PSTR      _Print_Str      \ JKL
+
+      _Reset0Ref                        PLIST_HW  _Print_List_hw  \ MNO PQR
+      _Reset0Ref                        PLIST     _Print_List     \ STU VWX
+      _Reset0Ref                        PLIST_CHK _Print_List_chk \ YZ[ \]^
+      key?
    until
    key drop
 ;
@@ -280,114 +304,50 @@ here equ plist_chk              -50 c, -40 c,   59 c,  5A c,  5B c,  80 c, \ YZ[
 \ Print Ships(_x) test word
 \ Includes a dump of $10 bytes before and after the stack as I saw some
 \ comments that Print_Ships BIOS/RUM routine underflows the stack, but it
-\ looks OK to me
+\ looks OK to me from my test.
 : psh \ -- ;
-   cr s0 $10 - $20 dump     \ dump the stack, s0 is base of stack
-   $30a0 pad !              \ store y x coords for _x variant
+   cr s0 $10 - $20 dump     \ Dump the stack, s0 is base address of stack
+   $30a0 pad !              \ Store y x coords for _x variant
 
    begin
       _Wait_Recal
       _Intensity_7F
-      #5  $68      pad _Print_Ships_x  \ #ships ship_char=spaceship ptr_to_xy_coords
+      #5  $68      pad _Print_Ships_x  \ #ships ship_char=spaceship xy_coords_addr
       #10 $69 $a0 -$30 _Print_Ships    \ #ships ship_char=spaceman x y
-      key?  \ press a key to end
+      key?
    until
    key drop
 
-   cr s0 $10 - $20 dump     \ redump the stack, check under stack is same
+   cr s0 $10 - $20 dump     \ Redump the stack, check under stack is same
 ;
 
-here equ plane1
--7f c, -7f c,   \ rel y, rel x, move to start
- 00 c,  6E c,   \ rel y, rel x
- 14 c, -1E c,
- 00 c, -32 c,
- 14 c, -1E c,
--28 c,  00 c,
 
-here equ plane2
- 05 c,  20 c,   \ count, scale
--7f c, -7f c,   \ rel y, rel x, move to start
- 00 c,  6E c,   \ rel y, rel x
- 14 c, -1E c,
- 00 c, -32 c,
- 14 c, -1E c,
--28 c,  00 c,
-
-here equ plane3
- 06 c,          \ count
--7f c, -7f c,   \ rel y, rel x, move to start
- 00 c,  6E c,   \ rel y, rel x
- 14 c, -1E c,
- 00 c, -32 c,
- 14 c, -1E c,
--28 c,  00 c,
-
-: md_reset/move \ y -- ;
-   _Reset0Ref 0 swap _Moveto_d
+: reset/move  \ y-coordinate -- ;
+   _Reset0Ref    0 swap _Moveto_d
+;
+: reset/move2 \ y-coordinate -- ;
+   _Reset0Ref -$7F swap _Moveto_d
 ;
 
-: md \ -- ; Move Draw tests.
+: md \ -- ; Move_Draw tests.
    begin
       _Wait_Recal
       _Intensity_7F
 
        $20 VIA_t1_cnt_lo c! \ Set scaling factor
-       $70 md_reset/move                                 plane3 _Mov_Draw_VLc_a
-       $50 md_reset/move  5 Vec_Misc_Count c!   $20      plane1 _Mov_Draw_VL_b
-       $30 md_reset/move                                 plane2 _Mov_Draw_VLcs
-       $10 md_reset/move                        $20    5 plane1 _Mov_Draw_VL_ab
-      -$10 md_reset/move                               5 plane1 _Mov_Draw_VL_a
-      -$30 md_reset/move  5 Vec_Misc_Count c!            plane1 _Mov_Draw_VL
-      -$50 md_reset/move  5 Vec_Misc_Count c!  -$7f -$7f plane1 _Mov_Draw_VL_d
 
-      key?  \ press a key to end
+       \ Display a plane VL using the seven different Mov_Draw BIOS calls
+       $70 reset/move                                 PLANE3 _Mov_Draw_VLc_a
+       $50 reset/move  5 Vec_Misc_Count c!   $20      PLANE1 _Mov_Draw_VL_b
+       $30 reset/move                                 PLANE2 _Mov_Draw_VLcs
+       $10 reset/move                        $20    5 PLANE1 _Mov_Draw_VL_ab
+      -$10 reset/move                               5 PLANE1 _Mov_Draw_VL_a
+      -$30 reset/move  5 Vec_Misc_Count c!            PLANE1 _Mov_Draw_VL
+      -$50 reset/move  5 Vec_Misc_Count c!  -$7f -$7f PLANE1 _Mov_Draw_VL_d
+
+      key?
    until
    key drop
-;
-
-here equ planeA
- 00 c,  6E c,   \ rel y, rel x
- 14 c, -1E c,
- 00 c, -32 c,
- 14 c, -1E c,
--28 c,  00 c,
-
-here equ planeB
- 04 c,  20 c,   \ count, scale
- 00 c,  6E c,   \ rel y, rel x
- 14 c, -1E c,
- 00 c, -32 c,
- 14 c, -1E c,
--28 c,  00 c,
-
-here equ planeC
- 04 c,          \ count
- 00 c,  6E c,   \ rel y, rel x
- 14 c, -1E c,
- 00 c, -32 c,
- 14 c, -1E c,
--28 c,  00 c,
-
-here equ planeD
- FF c,  00 c,  6E c,   \ rel y, rel x
- FF c,  14 c, -1E c,
- FF c,  00 c, -32 c,
- FF c,  14 c, -1E c,
- FF c, -28 c,  00 c,
- 01 c,
-
-here equ planeE
- 20 c,          \ scale
- FF c,  00 c,  6E c,   \ rel y, rel x
- FF c,  14 c, -1E c,
- FF c,  00 c, -32 c,
- FF c,  14 c, -1E c,
- FF c, -28 c,  00 c,
- 01 c,
-
-: md_reset/move2 \ y -- ;
-   _Reset0Ref -$7F swap _Moveto_d
 ;
 
 \ ;$00 REQUESTS BLANK LINE
@@ -403,34 +363,34 @@ here equ planeE
        $20 VIA_t1_cnt_lo c! \ Set scaling factor
 
       \ Standard vector lists
-       $70 md_reset/move                            planeC _Draw_VLc
-       $50 md_reset/move  4 Vec_Misc_Count c! $20   planeA _Draw_VL_b
-       $30 md_reset/move                            planeB _Draw_VLcs
-       $10 md_reset/move                      $20 4 planeA _Draw_VL_ab
-      -$10 md_reset/move                          4 planeA _Draw_VL_a
-      -$30 md_reset/move  4 Vec_Misc_Count c!       planeA _Draw_VL
+       $70 reset/move                            PLANEC _Draw_VLc
+       $50 reset/move  4 Vec_Misc_Count c! $20   PLANEA _Draw_VL_b
+       $30 reset/move                            PLANEB _Draw_VLcs
+       $10 reset/move                      $20 4 PLANEA _Draw_VL_ab
+      -$10 reset/move                          4 PLANEA _Draw_VL_a
+      -$30 reset/move  4 Vec_Misc_Count c!       PLANEA _Draw_VL
       _Reset0Ref 0 -$7F _Moveto_d             $7F 0        _Draw_Line_d
 
       \ Patterned vector lists
        $F0 Vec_Pattern c!
 
-       $70 md_reset/move2                           planeE _Draw_VLp_scale
-       $50 md_reset/move2                     $20   planeD _Draw_VLp_b
-       $30 md_reset/move2                           planeD _Draw_VLp
+       $70 reset/move2                           PLANEE _Draw_VLp_scale
+       $50 reset/move2                     $20   PLANED _Draw_VLp_b
+       $30 reset/move2                           PLANED _Draw_VLp
 
-       $10 md_reset/move2                         4 planeA _Draw_Pat_VL_a
-      -$10 md_reset/move2 4 Vec_Misc_Count c!       planeA _Draw_Pat_VL
-      -$30 md_reset/move2 4 Vec_Misc_Count c!   0 0 planeB _Draw_Pat_VL_d
-      -$50 md_reset/move2                           planeD _Draw_VL_mode
+       $10 reset/move2                         4 PLANEA _Draw_Pat_VL_a
+      -$10 reset/move2 4 Vec_Misc_Count c!       PLANEA _Draw_Pat_VL
+      -$30 reset/move2 4 Vec_Misc_Count c!   0 0 PLANEB _Draw_Pat_VL_d
+      -$50 reset/move2                           PLANED _Draw_VL_mode
 
        $5F VIA_t1_cnt_lo c! \ Set scaling factor for move
-       _Reset0Ref -$7F  $5F _Moveto_d               planeD _Draw_VLp_7F
+       _Reset0Ref -$7F  $5F _Moveto_d               PLANED _Draw_VLp_7F
        $5F VIA_t1_cnt_lo c! \ Set scaling factor for move
-       _Reset0Ref -$7F -$7F _Moveto_d               planeD _Draw_VLp_FF
+       _Reset0Ref -$7F -$7F _Moveto_d               PLANED _Draw_VLp_FF
 
       \ _Draw_Grid_VL \ Not sure what this is for, seems not well documented
 
-      key?  \ press a key to end
+      key?  \ Press a key to exit
    until
    key drop
 ;
@@ -581,7 +541,7 @@ here equ planeE
          $17 pad _Draw_VL_a
 
       loop
-      key?  \ press a key to end
+      key?  \ Press a key to exit
    until
    key drop
 ;
@@ -601,7 +561,7 @@ here equ planeE
          pad _Draw_VL_mode
 
       loop
-      key?  \ press a key to end
+      key?  \ Press a key to exit
    until
    key drop
 ;
@@ -645,7 +605,7 @@ here equ planeE
       _Intensity_7F
       1 pad         \ -- option_value option_string ;
       _Display_Option
-      key?  \ press a key to end
+      key?  \ Press a key to exit
    until
    key drop
 ;

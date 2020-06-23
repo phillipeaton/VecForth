@@ -1,3 +1,7 @@
+\ Vectrex Forth BIOS Application Programming Interface
+
+HEX
+
 : DT \ -- ; Display turtles using vector list with two different BIOS calls
    BEGIN
       _Wait_Recal

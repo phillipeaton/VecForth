@@ -287,6 +287,7 @@ NFA>LFA  nfa -- lfa        name adr -> link field
 R0     -- a-addr              end of return stack
 REVEAL --              "reveal" latest definition
 S0     -- a-addr           end of parameter stack
+STR"   --                  compile in-line string
 TIBSIZE  -- n                         size of TIB
 U0     -- a-addr           current user area adrs
 UD*    ud1 d2 -- ud3           32*16->32 multiply

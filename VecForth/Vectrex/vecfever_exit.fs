@@ -1,4 +1,6 @@
-\ VecFever Exit to menu
+\ VecFever exit back to menu function
+
+HEX
 
 C8A0 equ ramfunction \ mem for persistent or modified functions
 
