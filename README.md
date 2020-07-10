@@ -70,7 +70,11 @@ OK, let's address this head-on, starting with a few Q&A:
 
 - **Does VecForth run faster than BASIC?**
   
+<<<<<<< HEAD
   I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has significantly more Forth-friendly instructions. In practice, it's clear that Forth is way faster than BASIC.
+=======
+  I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has significantly more Forth-friendly instructions. In practice, it's clear that Forth is way faster than BASIC. 
+>>>>>>> c05a641... Fixing some README.md Markdown warnings.
 
 #### [Back to top](#VecForth)
 
