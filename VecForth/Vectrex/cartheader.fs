@@ -1,4 +1,5 @@
 \ Standard Vectrex cartridge header that must be present at $0000
+\ Copyright (C) 2020 Phillip Eaton <inbox at phillipeaton.com>
 
 HEX
 

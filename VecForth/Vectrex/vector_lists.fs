@@ -115,6 +115,13 @@ here equ PLANEC
  14 c, -1E c,
 -28 c,  00 c,
 
+
+\ Pattened vectorlists. The first column has a patten code, as per below:
+\ ;$00 REQUESTS BLANK LINE
+\ ;$01 DELIMIT
+\ ;$02 IS SOLID LINE
+\ ;$FF ENABLES DOTTED LINE
+
 here equ PLANED
  FF c,  00 c,  6E c,   \ rel y, rel x
  FF c,  14 c, -1E c,

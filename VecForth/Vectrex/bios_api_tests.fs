@@ -1,8 +1,8 @@
 \ Vectrex Forth BIOS Application Programming Interface Test Words
+\ Copyright (C) 2020 Phillip Eaton <inbox at phillipeaton.com>
 
 HEX
 
-\ -----------------------------------------------------------------------------
 \ FORTH WORD NAMES
 \
 \ Forth typically uses dash in word names, not underscore like e.g. C,
@@ -38,17 +38,18 @@ HEX
 \ typically for building formatted strings for display. It's handy for stashing
 \ some variables for passing to the Vectrex BIOS routines, e.g. a vector list.
 \ The 'pad' Forth word returns the address of the start of the Pad.
-\ -----------------------------------------------------------------------------
 
 
-\ Reset and initialization
-\ No test words needed for cold and warm start, as no params passed. You can just
-\ run them directly from the command line.
+\ Reset and initialization ----------------------------------------------------
+
+\ No test words needed for Cold_Start and Warm_Start, as no params passed. You
+\ can just run them directly from the command line.
 : inits \ -- ;
   _Init_VIA  _Init_OS_RAM  _Init_OS
 ;
 
-\ Calibration/Vector Reset
+\ Calibration/Vector Reset ----------------------------------------------------
+
 \ Test the various entry points, several of these are a supersets of the other
 \ routines, e.g. the Wait_Recal continues into the Set_Refresh code, which
 \ calls Recalibrate, which calls Reset0Int and Reset0Ref, which continues into
@@ -63,6 +64,12 @@ HEX
    _Reset_Pen
    _Reset0Int
 ;
+
+\ Set Direct Pointer ----------------------------------------------------------
+
+\ No tests needed, as not needed for Forth.
+
+\ Joystick handling -----------------------------------------------------------
 
 \ Read Buttons/mask.
 \ Display all the bytes that are set by the read.
@@ -86,7 +93,7 @@ HEX
       Vec_Joy_1_X $10 dump  \ Show the memory locations updated by Joy_Digital
       key?                  \ Returns a true flag if key input at terminal
    until                    \ Until true i.e. in this case if a key at terminal
-   key drop                 \ get key from terminal buffer and they ignore it
+   key drop                 \ Get key from terminal buffer and they ignore it
 ;
 
 : ja \ -- ; \ Read Joystick Analogue
@@ -99,6 +106,8 @@ HEX
    key drop
 ;
 
+\ Sound -----------------------------------------------------------------------
+
 \ Sound_Byte/_x/_raw and Clear_Sound test, i.e. a small music player
 \ ymlen/data/regs loaded from external YM music file
 : sb \ -- ;
@@ -110,30 +119,30 @@ HEX
          YMREGS i + c@                \ -- data reg# ; Get the register#
 
          \ Uncomment out one of these below lines to store the byte to register
-         \ using one of the three different Vectrex BIOS calls
+         \   using one of the three different Vectrex BIOS calls
          \              _Sound_Byte     \ -- ;
          Vec_Snd_Shadow _Sound_Byte_x   \ -- ;
          \              _Sound_Byte_raw \ -- ;
 
       loop
-      key? if key drop leave then \ exit loop if key pressed
+      key? if key drop leave then \ Exit loop if key pressed
    loop
    _Clear_Sound         \ Vectrex BIOS call to set all registers to 0
 ;
 
 : sbs \ -- ; Sound_Bytes test, modified version of Sound_Byte test
-   YMLEN2 @ 0 do         \ for each line of the YM file (j loop)
-      _Wait_Recal        \ one line per 20ms i.e. 50Hz
-      $2A emit           \ show feedback asterisk at terminal
+   YMLEN2 @ 0 do         \ For each line of the YM file (j loop)
+      _Wait_Recal        \ One line per 20ms i.e. 50Hz
+      $2A emit           \ Show feedback asterisk at terminal
       YMDATA2 i $17 * +  \ -- addr ; Get  next register/data pair data block
 
       \ Uncomment one of these two lines out to use either Vectrex BIOS call
                        _Sound_Bytes   \ -- ;
       \ Vec_Snd_Shadow _Sound_Bytes_x \ -- ;
 
-      key? if key drop leave then   \ exit loop if key pressed
+      key? if key drop leave then   \ Exit loop if key pressed
    loop
-   _Clear_Sound          \ set all registers to 0
+   _Clear_Sound          \ Set all registers to 0
 ;
 
 \ Do_Sound/_x and Init_music_chk test word, i.e. built-in music player
@@ -149,7 +158,7 @@ HEX
       key?
    until
    key drop
-   _Clear_Sound                 \ set all registers to 0
+   _Clear_Sound                 \ Set all registers to 0
 ;
 
 : imb \ -- ; Init_Music_Buf test word
@@ -176,6 +185,8 @@ here equ ES_DATA
       then
    until
 ;
+
+\ Vector brightness -----------------------------------------------------------
 
 : box \ len_x len_y start_x start_y -- ; Simple box drawing word
    _Reset0Ref
@@ -204,6 +215,8 @@ str" HELLO WORLD€"  \ str" is custom word to compile chars up to " to ROM, €=$80
    until
    key drop
 ;
+
+\ Drawing / Dot ---------------------------------------------------------------
 
 \ Dot drawing tests.
 : dots \ -- ;
@@ -236,6 +249,8 @@ str" HELLO WORLD€"  \ str" is custom word to compile chars up to " to ROM, €=$80
    until
    key drop
 ;
+
+\ Vector beam positioning -----------------------------------------------------
 
 : mt \ -- ; Moveto tests. Display a dot at each moveto position.
    begin
@@ -270,6 +285,8 @@ str" HELLO WORLD€"  \ str" is custom word to compile chars up to " to ROM, €=$80
    key drop
 ;
 
+\ Drawing / String ------------------------------------------------------------
+
 \ Print_Str/_List tests, character reference in John Hall RUM disassembly listing
 \                 width  height  rel x, rel y   Chars+Terminator
 here equ PSTR_HWYX F8 c, 50 c,   70 c, -40 c,   str" ABC€"
@@ -288,6 +305,8 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
    begin
       _Wait_Recal
       _Intensity_7F
+
+      \ Display some text using the seven different Print_Str BIOS calls
                                         PSTR_HWYX _Print_Str_hwyx \ ABC
       _Reset0Ref                        PSTR_YX   _Print_Str_yx   \ DEF
       _Reset0Ref   -$40 $30             PSTR_D    _Print_Str_d    \ GHI
@@ -300,6 +319,8 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
    until
    key drop
 ;
+
+\ Print Ships -----------------------------------------------------------------
 
 \ Print Ships(_x) test word
 \ Includes a dump of $10 bytes before and after the stack as I saw some
@@ -321,6 +342,7 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
    cr s0 $10 - $20 dump     \ Redump the stack, check under stack is same
 ;
 
+\ Drawing / Vector / Move and Draw --------------------------------------------
 
 : reset/move  \ y-coordinate -- ;
    _Reset0Ref    0 swap _Moveto_d
@@ -343,17 +365,14 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
        $10 reset/move                        $20    5 PLANE1 _Mov_Draw_VL_ab
       -$10 reset/move                               5 PLANE1 _Mov_Draw_VL_a
       -$30 reset/move  5 Vec_Misc_Count c!            PLANE1 _Mov_Draw_VL
-      -$50 reset/move  5 Vec_Misc_Count c!  -$7f -$7f PLANE1 _Mov_Draw_VL_d
+      -$50 reset/move  5 Vec_Misc_Count c!  -$7F -$7F PLANE1 _Mov_Draw_VL_d
 
       key?
    until
    key drop
 ;
 
-\ ;$00 REQUESTS BLANK LINE
-\ ;$01 DELIMIT
-\ ;$02 IS SOLID LINE
-\ ;$FF ENABLES DOTTED LINE
+\ Drawing / Vector / Draw only ------------------------------------------------
 
 : draw \ -- ; Draw tests.
    begin
@@ -362,16 +381,16 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
 
        $20 VIA_t1_cnt_lo c! \ Set scaling factor
 
-      \ Standard vector lists
+      \ Display plane VL using the seven different standard Mov_Draw BIOS calls
        $70 reset/move                            PLANEC _Draw_VLc
        $50 reset/move  4 Vec_Misc_Count c! $20   PLANEA _Draw_VL_b
        $30 reset/move                            PLANEB _Draw_VLcs
        $10 reset/move                      $20 4 PLANEA _Draw_VL_ab
       -$10 reset/move                          4 PLANEA _Draw_VL_a
       -$30 reset/move  4 Vec_Misc_Count c!       PLANEA _Draw_VL
-      _Reset0Ref 0 -$7F _Moveto_d             $7F 0        _Draw_Line_d
+      _Reset0Ref 0 -$7F _Moveto_d          $7F 0        _Draw_Line_d
 
-      \ Patterned vector lists
+      \ Display plane VL using the seven different patterned Mov_Draw BIOS calls
        $F0 Vec_Pattern c!
 
        $70 reset/move2                           PLANEE _Draw_VLp_scale
@@ -384,24 +403,30 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
       -$50 reset/move2                           PLANED _Draw_VL_mode
 
        $5F VIA_t1_cnt_lo c! \ Set scaling factor for move
-       _Reset0Ref -$7F  $5F _Moveto_d               PLANED _Draw_VLp_7F
+       _Reset0Ref -$7F  $5F _Moveto_d            PLANED _Draw_VLp_7F
        $5F VIA_t1_cnt_lo c! \ Set scaling factor for move
-       _Reset0Ref -$7F -$7F _Moveto_d               PLANED _Draw_VLp_FF
+       _Reset0Ref -$7F -$7F _Moveto_d            PLANED _Draw_VLp_FF
 
-      \ _Draw_Grid_VL \ Not sure what this is for, seems not well documented
-
-      key?  \ Press a key to exit
+      \ _Draw_Grid_VL \ No API call implementede. Appears to be a prototype VL
+                      \ routine using 4 bits each for x and y coordinates.
+      key?
    until
    key drop
 ;
+
+\ Random number generator -----------------------------------------------------
 
 \ Random(_3) test words. Visually, rand3 looks more random
 : rand  begin cr _random   8 / 1+ 0 do ." *" loop key? until ;
 : rand3 begin cr _random_3 8 / 1+ 0 do ." *" loop key? until ;
 
-: clearxb \ -- ;
-   $1234 pad !  $5678 pad 2 + !                    \ add some data
-   pad $10 dump   1 pad _clear_x_b   pad $10 dump  \ show, clear, show again
+\ Memory Management / Memory clear --------------------------------------------
+
+: clearxb \ -- ; Test word to fill memory black with 0's, up to 2^8 bytes
+   $1234 pad !  $5678 pad cell+ ! \ Add some data
+   pad $10 dump
+   1 pad _clear_x_b         \ 1=2 chars to fill with 0
+   pad $10 dump
 ;
 
 : clearc8 \ -- ; CRASHES FORTH, use FILL instead
@@ -412,50 +437,56 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
 \   $CB00 $100 dump  $CB00 _Clear_x_256  $CB00 $100 dump
 ;
 
-: clearxd \ -- ; Test work to fill memory block with 0's.
-   $1234 pad !  $5678 pad 2 + ! \ add some data
+: clearxd \ -- ; Test word to fill memory block with 0's, up to 2^16 bytes
+   $1234 pad !  $5678 pad cell+ ! \ Add some data
    pad $10 dump
-   1 pad _clear_x_d    \ 1=2 chars to fill with 0
+   1 pad _clear_x_d         \ 1=2 chars to fill with 0
    pad $10 dump
 ;
 
-: clearxb80 \ -- ; Test work to fill memory block with $80's.
-   $1234 pad !  $5678 pad 2 + ! \ add some data
+\ Memory Management / Memory fill ---------------------------------------------
+
+: clearxb80 \ -- ; Test word to fill memory block with $80's.
+   $1234 pad !  $5678 pad cell+ ! \ Add some data
    pad $10 dump
-   1 pad _clear_x_b_80  \ 1=2 chars to fill with $80
+   1 pad _clear_x_b_80      \ 1=2 chars to fill with $80
    pad $10 dump
 ;
 
 : clearxba \ -- ; Test work to fill memory block with bytes.
-   $1234 pad !  $5678 pad 2 + ! \ add some data
+   $1234 pad !  $5678 pad cell+ ! \ Add some data
    pad $10 dump
-   $AA01 pad _clear_x_b_a \ $AA=byte to fill with, $01=2 chars
+   $AA01 pad _clear_x_b_a   \ $AA=byte to fill with, $01=2 chars
    pad $10 dump
 ;
 
+\ Counters --------------------------------------------------------------------
+
 \ Dec_3/6_Counters test. Counters are 8 bit.
 : dec36c \ -- ;
-   6 0 do                         \ for 6 counters
-      _random i Vec_Counters + c! \ store in a random number
+   6 0 do                          \ For 6 counters:
+      _random i Vec_Counters + c!  \ Store in a random number
    loop
-   $ff 0 do                   \ decrement all counters to zero
-      _Dec_3_Counters         \ dec first three
-      _Dec_6_Counters         \ dec all six, thus first three dec'd twice
-      Vec_Counters $10 dump   \ dump the counters to terminal
-      key? if leave then      \ exit on key press
+   $FF 0 do                        \ Decrement all counters to zero
+      _Dec_3_Counters              \ Dec first three
+      _Dec_6_Counters              \ Dec all six, thus first three dec'd twice
+      Vec_Counters $10 dump        \ Dump the counters to terminal
+      key? if leave then           \ Exit on key press
    loop
    key? if key drop then
 ;
 
 \ Decrement Counters test. Decrements 1, then 2, 3, through to 6 counters.
 : decc \ -- ;
-   Vec_Counters 6 $FF fill           \ initialise counters to $ff
-   Vec_Counters $10 dump             \ Display counters
-   6 0 do                            \ Decrement 1 counter, 2 ,3...6
-      i Vec_Counters _Dec_Counters   \
+   Vec_Counters 6 $FF fill         \ Initialise counters to $FF
+   Vec_Counters $10 dump           \ Display counters
+   6 0 do                          \ Decrement 1 counter, 2 ,3...6
+      i Vec_Counters _Dec_Counters \
    loop
-   Vec_Counters $10 dump             \ Display counters again
+   Vec_Counters $10 dump           \ Display counters again
 ;
+
+\ Delay -----------------------------------------------------------------------
 
 \ Delay_n etc test. Probably unlikey to be used by Forth directly.
 : delays \ -- ;
@@ -463,11 +494,15 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
    $FF _Delay_b \ Parameterised general delay
 ;
 
+\ Day to Day / Bitmask --------------------------------------------------------
+
 \ Bitmask_a test. Provide a number 1 to 8, get back the power of 2
 \ Forth alternative is LSHIFT e.g. 1 5 lshift = 32
 : bma \ bit_number -- bit_mask ; \ output gives 1 2 4 8 16 32 64 128
    8 0 do i _Bitmask_a u. loop
 ;
+
+\ Mathematical ----------------------------------------------------------------
 
 : absab \ 2_8-bit_numbers -- 2_8-bit_numbers_absolute ;
    $8080 _abs_a_b u. ;
@@ -475,22 +510,27 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
 : absb \ 8-bit_number -- 8-bit_number_absolute ;
    $80 _abs_b u. ;
 
+\ Vector object handling / Rotating -------------------------------------------
+
+\ Rise_Run_Angle test. Given a Rise length and Run length, Rise_Run_Angle
+\ calculates the angle of the slope to make a triangle in Vectrex degrees.
+\ This test word runs the calculation with $30 pairs of Rise/Run values.
+\ Note 360 degrees = $40 steps for Vectrex
 : rra \ -- ;
    $30 1 do
-      $30 i - i 2dup cr ."  Run " . ."  Rise " .
-      _Rise_Run_Angle $FF and dup ."  Degrees64 " .
-      #360 swap $40 */ ."  Degrees360 " .
+      $30 i - i 2dup cr ."  Run " . ."  Rise " .     \ -- run rise ;
+      _Rise_Run_Angle $FF and dup ."  Degrees64 " .  \ -- degrees64 ; Vectrex degrees
+      #360 swap $40 */ ."  Degrees360 " .            \ -- ; Real world degrees
    loop
-;
-
-: u.r \        \ u width -- ; Display u right-aligned in a field n characters wide.
-  >r <# 0 #s #> r> over - 0 max spaces type
 ;
 
 : sine-wave \ -- ; Display a sine wave to the terminal. Run=Sine, Rise=Cosine
    $80 0 do                             \ 360 degrees = $40 steps for Vectrex
+
+      \ Uncomment either rise or run
       i _get_rise_idx dup cr 4 u.r      \ -- 180sine-val&negative-flags ;
-\      i _get_run_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
+\     i _get_run_idx dup cr 4 u.r       \ -- 180sine-val&negative-flags ;
+
       >< dup 0< if                      \ -- 180sine-val ;
          $FF and negate
       else
@@ -504,49 +544,70 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
 \ C836   EQU   Vec_Angle       \ Angle for rise/run and rotation calculations
 \ C837   EQU   Vec_Run_Index   \ Index pair for run
 \ C839   EQU   Vec_Rise_Index  \ Index pair for rise
-: sincos \ -- ; Puts Sine and Cosine into memory for given angle in memory.
-   Vec_Angle 5 dump   $00 Vec_Angle c!   _Rise_Run_Idx
-   Vec_Angle 5 dump   $08 Vec_Angle c!   _Rise_Run_Idx
-   Vec_Angle 5 dump   $10 Vec_Angle c!   _Rise_Run_Idx
-   Vec_Angle 5 dump
+: sincos \ -- ; Puts Sine and Cosine into memory for given angle in memory
+                                      Vec_Angle 5 dump
+   $00 Vec_Angle c!   _Rise_Run_Idx   Vec_Angle 5 dump
+   $08 Vec_Angle c!   _Rise_Run_Idx   Vec_Angle 5 dump
+   $10 Vec_Angle c!   _Rise_Run_Idx   Vec_Angle 5 dump
 ;
 
-: rrx \ -- ; Not sure what this is for...
+\ Rise_Run_Y. Not sure what this is for, the Malban tutorial text I don't get.
+\ Seems to be explained better in the Vectrex Programmer's Manual Vol II.
+\ Needs some more thinking about before fixing this word to be a bit more useful.
+\ This below Forth word just makes sure the BIOS routine returns some values.
+: rrx \ -- ;
    $40 0 do
       cr i .
       i 1 _Rise_Run_X 5 u.r
    loop
 ;
 
-: rvl \ -- ;
+: rry \ -- ; Rise_Run_Y. See 'rrx'.
+   $40 0 do
+      cr i .
+      i 1 _Rise_Run_Y 5 u.r
+   loop
+;
+
+: rrl \ -- ; Rise_Run_Y. See 'rrx'.
+   $40 0 do
+      cr i .
+      i Vec_Angle c!
+      $100 _Rise_Run_Len 5 u.r
+   loop
+;
+
+: rvl \ -- ; Rotate Vector List. Test out two rotation routines.
    begin
       $40 0 do
          _Wait_Recal
          _Intensity_7F
          $20 VIA_t1_cnt_lo c!  \ Set scaling factor
 
+         \ Setup and perform VL rotation using _Rot_VL BIOS routine
          $17 Vec_Misc_Count c! \ Number of vectors - 1
          i Vec_Angle c!        \ Angle to rotate by
          TURTLE pad _Rot_VL    \ Rotate vector list
 
-         0 -$7f _Moveto_d
+         0 -$7f _Moveto_d      \ Move and draw VL
          $17 pad _Draw_VL_a
 
          _Reset0Ref
 
+         \ Setup and perform VL rotation using _Rot_VL_ab BIOS routine
          $17 i TURTLE pad      \ -- #vectors angle VL_source VL_rotated ;
          _Rot_VL_ab            \ Rotate vector list
 
-         0 $7F _Moveto_d
+         0 $7F _Moveto_d       \ Move and draw VL
          $17 pad _Draw_VL_a
 
       loop
-      key?  \ Press a key to exit
+      key?
    until
    key drop
 ;
 
-: rvlm \ -- ; Rot_VL_M_dft not tested as it'll never be used from Forth
+: rvlm \ -- ; Rot_VL_Mode. Rotate and display VL with mode information.
    begin
       $40 0 do
          _Wait_Recal
@@ -554,45 +615,48 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
          $20 VIA_t1_cnt_lo c!  \ Set scaling factor
          $F0 Vec_Pattern c!    \ Patterned vector lists
 
-         i planeD pad            \ -- vectors angle VL_source VL_rotated ;
-         _Rot_VL_Mode            \ Rotate vector list
+         i planeD pad          \ -- vectors angle VL_source VL_rotated ;
+         _Rot_VL_Mode          \ Rotate vector list
 
          0 $7F _Moveto_d
          pad _Draw_VL_mode
 
       loop
-      key?  \ Press a key to exit
+      key?
    until
    key drop
 ;
 
-\ Not tested, no point in using
-\ _Rot_VL_M_dft
-\
+\ Rot_VL_M_dft not tested as it'll never be used from Forth, because it uses
+\ a pre-existing value is the A register, which is already used by Forth.
 
 : xfruna \ -- ;
    $0000 Vec_Run_Index !
    $20 _Xform_Run_a u.
 ;
 
-\ Not tested yet, need to check what uses them, can find any ASM that does
+\ Not tested yet, need to check what uses them, can't find any ASM that does
 \ _Xform_Run_a
 \ _Xform_Run
 \ _Xform_Rise_a
 \ _Xform_Rise
 
+\ Memory management / Memory copy ---------------------------------------------
+
 : mma1 \ -- ; Test Move_Mem_a(_1)
    $10 0 do i pad i + c! loop            \ Fill start of pad with sequence of numbers
    pad $10 dump                          \ Display start of pad i.e. initial sequence
-   1 pad     pad 8  + _Move_Mem_a_1      \ Copy 2 bytes of pad to address pad+8
-   2 pad 4 + pad $c + _Move_Mem_a        \ Copy 2 bytes of pad to address pad+8
+   1 pad     pad  8 + _Move_Mem_a_1      \ Copy bytes 0 & 1 of pad to pad bytes 8 & 9
+   2 pad 4 + pad $C + _Move_Mem_a        \ Copy bytes 4 & 5 of pad to pad bytes $c & $d
    pad $10 dump                          \ Display start of pad i.e. after moves
 ;
+
+\ Player option ---------------------------------------------------------------
 
 : sg \ -- ; Select_Game, use buttons 1,2 and 3 to choose, 4 to end, 5 second timeout
    3 4                      \ -- #game_versions #players_max ;
    _select_game             \ -- ;
-   Vec_Num_Players 10 dump  \ $c879 = Vec_Num_Players, $c87a = Vec_Num_Game
+   Vec_Num_Players 10 dump  \ $C879 = Vec_Num_Players, $C87A = Vec_Num_Game
 ;
 
 : dopt \ -- ; Display_Option
@@ -605,10 +669,15 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
       _Intensity_7F
       1 pad         \ -- option_value option_string ;
       _Display_Option
-      key?  \ Press a key to exit
+      key?
    until
    key drop
 ;
+
+\ Score -----------------------------------------------------------------------
+
+\ No test word needed for Clear_Score, as no params passed. You
+\ can just run directly from the command line.
 
 : .score \ string_addr -- ; Print a score
    begin
@@ -621,56 +690,57 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
 
 : dump-pad/score pad 10 dump pad .score ;
 
-: addd_dump pad _Add_Score_d dump-pad/score ;
-: adda_dump pad _Add_Score_a dump-pad/score ;
+: addd-dump pad _Add_Score_d dump-pad/score ;
+: adda-dump pad _Add_Score_a dump-pad/score ;
 
-\ Add decimal score to 6 number ascii text score field.
+\ Add decimal score to 6 digit ascii text score field.
 \ BIOS converts decimal score to BCD and then runs _Add_Score_d.
 : scorea \ -- ;
-                         pad 10 dump
-        pad _clear_score dump-pad/score
-   #003 adda_dump
-   #020 adda_dump
-   #100 adda_dump
-   #255 adda_dump
+   pad 10 dump
+   pad _clear_score dump-pad/score
+   #003 adda-dump  \ Add & display various numbers to test boundries
+   #020 adda-dump
+   #100 adda-dump
+   #255 adda-dump
 ;
 
-\ Add BCD score to 6 number ascii text score field.
+\ Add BCD score to 6 digit ascii text score field.
 : scored \ -- ;
    pad 10 dump
    pad _clear_score dump-pad/score
-   $0004 addd_dump
-   $0030 addd_dump
-   $0200 addd_dump
-   $1000 addd_dump
-   $1234 addd_dump
+   $0004 addd-dump  \ Add & display various numbers to test boundries
+   $0030 addd-dump
+   $0200 addd-dump
+   $1000 addd-dump
+   $1234 addd-dump
 ;
 
-: sz \ -- ; Strip Zeroes
-   pad 5 $30 fill
-   $3080 pad 5 + !
+: sz \ -- ; Strip Zeros. Strips leading zeros from score for display.
+   pad 5 $30 fill       \ Set first 5 bytes of pad with ASCII $30 i.e. '0'
+   $3080 pad 5 + !      \ Set sixth byte of pad to '0' and terminate with $80
    dump-pad/score
-   0 pad _Strip_Zeros
+   0 pad _Strip_Zeros   \ First digit to start with and address of score to use
    dump-pad/score
 ;
 
+\ Compare_Scores. Compare two BCD score strings, to determine highest.
 : cs \ -- ;
-   pad     _clear_score
-   pad 8 + _clear_score
+   pad     _clear_score \ Clear up score area 1
+   pad 8 + _clear_score \ Clear up score area 2
 
-   pad 10 dump
-   pad pad 8 + _Compare_Score 4 u.r
+   pad $10 dump
+   pad pad 8 + _Compare_Score 4 u.r     \ No scores, result is a 0
 
-   $31 pad $d + c!
-   pad 10 dump
-   pad pad 8 + _Compare_Score 4 u.r
+   $31 pad $d + c!                      \ Increment second score area
+   pad $10 dump
+   pad pad 8 + _Compare_Score 4 u.r     \ 2nd bigger than 1st, result is a 1
 
-   $32 pad 5 + c!
-   pad 10 dump
-   pad pad 8 + _Compare_Score 4 u.r
+   $32 pad 5 + c!                       \ Increment first score area
+   pad $10 dump
+   pad pad 8 + _Compare_Score 4 u.r     \ 2nd bigger than 1st, result is a 2
 ;
 
-: nhs \ -- ; New_High_Score
+: nhs \ -- ; New_High_Score. Sets high score to score if score is higher.
    pad     _clear_score     \ Score 1
    pad 8 + _clear_score     \ Score 2
 
@@ -681,32 +751,36 @@ here equ PLIST_CHK              -50 c, -40 c,   str" YZ[€"
    pad     pad 8 + _New_High_Score pad 10 dump \ New high score? Yes, set high score = score
 ;
 
-: oh \ -- ; Obj_Hit test
-   $0404 pad !            \ 0404=no_hit
-   $0505 pad $1010 $1A1A  \ -- box_yx  movement_xy_addr  pos_obj_yx  pos_missile_yx
-   _Obj_Will_Hit_u        \ -- f ; f = hit
-   cr .                   \ Display result on a newline
+\ Vector object handling / Object collision detection -------------------------
 
-   $0505 pad !            \ 0505=hit
+\ Obj_Hit test. Use three hit check routines to produce hit and no-hit. Hard to explain how
+\ these work without some diagrams. Malban has some on his VIDE blog.
+: oh \ -- ;
+   $0404 pad !              \ 0404=no_hit
+   $0505 pad $1010 $1A1A    \ -- box_yx  movement_xy_addr  pos_obj_yx  pos_missile_yx
+   _Obj_Will_Hit_u          \ -- flag ; t = hit, f=no-hit
+   cr ." Obj_Will_Hit_u " . \ Display result on a newline
+
+   $0505 pad !              \ 0505=hit
    $0505 pad $1010 $1A1A
    _Obj_Will_Hit_u
-   cr .
+   cr ." Obj_Will_Hit_u " .
 
 
-   $0505 $0404 $1010 $1A1A \ -- box_yx  movement_xy      pos_obj_yx  pos_missile_yx \ 0404=no_hit
+   $0505 $0404 $1010 $1A1A  \ -- box_yx  movement_xy       pos_obj_yx  pos_missile_yx \ 0404=no_hit
    _Obj_Will_Hit
-   cr .
+   cr ." Obj_Will_Hit " .
 
-   $0505 $0505 $1010 $1A1A                                                          \ 0505=hit
+   $0505 $0505 $1010 $1A1A  \ 0505=hit
    _Obj_Will_Hit
-   cr .
+   cr ." Obj_Will_Hit " .
 
 
-   $0505 $1010 $1616       \ -- box_yx                 pos_obj_yx pos_missile_yx    \ 1616=no_hit
+   $0505 $1010 $1616        \ -- box_yx                    pos_obj_yx  pos_missile_yx \ 1616=no_hit
    _Obj_Hit
-   cr .
+   cr ." Obj_Hit " .
 
-   $0505 $1010 $1515                                                                \ 1515=hit
+   $0505 $1010 $1515        \ 1515=hit
    _Obj_Hit
-   cr .
+   cr ." Obj_Hit " .
 ;

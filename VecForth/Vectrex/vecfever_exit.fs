@@ -1,8 +1,9 @@
 \ VecFever exit back to menu function
+\ Copyright (C) Thomas Sontowski
 
 HEX
 
-C8A0 equ ramfunction \ mem for persistent or modified functions
+$C8A0 equ ramfunction \ mem for persistent or modified functions
 
 \ the function below does the magic handshake with the cart,
 \ then waits for the new cart data to appear in the cart address

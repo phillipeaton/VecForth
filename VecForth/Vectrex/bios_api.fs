@@ -1,4 +1,5 @@
 \ Vectrex Forth BIOS Application Programming Interface
+\ Copyright (C) 2020 Phillip Eaton <inbox at phillipeaton.com>
 
 HEX
 
@@ -19,6 +20,8 @@ HEX
 \ E.g. at the end of Wait_Recal, the code then continues into Set_Refresh, which
 \ jumps to Recalibrate, which call various other routines, the order of the
 \ routines can give some clues to this flow and this which routine to call.
+\ The Vectrex Programmer's Manual Vol II documents this, see 'Executive subroutines
+\ Utilized' for each routine.
 \
 \ MALBAN TUTORIALS
 \
@@ -322,12 +325,6 @@ $6E equ UYdpD    $6E equ SYdpD
 \ COSGET  $F5D9   COSINE  Calculate the cosine of 'A'
 \ SINGET  $F5DB   SINE    Calculate the sine of 'A'
 \ SINCOS  $F5EF   ---     Calculate the sine and cosine of 'ANGLE'
-\
-\ RSINA   $F65B   MSINE   Multiply 'A' by previous sine value
-\ RSIN    $F65D   LSINE   Multiply 'LEG' by previous sine value
-\ RCOSA   $F661   MCSINE  Multiply 'A' by previous cosine value
-\ RCOS    $F663   LCSINE  Multiply 'LEG' by previous cosine value
-
 ( COMPAS  $F593 ) CODE _Rise_Run_Angle    __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   A B EXG,   S ,++ ADDD,   Rise_Run_Angle JSR,   __dp_ # PULU,   NEXT ;C \ run  rise -- angle ; angle is from X axis
 ( COSGET  $F5D9 ) CODE _Get_Rise_Idx                                               A B EXG,                 Get_Rise_Idx   JSR,                   NEXT ;C \     angle -- value ; value  A=VALUE,B=SIGN/OVERFLOW
 ( SINGET  $F5DB ) CODE _Get_Run_Idx                                                A B EXG,                 Get_Run_Idx    JSR,                   NEXT ;C \     angle -- value ; value  A=VALUE,B=SIGN/OVERFLOW
@@ -344,6 +341,10 @@ $6E equ UYdpD    $6E equ SYdpD
 ( POTATE  $F622 )
 ( ------- $F62B ) CODE _Rot_VL_M_dft      _Ydp_ # PSHU,   U Y TFR,   D U TFR,   ____D # PULS,   D X TFR,                                            Rot_VL_M_dft JSR,   Y U TFR,   ____D # PULS,   _Ydp_ # PULU,   NEXT ;C \                vl_addr_before vl_addr_after -- ;
 
+\ RSINA   $F65B   MSINE   Multiply 'A' by previous sine value
+\ RSIN    $F65D   LSINE   Multiply 'LEG' by previous sine value
+\ RCOSA   $F661   MCSINE  Multiply 'A' by previous cosine value
+\ RCOS    $F663   LCSINE  Multiply 'LEG' by previous cosine value
 ( RSINA   $F65B ) CODE _Xform_Run_a       __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                   Xform_Run_a  JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \ length --  run_value ; Length for run
 ( RSIN    $F65D ) CODE _Xform_Run         __dp_ # PSHU,   C8 # LDX,   X DPR TFR,   ____D # PSHS,   Xform_Run    JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \        --  run_value ; Length for run already in $C83B Vec_RiseRun_Len
 ( RCOSA   $F661 ) CODE _Xform_Rise_a      __dp_ # PSHU,   C8 # LDX,   X DPR TFR,                   Xform_Rise_a JSR,   CLRB,   A B EXG,   __dp_ # PULU,   NEXT ;C \ length -- rise_value ; Length for rise

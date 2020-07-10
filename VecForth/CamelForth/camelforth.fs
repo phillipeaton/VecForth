@@ -603,11 +603,22 @@ EMULATE:  M['] (S") T,  TS"  M['] TYPE T,  ;EMULATE  IMMEDIATE
 : SIGN        \ n --                 add minus sign if n<0
     0< IF 2D HOLD THEN ;
 
+: (U.) <# 0 #S #> ;
+
+: U.R \       \ u w  -- ;            display u unsigned right-aligned in field n chars wide
+    >R (U.) R> OVER - 0 MAX SPACES TYPE ;
+
 : U.          \ u --                 display u unsigned
-    <# 0 #S #> TYPE SPACE ;
+    (U.) TYPE SPACE ;
+
+: (.) <# DUP ABS 0 #S ROT SIGN #> ;
+
+: .R          \ n w -- ;             display n signed right-aligned in field n chars wide
+    >R (.) R> OVER - 0 MAX SPACES TYPE ;
 
 : .           \ n --                 display n signed
-    <# DUP ABS 0 #S ROT SIGN #> TYPE SPACE ;
+    (.) TYPE SPACE ;
+
 : DECIMAL     \ --                   set number base to decimal
     0A BASE ! ;
 

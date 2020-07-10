@@ -1,6 +1,6 @@
 \ ***************************************************************************************
 \ This file provided by Neal Crook for enabling the Chromium cross compiler to work using
-\ Gforth instead of F83, plus some issues issues he found in teh process of doing so.
+\ Gforth instead of F83, plus some issues issues he found in the process of doing so.
 \ ***************************************************************************************
 
 
