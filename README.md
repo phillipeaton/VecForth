@@ -70,15 +70,7 @@ OK, let's address this head-on, starting with a few Q&A:
 
 - **Does VecForth run faster than BASIC?**
   
-<<<<<<< HEAD
-<<<<<<< HEAD
-  I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has significantly more Forth-friendly instructions. In practice, it's clear that Forth is way faster than BASIC.
-=======
-  I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has significantly more Forth-friendly instructions. In practice, it's clear that Forth is way faster than BASIC. 
->>>>>>> c05a641... Fixing some README.md Markdown warnings.
-=======
   I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has two and significantly more Forth-friendly instructions. In practice, once you start using Forth, it becomes clear that it's way faster than BASIC.
->>>>>>> 1a02462... README.md internal URL tweaks and text updates.
 
 #### [Back to top](#VecForth)
 
@@ -211,7 +203,7 @@ See how VecForth made it to where it is today. More to follow, when time permits
 - [Vectrex Programming with Forth - Part 1 - Intro to Vectrex, Forth and the Project](https://www.youtube.com/watch?v=0_OprEzRG2s)
 - [Vectrex Programming with Forth - Part 2 - Working with the Vectrex Memory Map](https://www.youtube.com/watch?v=N6mMw1WpcoE)
 - [Vectrex Programming with Forth - Part 3 - It's Alive!](https://www.youtube.com/watch?v=8J-r_Sr9AYY)
-- [Vectrex Programming with Forth - Part 4 - Porting a Game - 2048]([https://www.youtube.com/watch?v=o89QMOgPuug](https://www.youtube.com/watch?v=o89QMOgPuug))
+- [Vectrex Programming with Forth - Part 4 - Porting a Game - 2048](https://www.youtube.com/watch?v=o89QMOgPuug)
 
 #### [Back to top](#VecForth)
 
