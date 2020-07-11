@@ -219,6 +219,8 @@ See how VecForth made it to where it is today. More to follow, when time permits
 
 - **VecForth**
   
+  - Reintroduce the option to create a `.cnt` symbol file for the VIDE debugger.
+  
   - Implement `?DO` and the `CASE` statement, which will allow easier portability of programs to run with VecForth
   
   - Improve the number recogniser so that `$-10` ond `-$10` would both be recognised and add a character recogniser
