@@ -4,8 +4,8 @@ Vectrex Forth is a port of Brad Rodriguez' CamelForth/6809 to the Vectrex video 
 
 1. [Introduction](#Introduction)
 1. [What Can You Do With It?](#What-Can-You-Do-With-It)
-1. [How About Performance?](#How-About-Performance?)
-1. [Can I Write My Game In It?](#Can-I-Write-My-Game-In-It?)
+1. [How About Performance?](#How-About-Performance)
+1. [Can I Write My Game In It?](#Can-I-Write-My-Game-In-It)
 1. [Repository Contents](#Repository-Contents)
 1. [Hardware Requirements](#Hardware-Requirements)
 1. [Getting Started](#Getting-Started)
@@ -62,7 +62,7 @@ OK, let's address this head-on, starting with a few Q&A:
 
 - **Does VecForth run as fast as C on the Vectrex?**
   
-  Maybe, but probably not. VecForth is non-commercial "Direct Threaded Code" (DTC) compiler, so code probably will not be as fast as compiled C for the Vectrex, unless you add some optimisations. How much faster or slower, I really don't know yet, I haven't tried it - I'm guessing. With it's two hardware stacks and opcodes to use them, the 6809 is particularly suitable for Forth, but my money is still on C running faster. I look forward to finding out!
+  Maybe, but probably not. VecForth is non-commercial "Direct Threaded Code" (DTC) compiler, so code probably will not be as fast as compiled C for the Vectrex, unless you add some optimisations. How much faster or slower, I really don't know yet, I haven't tried it - I'm just making educated guesses. With it's two hardware stacks and opcodes to use them, the 6809 is particularly suitable for Forth, but my money is still on C running faster. I look forward to finding out!
 
 - **Forth has an interactive command prompt, like BASIC. Does it use an interpreter, like BASIC, or does it compile code, like C?**
   
@@ -71,10 +71,14 @@ OK, let's address this head-on, starting with a few Q&A:
 - **Does VecForth run faster than BASIC?**
   
 <<<<<<< HEAD
+<<<<<<< HEAD
   I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has significantly more Forth-friendly instructions. In practice, it's clear that Forth is way faster than BASIC.
 =======
   I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has significantly more Forth-friendly instructions. In practice, it's clear that Forth is way faster than BASIC. 
 >>>>>>> c05a641... Fixing some README.md Markdown warnings.
+=======
+  I haven't done any substantial tests of my own, but if you believe the tag line of the 1980's Jupiter Ace home computer advert, then Forth is "10 times faster and 4 times more compact than BASIC". The Jupiter Ace used a Z80 CPU, which has only one stack, the 6809 CPU has two and significantly more Forth-friendly instructions. In practice, once you start using Forth, it becomes clear that it's way faster than BASIC.
+>>>>>>> 1a02462... README.md internal URL tweaks and text updates.
 
 #### [Back to top](#VecForth)
 
