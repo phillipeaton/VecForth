@@ -190,12 +190,18 @@ This section assumes you know your way around a PC a little bit and how to setup
 1. **Boot the VecForth system**
 
    If you managed the above steps on the VecFever and the PC Tera Term is setup correctly, VecForth has already booted and on the terminal screen there will be a VecForth message and an OK prompt.
+   ```
+   VecForth v1.00 2020-07-12 Phillip Eaton
+   based on 6809 CamelForth v1.1 2016-03-20
+   OK-0
+   ```
 
-   At the OK prompt on the terminal, type 
+   At the OK prompt on the terminal, type `1 2 +` and hit enter, if the terminal returns `3` then it's working! 
    ```
-   1 2 + .
+   OK-0 1 2 + . 3
+   OK-0
    ```
-   and hit enter, if the terminal returns `3` then it's working!
+   Try typing `words` and hit enter, for a list of all the words in the dictionary you can run.
 
 **Optional:**
 
