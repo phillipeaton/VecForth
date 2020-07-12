@@ -34,7 +34,7 @@ Now, for the Vectrex specifically, with VecForth you can:
 
 - Live experiment with the Vectrex hardware directly on the device, e.g. read/write directly to the timers, joysticks, sound generator, Vector monitor. 
 
-- Write new programs/games in Forth on a PC and - in literally 1 second - cross-compile, transfer to and run on the Vectrex for interactive testing/debugging.
+- Write new programs/games in Forth on a PC and - in literally 1 or 2 seconds - cross-compile, transfer to and run on the Vectrex for interactive testing/debugging.
 
 - Use Forth calls to the built-in Vectrex BIOS routines using an API written in assembly.
 
