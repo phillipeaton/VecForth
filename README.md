@@ -191,7 +191,7 @@ This section assumes you know your way around a PC a little bit and how to setup
 
    If you managed the above steps on the VecFever and the PC Tera Term is setup correctly, VecForth has already booted and on the terminal screen there will be a VecForth message and an OK prompt.
    ```
-   VecForth v1.00 2020-07-12 Phillip Eaton
+   VecForth v1.0 2020-07-12 Phillip Eaton
    based on 6809 CamelForth v1.1 2016-03-20
    OK-0
    ```
