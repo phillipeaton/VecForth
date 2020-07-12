@@ -1,5 +1,6 @@
 # VecForth
 
+
 Vectrex Forth is a port of Brad Rodriguez' CamelForth/6809 to the Vectrex video game console, with an added Forth to Vectrex BIOS API for easy programming.
 
 1. [Introduction](#Introduction)
@@ -138,7 +139,7 @@ Really, this is the same as above. You're getting further away from the bare-met
 
 ## Getting Started
 
-This section assumes you know your way around a PC a little bit and how to attached USB serial interfaces. If you're in deep enough to attempt to create a target binary, hopefully you can handle it. See also the YouTube video links.
+This section assumes you know your way around a PC a little bit and how to setup USB serial interfaces. If you're in deep enough to attempt to create a target binary, hopefully you can handle it. See also the YouTube video links.
 
 1. **Install Gforth onto your PC**
 
@@ -166,7 +167,11 @@ This section assumes you know your way around a PC a little bit and how to attac
 
 1. **Cross-compile the code to a target binary**
 
-   Assuming you added the Gforth binary to the `path` environment variable, from a command prompt and within the `VecForth\VecForth\` directory, type `gforth include.fs` and then your target binary should be compiled to a target binary file. Review the contents of the `include.fs` file, you may want to tweak things in there.
+   Assuming you added the Gforth binary to the `path` environment variable, from a command prompt and within the `VecForth\VecForth\` directory, type 
+   ```
+   gforth include.fs
+   ```
+   and then your target binary should be compiled to a target binary file. Review the contents of the `include.fs` file, you may want to tweak things in there.
 
 1. **Transfer the binary**
 
@@ -186,7 +191,11 @@ This section assumes you know your way around a PC a little bit and how to attac
 
    If you managed the above steps on the VecFever and the PC Tera Term is setup correctly, VecForth has already booted and on the terminal screen there will be a VecForth message and an OK prompt.
 
-   At the OK prompt on the terminal, type `1 2 + .` and hit enter, if the terminal returns `3` then it's working!
+   At the OK prompt on the terminal, type 
+   ```
+   1 2 + .
+   ```
+   and hit enter, if the terminal returns `3` then it's working!
 
 **Optional:**
 

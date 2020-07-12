@@ -880,7 +880,7 @@ EMULATES .S
 : COLD        \ -- ; cold start Forth system
 
     UINIT U0 #INIT CMOVE
-    CR ." VecForth v0.05 2020-06-05 Phillip Eaton"
+    CR ." VecForth v1.00 2020-07-12 Phillip Eaton"
     CR ." based on 6809 CamelForth v1.1 2016-03-20"
     CR ." OK-0 " ABORT ;
 
