@@ -1,6 +1,5 @@
 # VecForth
 
-
 Vectrex Forth is a port of Brad Rodriguez' CamelForth/6809 to the Vectrex video game console, with an added Forth to Vectrex BIOS API for easy programming.
 
 1. [Introduction](#Introduction)
@@ -21,19 +20,19 @@ In the late 1990s, I came across a Vectrex at some video game show. I remember t
 
 Fast-forward 20 years, I acquired a non-working Vectrex for free, which I fixed and then wondered what I could do with it, maybe there was more than just a version of Asteroids. Seeing it had a 6809 CPU, I remembered the open source CamelForth for 6809 I'd seen some years previously, which included a PC-based cross-compiler. This was very similar to the professional Z80180 single-board computers I had programmed in Forth in the 1990s.
 
-I thought maybe I could get CamelForth running on the Vectrex? At first sight, the Vectrex presents a few challenges to this scenario, namely 1K of RAM, no serial communications port, keyboard or other usable display. However, the cartridge port is quite fully featured and the computer address space is completely open and all the circuit diagrams are readily available. I also found a thriving community of Vectrex enthusiasts making all sorts of hardware add-ons, new software and other stuff. As it turns out, getting CamelForth running was quite doable.
+I thought maybe I could get CamelForth running on the Vectrex? At first sight, the Vectrex presents a few challenges to this scenario, namely 1K of RAM, no serial communications port, keyboard or other usable display. However, the cartridge port is quite fully featured, the computer address space is completely open and all the circuit diagrams are readily available. I also found a thriving community of Vectrex enthusiasts making all sorts of hardware add-ons, new software and all sorts of other stuff. As it turns out, getting CamelForth running on the Vectrex was quite doable.
 
 #### [Back to top](#VecForth)
 
 ## What Can You Do With It?
 
-Good question! Lots of people have heard of Forth, but not many know much about it. In the 1970s and 80s, Forth was very popular in micro-computer programming circles as it could provide a complete interactive operating system and programming language on the device itself, with good performance, whilst consuming hardly any system resources. Since the 1990s, coupled with a PC-based cross-compiler, Forth offers an incredibly efficient development platform for custom hardware, even today.
+Good question! Lots of people have heard of Forth, but not many know much about it. In the 1970s and 80s, Forth was very popular in microcomputer programming circles as it could provide a complete interactive operating system and programming language on the device itself, with good performance, whilst consuming very few system resources. Since the 1990s, coupled with a PC-based cross-compiler, Forth offers an incredibly efficient development platform for custom hardware, even today.
 
 Now, for the Vectrex specifically, with VecForth you can:
 
-- Use the Vectrex like a 1980s micro-computer like the Commodore 64 for example, via a serially connected PC terminal-emulator, entering commands on the keyboard and getting immediate answers. You can write Forth programs on-the-fly.
+- Use the Vectrex like a 1980s microcomputer, such as the Commodore 64 for example, via a serially-connected PC terminal emulator, entering commands on the keyboard and getting immediate answers. You can write Forth programs on-the-fly.
 
-- Live experiment with the Vectrex hardware directly on the device, e.g. read/write directly to the timers, joysticks, sound generator, Vector monitor. 
+- Live experiment with the Vectrex hardware directly on the device, e.g. read/write directly to the timers, joysticks, sound generator, vector monitor.
 
 - Write new programs/games in Forth on a PC and - in literally 1 or 2 seconds - cross-compile, transfer to and run on the Vectrex for interactive testing/debugging.
 
@@ -43,9 +42,9 @@ Now, for the Vectrex specifically, with VecForth you can:
 
 - Use the built-in assembler to write machine-language programs or subroutines that can be called from Forth.
 
-- The compiler can be configured to output a symbol file with the target binary that can be loaded into VIDE emulator/debugger, if you're really in deep. 
+- The compiler can be configured to output a symbol file with the target binary that can be loaded into the VIDE emulator/debugger, if you're really want to deep-dive. (Currently removed, will be reinstated soon!)
 
-- Develop games just like they did at Atari Coin-Op in the early 1980's, using pretty much the same setup as the [Blue Box/White box as explained here](https://www.jmargolin.com/vmail/vmail.htm).
+- Develop games just like they did at Atari Coin-Op in the early 1980's, using pretty much the same setup as the [Blue Box/White box, explained here](https://www.jmargolin.com/vmail/vmail.htm).
 
 #### [Back to top](#VecForth)
 
@@ -67,7 +66,7 @@ OK, let's address this head-on, starting with a few Q&A:
 
 - **Forth has an interactive command prompt, like BASIC. Does it use an interpreter, like BASIC, or does it compile code, like C?**
   
-  Yes! Forth has a command interpreter like BASIC, whatever you type gets interpreted and executed when you press Enter. But if you enter the : (colon) command, the interpreter switches to compile mode and compiles everything until it encounters, instead of running it. Entering the ; (semi-colon) command returns Forth back to interpret mode. Once you've compiled some code, you can use the interpreter, to run it. When you've developed all your code, you can cross-compile the target image to a ROM and run it at startup, without using the command interpreter.  
+  Yes and yes! Forth has a command interpreter like BASIC, whatever you type gets interpreted and executed when you press Enter. But if you enter the : (colon) command, the interpreter switches to compile mode and compiles everything you type, instead of running it. Entering the ; (semi-colon) command returns Forth back to interpret mode. Once you've compiled some code, you can then use the interpreter to run it. Whilst developing and testing your program, you can cross-compile it to a binary target image at any time and run it at startup, bypassing the command interpreter, just like an assembled binary.
 
 - **Does VecForth run faster than BASIC?**
   
@@ -77,11 +76,11 @@ OK, let's address this head-on, starting with a few Q&A:
 
 ## Can I Write My Game In It?
   
-  If you're an assembly guru looking to create the next AAA game title for the Vectrex, to rival "Protector", "Vector Patrol" or "Vectorblade", you're probably not going to use Forth to produce the core game code. However, you could use the Forth environment, because the PC-hosted cross-compiler also includes an assembler and you can prototype with Forth code *really* quickly. 
+  If you're an assembly guru looking to create the next AAA game title for the Vectrex, to rival "Protector", "Vector Patrol" or "Vectorblade", you're probably not going to use Forth to produce the core game code. However, you could use the Forth environment, because the PC-hosted cross-compiler also includes an assembler and you can prototype with Forth code *really* quickly.
   
-  If you're not an assembly wizard and learning C sounds like a lot of hard work, or your design does not demand the ultimate in performance, then Forth might be what you're looking for, it's fast, flexible, easy to learn and *extensible*, meaning that your program is literally extending the Forth language to be specific to your program. To quote Wolf Wejgaard, "*[With Forth] The program is the compiler*".
+  If you're not an assembly wizard and learning C sounds like a lot of hard work, or your design does not demand the ultimate in performance, then Forth might be what you're looking for, it's fast, flexible, easy to learn and *extensible*, meaning that your program is literally extending the Forth language to be specific to your program. To quote Wolf Wejgaard, regarding Forth, "*The program is the compiler*".
   
-  Either way, as mentioned above, compared with other languages, using Forth you can get something running really fast. The code/compile/transfer/test cycle from PC to physical hardware is 1 or 2 seconds and, if that's not fast enough, you can also code directly on the Vectrex via the terminal command prompt. With all the time you saved, if parts of the code are not fast enough, you can rewrite them in assembler or improve your algorithm.
+  Either way, as mentioned above and compared with other languages, using Forth you can get something running really fast. The code/compile/transfer/test cycle from PC to physical hardware is 1 or 2 seconds and, if that's not fast enough, you can also code directly on the Vectrex via the terminal command prompt. With all the time you save, if parts of the code are not fast enough, you can rewrite them in assembler or improve your algorithm.
 
 #### [Back to top](#VecForth)
 
@@ -89,9 +88,9 @@ OK, let's address this head-on, starting with a few Q&A:
 
 - **CamelForth\_Original** - The original Brad Rodriguez 1995 CamelForth 6809 source code and Neal Crook's 2015 ANS Forth update to allow PC compilation using GForth as a host.
 
-- **VecForth** - A 2020 onwards update based on Neal Crook's 2015 code, converted to use plain text source code files and with some further changes.
+- **VecForth** - A 2020-onwards update based on Neal Crook's 2015 code, converted to use plain text source code files and with several further enhancements.
   
-  - **Chromium** - The Forth target cross-compiler and 6809 assembler that is hosted on Gforth and tested under Windows. It should also work on Linux, Mac and probably Android.
+  - **Chromium** - The Forth 6809 target cross-compiler and assembler that is hosted on Gforth and tested under Windows. It should also work on Linux, Mac and probably Android.
 
   - **CamelForth** - The core ANS-compliant Forth implementation for the 6809 target.
 
@@ -119,7 +118,7 @@ A key feature of Forth is that it has an interactive command-line interpreter th
 
 - A non-VecFever multicart or dedicated EPROM emulator, i.e. something that will allow you to use a custom binary file e.g. a VecFlash or VecMulti in developer mode
 
-If you don't have a VecFever with additional serial port, you can compile Forth programs to a regular binary that doesn't include the command-line interpreter and runs just like any other Vectrex binary file. You're missing out the essence of Forth with the command line, but you'll still get your programs written quickly.
+If you don't have a VecFever with additional serial port, you can compile Forth programs to a regular binary that doesn't bypasses the command-line interpreter and runs just like any other Vectrex binary file. You're missing out the essence of Forth with the command line, but you'll still get your programs written quickly.
 
 ### Absolute Minimum:
 
@@ -139,11 +138,11 @@ Really, this is the same as above. You're getting further away from the bare-met
 
 ## Getting Started
 
-This section assumes you know your way around a PC a little bit and how to setup USB serial interfaces. If you're in deep enough to attempt to create a target binary, hopefully you can handle it. See also the YouTube video links.
+This section assumes you know your way around a PC a little bit and how to setup a USB serial interface. If you're in deep enough to attempt to create a target binary, hopefully you can handle it. See also the YouTube video links.
 
 1. **Install Gforth onto your PC**
 
-   The latest Windows binary version is 0.7.0, this is what I use to develop with. The Linux port is newer and should also work. Gforth hosts the Chromium cross\-compiler, which is also written in Forth. 
+   The latest Windows binary version is 0.7.0, this is what I use to develop with. The Linux port is newer and should also work. Gforth hosts the Chromium cross\-compiler, which is also written in Forth.
 
    *Recommended:* Add the path to the Gforth executable to the `path` environment variable, so you can compile from your target Forth code directory.
 
@@ -157,7 +156,7 @@ This section assumes you know your way around a PC a little bit and how to setup
 
 1. **Setup the `include` file**
 
-   This works a bit like a 'C' make file, it contains links to all the source code to create the target binary. You may need to add/delete/comment out lines in this file, depending on what you're trying to build.
+   This works a bit like a C make file, it contains links to all the source code to create the target binary. You can add/delete/comment out lines in this file, depending on what you're trying to build.
 
 1. **Setup the Vectrex communications serial port (if you're using the VecFever with additional serial port)**
 
@@ -168,10 +167,12 @@ This section assumes you know your way around a PC a little bit and how to setup
 1. **Cross-compile the code to a target binary**
 
    Assuming you added the Gforth binary to the `path` environment variable, from a command prompt and within the `VecForth\VecForth\` directory, type 
+
    ```
    gforth include.fs
    ```
-   and then your target binary should be compiled to a target binary file. Review the contents of the `include.fs` file, you may want to tweak things in there.
+
+   and your target binary should then be compiled to a file. Review the contents of the `include.fs` file, you may want to tweak things in there.
 
 1. **Transfer the binary**
 
@@ -183,31 +184,34 @@ This section assumes you know your way around a PC a little bit and how to setup
 
    1. Rename the compiled binary to `CART.BIN` and transfer it to the VecFever as a storage device
 
-   1. Press Button 4 on the joystick to run the target binary.
+   1. Press Button 4 on the controller to run the target binary.
 
-   Alternatively, you could simply copy the binary to the VecFever or any other programmable multicart and run it, just like any other ROM binary.
+   Alternatively, you could simply copy the binary to the VecFever or any other programmable multicart or and run it, just like any other target binary.
 
 1. **Boot the VecForth system**
 
-   If you managed the above steps on the VecFever and the PC Tera Term is setup correctly, VecForth has already booted and on the terminal screen there will be a VecForth message and an OK prompt.
+   If you managed the above steps on the VecFever and the PC Tera Term is setup correctly, VecForth will have already booted up and on the terminal screen there will be a VecForth message and an OK prompt.
+
    ```
    VecForth v1.0 2020-07-12 Phillip Eaton
    based on 6809 CamelForth v1.1 2016-03-20
    OK-0
    ```
 
-   At the OK prompt on the terminal, type `1 2 +` and hit enter, if the terminal returns `3` then it's working! 
+   At the OK prompt on the terminal, type `1 2 +` and hit Enter, if the terminal returns `3` then it's working!
+
    ```
    OK-0 1 2 + . 3
    OK-0
    ```
-   Try typing `words` and hit enter, for a list of all the words in the dictionary you can run.
+
+   Try typing `words` and hit Enter, for a list of all the words in the dictionary you can run.
 
 **Optional:**
 
 - **Install VIDE for debugging, reference and tools**
   
-  One of Forth major advantages is that it provides a user command prompt terminal that runs on the target computer so having an emulator isn't so necessary. However, if you want to poke around inside the Forth target code, you can use the VIDE debugger with the compiled target binary and a corresponding `.cnt` file that is also produced by the cross-compiler.
+  One of Forths major advantages is that it provides a user command prompt terminal that runs on the target computer, so having a Vectrex emulator isn't so necessary. However, if you want to poke around inside the Forth target code, you can use the VIDE debugger with the compiled target binary and a corresponding `.cnt` file that is also produced by the cross-compiler. (Currently removed, will be reinstated soon!)
 
 #### [Back to top](#VecForth)
 
@@ -226,13 +230,13 @@ See how VecForth made it to where it is today. More to follow, when time permits
 
 - **VecForth**
   
-  - Reintroduce the option to create a `.cnt` symbol file for the VIDE debugger.
+  - Reintroduce the option to create a `.cnt` symbol file for the VIDE debugger
   
   - Implement `?DO` and the `CASE` statement, which will allow easier portability of programs to run with VecForth
   
   - Improve the number recogniser so that `$-10` ond `-$10` would both be recognised and add a character recogniser
   
-  - Reimplement some of the key Vectrex BIOS routines so that the Forth API calls have less of an overhead
+  - Reimplement some of the key Vectrex BIOS routines so that the Forth API calls have less of a call overhead
   
   - Implement some optimisers, such as peephole and inlining 
 
@@ -248,15 +252,17 @@ See how VecForth made it to where it is today. More to follow, when time permits
 
 ## Links
 
-- http://vide.malban.de/] - Home of the VIDE development environment, which includes lots of useful tools and tutorials
+- <http://vide.malban.de/> - Home of the VIDE development environment, which includes lots of useful tools and tutorials
 
-- http://www.playvectrex.com/ - Yet more programming tools on the DESIGN IT page
+- <http://www.playvectrex.com/> - Yet more programming tools on the DESIGN IT page
 
 - <https://www.forth.com/starting-forth/> - The original and best tutorial for learning Forth, defacto standard
 
 - <http://turboforth.net/> - A wonderful Forth implementation for the Texas Instruments TI-99/4A home computer and a supporting website that's even better, including some great videos
 
-- <http://www.camelforth.com> - The website of the original CamelForth that is the basis of VecForth
+- <http://www.camelforth.com/> - The website of the original CamelForth that is the basis of VecForth
+
+- <https://www.mpeforth.com/sample-page/about-forth-2/> - Commercial Forth vendor with advanced compilation and community product licensing
 
 - <https://github.com/nealcrook/multicomp6809> - Neal uses CamelForth as the core OS for an FPGA computer with a 6809 core, based on Grant Searle's popular design
 
