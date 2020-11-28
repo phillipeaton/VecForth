@@ -640,6 +640,12 @@ EMULATE:  M['] (S") T,  TS"  M['] TYPE T,  ;EMULATE  IMMEDIATE
 : C,          \ char --          append char to dict
     HERE C!  1 CHARS ALLOT ;
 
+: UNUSED      \ -- u             number of free dictionary bytes
+    TIB HERE - ;
+
+: .FREE       \ --               display number of free dictionary bytes
+    UNUSED U. ." bytes free" ;
+
 \ \\   High level: interpreter                      (c) 31mar95 bjr
 : SOURCE      \ -- adr n         current input buffer
     'SOURCE 2@ ;
@@ -767,7 +773,12 @@ CREATE NUM-BASES 0A ,  10 ,  2 ,  0A ,
     BEGIN
         TIB DUP TIBSIZE ACCEPT SPACE
         INTERPRET
-        CR STATE @ 0= IF ." OK-" DEPTH . THEN
+        STATE @ 0= IF
+           ."  ok" DEPTH ?DUP IF
+              ( ascii -) 2D EMIT .
+           THEN
+        THEN
+        CR
     AGAIN ;
 
 : ABORT       \ i*x --  R: j*x --   clear stack and QUIT
@@ -881,8 +892,9 @@ EMULATES .S
 
     UINIT U0 #INIT CMOVE
     CR ." VecForth v1.0 2020-07-12 Phillip Eaton"
-    CR ." based on 6809 CamelForth v1.1 2016-03-20"
-    CR ." OK-0 " ABORT ;
+    CR ." + FT245R @ $8000"
+    CR .FREE
+    CR ABORT ;
 
 \ \\   Testing words: memory dump                        24mar15nac
 HEX
