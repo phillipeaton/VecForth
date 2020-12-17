@@ -276,6 +276,6 @@ See how VecForth made it to where it is today. More to follow, when time permits
 
 GPLv3 - essentially you must keep this open, all changes must be disclosed and shared.
 
-Full [LICENSE here](https://github.com/technobly/VEXTREME/blob/master/LICENSE) and [TL;DR summary here](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3))
+Full [LICENSE here](https://github.com/phillipeaton/VecForth/blob/master/LICENSE) and [TL;DR summary here](https://tldrlegal.com/license/gnu-general-public-license-v3-(gpl-3))
 
 #### [Back to top](#VecForth)

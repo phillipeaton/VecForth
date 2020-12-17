@@ -29,7 +29,7 @@ next, ;c
 \ + and - don't compile, not sure why, probably a vocabulary issue.
 \ Slimey hack, hardcode $19 bytes, you can use more for safety e.g. $30
 
-code exit \ -- ; Exit back to VecFever menu system
+code vfexit \ -- ; Exit back to VecFever menu system
    ramfunctiondata # LDU,      \ source
    ramfunction     # LDX,      \ destination
    $19             # LDA,      \ #bytes = 1+ramfuncend-ramfunctiondata
