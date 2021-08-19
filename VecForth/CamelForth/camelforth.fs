@@ -892,7 +892,7 @@ EMULATES .S
 
     UINIT U0 #INIT CMOVE
     CR ." VecForth v1.0 2020-07-12 Phillip Eaton"
-    CR ." + FT245R @ $8000"
+\    CR ." + FT245R @ $8000"
     CR .FREE
     CR ABORT ;
 

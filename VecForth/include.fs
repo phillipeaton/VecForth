@@ -41,6 +41,7 @@ include CamelForth\camelforth.fs
 include    Vectrex\bios_api.fs
 include    Vectrex\bios_api_tests.fs
 include    Vectrex\bios_api_tests_old.fs
+include    Vectrex\benchmarks.fs
 include    Vectrex\vecfever_exit.fs
 include CamelForth\latest.fs
 

@@ -10,31 +10,31 @@ HEX
 8000 EQU ft245TxByteReg
 8000 EQU ft245RxByteReg
 
-\ CODE KEY?   \ -- f    return true if char waiting
-\   6 # ( D) PSHS,   CLRA,   v4eRxStatReg LDB,
-\   NE IF,   -1 # LDD,   THEN,   NEXT ;C
+CODE KEY?   \ -- f    return true if char waiting
+  6 # ( D) PSHS,   CLRA,   v4eRxStatReg LDB,
+  NE IF,   -1 # LDD,   THEN,   NEXT ;C
 \
-\ CODE KEY    \ -- c    get char from serial port
-\    6 # ( D) PSHS,   BEGIN,   v4eRxStatReg LDB,   NE UNTIL,
-\    v4eRxByteReg  LDB,   CLRA,   NEXT ;C
+CODE KEY    \ -- c    get char from serial port
+   6 # ( D) PSHS,   BEGIN,   v4eRxStatReg LDB,   NE UNTIL,
+   v4eRxByteReg  LDB,   CLRA,   NEXT ;C
 \
-\ CODE EMIT   \ c --    output character to serial port
-\    BEGIN,   v4eTxStatReg  LDA,  MI UNTIL,
-\    v4eTxByteReg STB,   6 # ( D) PULS,   NEXT ;C
+CODE EMIT   \ c --    output character to serial port
+   BEGIN,   v4eTxStatReg  LDA,  MI UNTIL,
+   v4eTxByteReg STB,   6 # ( D) PULS,   NEXT ;C
 
 \ FT245R USB to Parallel FIFO interface (Serial Port)
 
-CODE KEY?  \ -- f    return true if char waiting
-  6 # ( D) PSHS,   CLRA,   40 # LDB,   VIA_port_b BITB,
-  EQ IF,   -1 # LDD,   ELSE,   CLRB,   THEN,   NEXT ;C
-
-CODE KEY   \ -- c    get char from serial port
-   6 # ( D) PSHS,   BEGIN,   40 # LDB,   VIA_port_b BITB,  EQ UNTIL,
-   ft245RxByteReg  LDB,   CLRA,   NEXT ;C
-
-CODE EMIT  \ c --    output character to serial port
-\   BEGIN,   v4eTxStatReg  LDA,  MI UNTIL,    \ No Tx-Ready control line
-   ft245TxByteReg STB,   6 # ( D) PULS,   NEXT ;C
+\ CODE KEY?  \ -- f    return true if char waiting
+\   6 # ( D) PSHS,   CLRA,   40 # LDB,   VIA_port_b BITB,
+\   EQ IF,   -1 # LDD,   ELSE,   CLRB,   THEN,   NEXT ;C
+\
+\ CODE KEY   \ -- c    get char from serial port
+\    6 # ( D) PSHS,   BEGIN,   40 # LDB,   VIA_port_b BITB,  EQ UNTIL,
+\    ft245RxByteReg  LDB,   CLRA,   NEXT ;C
+\
+\ CODE EMIT  \ c --    output character to serial port
+\ \   BEGIN,   v4eTxStatReg  LDA,  MI UNTIL,    \ No Tx-Ready control line
+\    ft245TxByteReg STB,   6 # ( D) PULS,   NEXT ;C
 
 
 
